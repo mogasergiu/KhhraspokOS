@@ -22,6 +22,27 @@ startRealMode:
 
     jmp $
 
+; Prints the string whose address has been passed into the `si` register
+realModePuts:
+.iterateString:
+    lodsb
+    cmp al, 0
+    je .endIteration
+    call realModePutc
+    jmp .iterateString
+
+.endIteration:
+    ret
+
+; Prints the character that was passed into the `al` register
+realModePutc:
+    ; TELETYPE OUTPUT
+    xor bx, bx
+    mov ah, 0xe
+    int 0x10
+
+    ret
+
 ; Specify padding up to boot signature
 times 510 - ($ - $$) db 0
 
