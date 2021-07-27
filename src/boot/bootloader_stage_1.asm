@@ -1,10 +1,24 @@
-
 ORG 0x7c00
 
-BITS 16
+[BITS 16]
+
+; Define macro's for Global Descriptor Table entries offsets
+CODE_SEGMENT_OFFSET equ gdtStart.gdtCodeSegmentDescriptor - gdtStart
+DATA_SEGMENT_OFFSET equ gdtStart.gdtDataSegmentDescriptor - gdtStart
+
+; Add a temporary fake BIOS Parameter Block - will update later for FAT
+fakeBPB:
+    jmp short _startRealMode
+    nop
+
+times 33 db 0
 
 ; Real Mode Bootloader:
+;       - Loads the other sectors into memory
 ;       - Represents the first memory sector (first 512 bytes)
+
+_startRealMode:
+    jmp 0x0:startRealMode
 
 startRealMode:
     ; Clear Interrupts
@@ -15,112 +29,49 @@ startRealMode:
     mov ds, ax
     mov es, ax
     mov ss, ax
+    mov bp, 0x7c00
     mov sp, 0x7c00
 
     ; Restore Interrupts
     sti
 
-    jmp $
+    ; Load second stage bootloader for protected mode
+    call realModeDiskOperations.LBARead
 
-; Prints the string whose address has been passed into the `si` register
-realModePuts:
-.iterateString:
-    lodsb
-    cmp al, 0
-    je .endIteration
-    call realModePutc
-    jmp .iterateString
+    ; Clear Interrupts
+    cli
 
-.endIteration:
-    ret
+    ; Enable the A20 line
+    in al, 0x92
+    or al, 2
+    out 0x92, al
 
-; Prints the character that was passed into the `al` register
-realModePutc:
-    ; TELETYPE OUTPUT
-    xor bx, bx
-    mov ah, 0xe
-    int 0x10
+    ; place into the GDT register the address of the GDT descriptor
+    lgdt [gdtDescriptor]
 
-    ret
+    ; set Protection Enable bit in Control Register 0
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
 
-; This label marks the beginning of the Global Descriptor Table
-gdtStart:
+    ; Restore Interrupts
+    sti
 
-; the null descriptor is never referenced by the CPU, only in rare cases
-.gdtNullSegmentDescriptor:
-    dd 0x0
-    dd 0x0
+    ; Jump to Protected Mode and update cs register
+    jmp CODE_SEGMENT_OFFSET:0x7e00
 
-; used for code segment decriptor
-.gdtCodeSegmentDescriptor:
-    dw 0xffff  ; Limit field bits 0-15 - describes where segment ends
+; Include Real Mode Disk Operations helper functions
+%include "realModeDiskOperations.asm"
 
-    dw 0  ; Base field bits 0-15 - describes where segment begins
-    db 0  ; Base field bits 16-23
+; Include Real Mode Printing helper functions
+%include "realModePrint.asm"
 
-    ; Access byte:
-    ; - Present bit set to 1 - must be 1 for all valid sectors
-    ; - 2 Privilege bits set to 0 (ring 0)
-    ; - Descriptor type bit S set to 1 (must be 1 for code or data segments)
-    ; - Executable bit set to 1 - code must be executable
-    ; - Direction Bit/Conforming bit set to 0 - only be executable in ring 0
-    ; - Readable bit set to 1 (write permissions never allowed)
-    ; - Accessed bit set to 0 - the CPU sets it to 1 when segment accessed
-    db 10011010b
-
-    ; Flags field nibble:
-    ; - Granularity bit set to 1 - 4 Kib blocks (page granularity)
-    ; - Size bit set to 1 - selector defines 32-bit protected mode
-    ; - leave last 2 bits set to 0
-    ; Followed by Limit field's 16-20 bits (lower nibble)
-    ; So the Base field will be 0 and Limit field will be 0xfffff, this way the
-    ; segment will span the full 4GiB address space
-    db 11001111b
-
-    db 0  ; Base field bits 24-31
-
-; for the other registers
-.gdtDataSegmentDescriptor:
-    dw 0xffff  ; Limit field bits 0-15 - describes where segment ends
-
-    dw 0  ; Base field bits 0-15 - describes where segment begins
-    db 0  ; Base field bits 16-23
-
-    ; Access byte:
-    ; - Present bit set to 1 - must be 1 for all valid sectors
-    ; - 2 Privilege bits set to 0 (ring 0)
-    ; - Descriptor type bit S set to 1 (must be 1 for code or data segments)
-    ; - Executable bit set to 0 - data must not be executable
-    ; - Direction Bit/Conforming bit set to 0 - only be executable in ring 0
-    ; - Writable bit set to 1 (readable permission always allowed)
-    ; - Accessed bit set to 0 - the CPU sets it to 1 when segment accessed
-    db 10010010b
-
-    ; Flags field nibble:
-    ; - Granularity bit set to 1 - 4 Kib blocks (page granularity)
-    ; - Size bit set to 1 - selector defines 32-bit protected mode
-    ; - leave last 2 bits set to 0
-    ; Followed by Limit field's 16-20 bits (lower nibble)
-    ; So the Base field will be 0 and Limit field will be 0xfffff, this way the
-    ; segment will span the full 4GiB address space
-    db 11001111b
-
-    db 0  ; Base field bits 24-31
-
-; This label marks the end of this Global Descriptor Table
-gdtEnd:
-
-; This label marks the structure to which the Global Descriptor Table Register
-; (GDTR) should point to
-gdtDescriptor:
-    ; Size of the Global Descriptor Table minus 1
-    dw gdtEnd - gdtStart - 1
-
-    ; The starting address of the Global Descriptor Table
-    dd gdtStart
+; Include the Global Descriptor Table
+%include "globalDescriptorTable.asm"
 
 ; Specify padding up to boot signature
 times 510 - ($ - $$) db 0
 
 ; Boot signature
-dw 0xAA55
+dw 0xaa55
+
