@@ -1,4 +1,4 @@
-ENTRY(kernelMain)
+ENTRY(_start)
 OUTPUT_FORMAT(binary)
 
 SECTIONS
@@ -7,21 +7,39 @@ SECTIONS
     .text : ALIGN(4096)
     {
         *(.text)
+        *(.gnu.linkonce.t*)
     }
 
     .rodata : ALIGN(4096)
     {
-        *(.rodata)
+        startCtors = .;
+        *(SORT(.ctors*))
+        endCtors = .;
+
+        startDtors = .;
+        *(SORT(.dtors*))
+        endDtors = .;
+
+        *(.rodata*)
+        *(.gnu.linkonce.r*)
     }
 
     .data : ALIGN(4096)
     {
         *(.data)
+        *(.gnu.linkonce.d*)
     }
 
     .bss : ALIGN(4096)
     {
         *(COMMON)
         *(.bss)
+        *(.gnu.linkonce.b*)
+    }
+
+    /DISCARD/ :
+    {
+        *(.comment)
+        *(.eh_frame)
     }
 }
