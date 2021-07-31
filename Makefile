@@ -26,3 +26,4 @@ clean:
 	rm -f $(OS_BINARY)
 	cd $(BOOTLOADER_SOURCES_PATH); make clean; cd ${KHH_HOME}
 	cd $(KERNEL_SOURCES_PATH); make clean; cd ${KHH_HOME}
+

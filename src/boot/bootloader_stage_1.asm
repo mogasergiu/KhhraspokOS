@@ -30,7 +30,7 @@ startRealMode:
     mov es, ax
     mov ss, ax
     mov bp, 0x7c00
-    mov sp, 0x7c00
+    mov sp, bp
 
     ; Restore Interrupts
     sti

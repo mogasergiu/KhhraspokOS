@@ -4,7 +4,7 @@ DISK_DRIVE_NUMBER equ 0x80
 DISK_HEAD_NUMBER equ 0x0
 DISK_SEGMENT_TO_READ_INTO equ 0x0
 DISK_OFFSET_TO_READ_INTO equ 0x7e00
-DISK_SECTORS_NUMBER_TO_READ equ 0x1
+DISK_SECTORS_NUMBER_TO_READ equ 0xa
 DISK_SECTOR_TRACK_TO_READ equ 0X0
 DISK_SECTOR_TO_READ equ 0X2
 
@@ -61,6 +61,7 @@ realModeDiskOperations:
 
     ret
 
+
 .diskAddressPacketStructure:
     ; Size of packet
     db 0x10
@@ -98,12 +99,12 @@ realModeDiskOperations:
     ; Read with CHS addressing manner instead
     jc .CHSRead
 
-    ; Select desired Disk Address Packet Structure
-    mov si, .diskAddressPacketStructure
-    
     ; dl already set by BIOS
     ; Select IBM/MS  Extended Read function
     mov ah, 0x42
+
+    ; Select desired Disk Address Packet Structure
+    mov si, .diskAddressPacketStructure
 
     ; Call BIOS function
     int 0x13
@@ -112,3 +113,4 @@ realModeDiskOperations:
     jc .LBARead
 
     ret
+
