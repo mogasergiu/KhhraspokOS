@@ -8,13 +8,19 @@
 #define VGA_HEIGHT 20
 #define VGA_START_ADDRESS 0xb8000
 
-// This namespace contains every Video related component
+/*********************************************************
+ * This namespace contains every Video related component *
+ *********************************************************/
 namespace VIDEO {
 
-    // This namespace contains every VGA related component
+    /*******************************************************
+     * This namespace contains every VGA related component *
+     *******************************************************/
     namespace VGA {
 
-        // This class contains the Text Mode functionality that is part of VGA
+        /****************************************************************
+         * This class contains the Text Mode functionality, part of VGA *
+         ****************************************************************/
         class TextMode {
             private:
                 // Pointer to video memory address (0xb8000)

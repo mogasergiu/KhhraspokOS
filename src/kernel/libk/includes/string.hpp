@@ -9,7 +9,7 @@
  * @string: the string whose length is to be retrieved
  * @return: length of given string
  */
-extern size_t strlen(const char *string);
+size_t strlen(const char *string);
 
 /*
  * Copies the string from the source address to the destionation address
@@ -17,7 +17,7 @@ extern size_t strlen(const char *string);
  * @stringSrc: the source address
  * @return: number of copied bytes
  */
-extern size_t strcpy(char *stringDst, const char *stringSrc);
+size_t strcpy(char *stringDst, const char *stringSrc);
 
 /*
  * Copies the first given number of bytes from the string at the source address
@@ -27,7 +27,7 @@ extern size_t strcpy(char *stringDst, const char *stringSrc);
  * @bytesNo: number of bytes to be copied
  * @return: number of copied bytes
  */
-extern size_t strncpy(char *stringDst, const char *stringSrc, size_t bytesNo);
+size_t strncpy(char *stringDst, const char *stringSrc, size_t bytesNo);
 
 /*
  * Copies the first given number of bytes from the the source address
@@ -37,7 +37,7 @@ extern size_t strncpy(char *stringDst, const char *stringSrc, size_t bytesNo);
  * @bytesNo: number of bytes to be copied
  * @return: number of copied bytes
  */
-extern void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo);
+void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo);
 
 /*
  * Overwrites the first given number of bytes at given address with
@@ -46,6 +46,6 @@ extern void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo);
  * @byte: the byte to overwrite with
  * bytesNo: how many bytes to overwrite
  */
-extern void* memset(void *addr, int8_t byte, size_t bytesNo);
+void* memset(void *addr, int8_t byte, size_t bytesNo);
 
 #endif /* STRING_HPP */
