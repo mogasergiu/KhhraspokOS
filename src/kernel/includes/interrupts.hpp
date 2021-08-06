@@ -7,6 +7,9 @@
 
 #define MAX_IDT_ENTRIES 256
 
+#define FREQUENCY 100
+#define HZ 1193180
+
 /******************************************
  * x86 Hardware Interrupts for Master PIC *
  ******************************************/
@@ -31,7 +34,7 @@
 // IRQ 0x7 is reserved
 
 // PIC End of Interrupt
-#define PIC_EOI                         0x20
+#define PIC_EOI 0x20
 
 
 #define PIC1 0x0  // Master PIC
@@ -106,6 +109,92 @@
 #define PIC_OCW3_SL 0b01000000  // Selection 
 #define PIC_OCW3_R 0b10000000  // Rotation
 
+
+/**************************
+ * PIT Internal Registers - readable/writable *
+ **************************/
+#define PIT_REG_CHANNEL_0 0x40
+#define PIT_REG_CHANNEL_1 0x41
+#define PIT_REG_CHANNEL_2 0x42
+#define PIT_REG_CW 0x43
+
+/******************************
+ * PIT Operation Common Words *
+ ******************************/
+// BCP bit - set to 1 for BCD Counter and Binary otherwise
+#define PIT_OCW_BIN 0b0000000
+#define PIT_OCW_BCP 0b0000001
+
+// Operation mode 3 bits:
+// 0b000 Mode 0: Interrupt or Terminal Count
+#define PIT_OCW_MODE_TERMINALCOUNT 0b00000000
+// 0b001 Mode 1: Programmable one-shot
+#define PIT_OCW_MODE_ONESHOT 0b00000010
+// 0b010 Mode 2: Rate Generator
+#define PIT_OCW_MODE_RATEGENERATOR 0b00000100
+// 0b011 Mode 3: Square Wave Generator
+#define PIT_OCW_MODE_SQUAREWAVEGENERATOR 0b00000110
+// 0b100 Mode 4: Software Triggered Strobe
+#define PIT_OCW_MODE_SWTRIGGERED 0b00001000
+// 0b101 Mode 5: Hardware Triggered Strobe
+#define PIT_OCW_MODE_HWTRIGGERED 0b00001010
+// 0b110 and 0b111 are the same as SWTRIGGERED and HWTRIGGERED
+
+// Read/Load Mode 2 bits:
+// 0b00 Latch count value command
+#define PIT_OCW_RL_LATCH 0b00000000
+// 0b01 Read/Load LSB only
+#define PIT_OCW_RL_LSB 0b00010000
+// 0b10 Read/Load MSB only
+#define PIT_OCW_RL_MSB 0b00100000
+// 0b11 Read/Load LSB first then MSB
+#define PIT_OCW_RL_LMSB 0b00110000
+
+// Select Channel 2 bits:
+// 0b00 Channel 0
+#define PIT_OCW_SC_0 0b00000000
+// 0b01 Channel 1
+#define PIT_OCW_SC_1 0b01000000
+// 0b10 Channel 2
+#define PIT_OCW_SC_2 0b10000000
+// 0b11 READ-back command (8254 only)
+#define PIT_OCW_SC_RB 0b11000000
+
+
+/*********************************************
+ * CLI and STI assembly instructions inlined *
+ *********************************************/
+#define cli()                                                                  \
+    __asm__ __volatile__(                                                      \
+        "cli"                                                                  \
+        :                                                                      \
+        :                                                                      \
+    )
+
+#define sti()                                                                  \
+    __asm__ __volatile__(                                                      \
+        "sti"                                                                  \
+        :                                                                      \
+        :                                                                      \
+    )
+
+#define initInt()                                                              \
+    __asm__ __volatile__(                                                      \
+        "cli;"                                                                 \
+        "pushal;"                                                              \
+        :                                                                      \
+        :                                                                      \
+    )
+
+#define endInt()                                                               \
+    __asm__ __volatile__(                                                      \
+        "sti;"                                                                 \
+        "popal;"                                                               \
+        "iret;"                                                                \
+        :                                                                      \
+        :                                                                      \
+    )
+
 /********************************************************************
  * INTERRUPTS namespace - covers every interrupts related component *
  ********************************************************************/
@@ -147,21 +236,21 @@ namespace INTERRUPTS {
 
             // Constructor - sets up IDTR, zeroes out IDT and loads IDT (lidt)
             Interrupts();
-
-            /*
-             * Helper function to add an entry in the IDT
-             * @number: desired interrupt number of the entry
-             * @address: address of the function to be placed in the entry
-             */
-            void setIDTEntry(uint32_t number, void (*address)());
-
-            /*
-             * Helper function to retrieve an entry in the IDT
-             * @number: desired interrupt number of the entry
-             * @return: address of the function to be placed from the entry
-             */
-            void (*getIDTEntry)(uint32_t number);
     };
+
+    /*
+     * Helper function to add an entry in the IDT
+     * @number: desired interrupt number of the entry
+     * @address: address of the function to be placed in the entry
+     */
+    void setIDTEntry(IDTD *descriptor, uint32_t number, void (*address)());
+
+    /*
+     * Helper function to retrieve an entry in the IDT
+     * @number: desired interrupt number of the entry
+     * @return: address of the function to be placed from the entry
+    */
+    void (*getIDTEntry)(uint32_t number);
 
     void handleZero();
 
@@ -202,6 +291,42 @@ namespace INTERRUPTS {
              * @return: the byte that was received
              */
             uint8_t readSR(uint8_t picNum);
+    };
+
+    /*********************************************************************
+     * Class to describe the Programmable Interval Timer component *
+     *********************************************************************/
+    class PIT {
+        public:
+            // Constructor - Initializes the PIT
+            PIT();
+
+            /*
+             * Getter method to retrieve the number of system ticks
+             * @return: number of system ticks
+             */
+            uint32_t getTicks() const;
+
+            /*
+             * Write Operation Command Word to Command Register
+             * @ocw: the OCW to send
+             */
+            void sendOCW(uint8_t ocw) const;
+
+            /*
+             * Get current count value from Channel Register
+             * @channel: the Channel Register we get the value from
+             * @return: value found in the Channel Register
+             */
+            uint8_t readChannel(uint8_t channel) const;
+
+            /*
+             * Set current count value of Channel Register
+             * @channel: the Channel Register whose value we set
+             * @value: the value we will set
+             * @return: value found in the Channel Register
+             */
+            void sendChannel(uint8_t channel, uint8_t value) const;
     };
 }
 

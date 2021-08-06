@@ -5,6 +5,7 @@
 
 VIDEO::VGA::TextMode vga;
 INTERRUPTS::PIC pic;
+INTERRUPTS::PIT pit;
 
 static void handleZero() {
     vga.putString("zerooo", 15);
@@ -12,6 +13,21 @@ static void handleZero() {
 
 extern "C" void kernelMain() {
     vga.putString("hello", 15);
-    pic.setIDTEntry(0, handleZero);
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
+    pit.getTicks();
     // __asm__ __volatile__ ("int $0x0"::);
 }
