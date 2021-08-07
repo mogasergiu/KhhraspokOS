@@ -23,6 +23,17 @@ VGA::TextMode::TextMode() {
  * @color: the desired color of the character
  */
 void VGA::TextMode::putChar(const char character, const uint8_t color) {
+    if (this->line == VGA_HEIGHT) {
+        // Clear screen (fill with black zeroes)
+        for (uint8_t l = 0; l < VGA_HEIGHT; l++) {
+            for (uint8_t c = 0; c < VGA_WIDTH; c++) {
+                this->address[l * VGA_WIDTH + c] = 0x0032;
+            }
+        }
+
+        this->line = 0;
+        this->column = 0;
+    }
     // If character is newline, move to next line and reset column
     if (character == '\n') {
         this->line++;
@@ -42,7 +53,7 @@ void VGA::TextMode::putChar(const char character, const uint8_t color) {
             this->line++;
         }
     }
-};
+}
 
 /*
  * Places given string of given color in VGA buffer

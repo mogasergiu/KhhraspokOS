@@ -2,7 +2,7 @@
 
 using namespace INTERRUPTS;
 
-uint32_t ticks = 0;
+uint32_t INTERRUPTS::ticks = 0;
 
 // Constructor - sets up IDTR, zeroes out IDT and loads IDT (lidt)
 Interrupts::Interrupts() {
@@ -19,6 +19,8 @@ Interrupts::Interrupts() {
         :
         : "r" ( &this->IDTRDescriptor )
     );
+
+    // this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER, pitIRQ);
 }
 
 /*
@@ -26,8 +28,10 @@ Interrupts::Interrupts() {
  * @number: desired interrupt number of the entry
  * @address: address of the function to be placed in the entry
  */
-void setIDTEntry(IDTD *descriptor, uint32_t number, void (*address)()) {
+void Interrupts::setIDTEntry(uint32_t number, void (*address)()) {
     cli();
+
+    IDTD *descriptor = this->IDTDescriptors + number;
 
     // Lower part of the interrupt function's offset address
     descriptor->offset1 = (uint32_t)address & 0x0000ffff;
@@ -47,6 +51,16 @@ void setIDTEntry(IDTD *descriptor, uint32_t number, void (*address)()) {
     sti();
 }
 
+extern "C" void IntCallbacks::pitIRQ() {
+    INTERRUPTS::ticks++;
+
+    PIO::outByte(PIC1_REG_COMMAND, PIC_EOI);
+}
+
+extern "C" void IntCallbacks::keyboardIRQ() {
+    PIO::outByte(PIC1_REG_COMMAND, PIC_EOI);
+}
+
 // Constructor - sets up the Programmable Interrupt Controller
 PIC::PIC() {
     uint8_t icw = 0;
@@ -56,8 +70,8 @@ PIC::PIC() {
     this->writeCMDR(icw | PIC_ICW1_INIT | PIC_ICW1_IC4, PIC2);
 
     // Send ICW2
-    this->writeIMR(PIC1_ICW2_IRQ0, PIC1);
-    this->writeIMR(PIC2_ICW2_IRQ8, PIC2);
+    this->writeIMR(PIC1_IRQ0, PIC1);
+    this->writeIMR(PIC2_IRQ8, PIC2);
 
     // Send ICW3
     this->writeIMR(PIC1_ICW3_PIC2_LINK, PIC1);
@@ -134,28 +148,15 @@ uint8_t PIC::readSR(uint8_t picNum) {
     return PIO::inByte(portNum);
 }
 
-// IRQ handler for interrupt 0, mapped to PIT
-static void pitIRQ() {
-    initInt();
-
-    ticks++;
-
-    PIO::outByte(PIC1_REG_COMMAND, PIC_EOI);
-
-    endInt();
-}
-
 // Constructor - Initializes the PIT
 PIT::PIT() {
-    this->setIDTEntry(0, pitIRQ);
-
     this->sendOCW(PIT_OCW_BIN | PIT_OCW_MODE_SQUAREWAVEGENERATOR | PIT_OCW_RL_LMSB);
 
     // send LSB
-    this->sendChannel((HZ / FREQUENCY) & 0xff, PIT_REG_CHANNEL_0);
+    this->sendChannel((INPUT_FREQ / DIVISOR) & 0xff, PIT_REG_CHANNEL_0);
 
     // send MSB
-    this->sendChannel(((HZ / FREQUENCY) & 0xff00) >> 8, PIT_REG_CHANNEL_0);
+    this->sendChannel(((INPUT_FREQ / DIVISOR) & 0xff00) >> 8, PIT_REG_CHANNEL_0);
 
     ticks = 0;
 }

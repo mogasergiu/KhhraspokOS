@@ -1,6 +1,10 @@
 global _start
+global pitIRQHandler
+global keyboardIRQHandler
 
 extern kernelMain
+extern pitIRQ
+extern keyboardIRQ
 
 ; Export constructor and destructor sections
 extern startCtors
@@ -38,3 +42,20 @@ _start:
 .hang:
     hlt
     jmp  .hang
+
+pitIRQHandler:
+    pushad
+    cli
+    call pitIRQ
+    popad
+    sti
+    iret
+
+keyboardIRQHandler:
+    pushad
+    cli
+    call keyboardIRQ
+    popad
+    sti
+    iret
+

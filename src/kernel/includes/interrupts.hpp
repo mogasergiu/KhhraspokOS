@@ -7,8 +7,8 @@
 
 #define MAX_IDT_ENTRIES 256
 
-#define FREQUENCY 100
-#define HZ 1193180
+#define DIVISOR 100
+#define INPUT_FREQ 1193180
 
 /******************************************
  * x86 Hardware Interrupts for Master PIC *
@@ -73,8 +73,8 @@
 #define PIC_ICW1_INIT 0b00010000
 
 // ICW2 - used to map base address of IVT/IDT entries the PIC will take care of
-#define PIC1_ICW2_IRQ0  0x20
-#define PIC2_ICW2_IRQ8  0x28
+#define PIC1_IRQ0  0x20
+#define PIC2_IRQ8  0x28
 
 // ICW3 - says how the PIC's are cascaded
 // IRQ connection to Slave PIC is specified in binary in the case of Master PIC
@@ -180,16 +180,16 @@
 
 #define initInt()                                                              \
     __asm__ __volatile__(                                                      \
-        "cli;"                                                                 \
         "pushal;"                                                              \
+        "cli;"                                                                 \
         :                                                                      \
         :                                                                      \
     )
 
 #define endInt()                                                               \
     __asm__ __volatile__(                                                      \
-        "sti;"                                                                 \
         "popal;"                                                               \
+        "sti;"                                                                 \
         "iret;"                                                                \
         :                                                                      \
         :                                                                      \
@@ -199,6 +199,27 @@
  * INTERRUPTS namespace - covers every interrupts related component *
  ********************************************************************/
 namespace INTERRUPTS {
+
+    /*********************************************************************
+     * This namespaces declares the IRQ Handlers whose implementation is *
+     * located inside the pre-Kernel                                     *
+     *********************************************************************/
+    namespace IntHandlers {
+        extern "C" void pitIRQHandler();
+        extern "C" void keyboardIRQHandler();
+    }
+
+    namespace IntCallbacks {
+        /*
+         * Callback function for Master PIC's Keyboard IRQ
+         */
+        extern "C" void keyboardIRQ();
+
+        /*
+         * Callback function for Master PIC's connection to the PIT
+         */
+        extern "C" void pitIRQ();
+    };
 
     /*******************************************************************
      * Interrupts class is meant to act as a template and be inherited *
@@ -236,28 +257,26 @@ namespace INTERRUPTS {
 
             // Constructor - sets up IDTR, zeroes out IDT and loads IDT (lidt)
             Interrupts();
+
+            /*
+             * Helper function to add an entry in the IDT
+             * @number: desired interrupt number of the entry
+             * @handler: address of the handler to be placed in the entry
+             */
+            void setIDTEntry(uint32_t number, void (*handler)());
+
+            /*
+             * Helper function to retrieve an entry in the IDT
+             * @number: desired interrupt number of the entry
+             * @return: address of the function to be placed from the entry
+             */
+            void (*getIDTEntry)(uint32_t number);
     };
-
-    /*
-     * Helper function to add an entry in the IDT
-     * @number: desired interrupt number of the entry
-     * @address: address of the function to be placed in the entry
-     */
-    void setIDTEntry(IDTD *descriptor, uint32_t number, void (*address)());
-
-    /*
-     * Helper function to retrieve an entry in the IDT
-     * @number: desired interrupt number of the entry
-     * @return: address of the function to be placed from the entry
-    */
-    void (*getIDTEntry)(uint32_t number);
-
-    void handleZero();
 
     /*********************************************************************
      * Class to describe the Programmable Interrupt Controller component *
      *********************************************************************/
-    class PIC : public Interrupts {
+    class PIC {
         public:
             // Constructor - sets up Programmable Interrupt Controller
             PIC();
@@ -293,6 +312,8 @@ namespace INTERRUPTS {
             uint8_t readSR(uint8_t picNum);
     };
 
+    extern uint32_t ticks;
+
     /*********************************************************************
      * Class to describe the Programmable Interval Timer component *
      *********************************************************************/
@@ -327,6 +348,8 @@ namespace INTERRUPTS {
              * @return: value found in the Channel Register
              */
             void sendChannel(uint8_t channel, uint8_t value) const;
+
+            
     };
 }
 
