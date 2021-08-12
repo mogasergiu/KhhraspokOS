@@ -13,6 +13,7 @@ $(OS_BINARY): $(BOOTLOADER) $(KERNEL)
 	rm -f $(OS_BINARY)
 	dd if=$(BOOTLOADER) >> $@
 	dd if=$(KERNEL) >> $@
+	dd if=/dev/zero bs=512 count=10 >> $@
 
 $(BOOTLOADER): $(BOOTLOADER_SOURCES_PATH)
 	cd $(BOOTLOADER_SOURCES_PATH); make; cd ${KHH_HOME}
