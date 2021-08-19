@@ -16,7 +16,7 @@ startProtectedMode:
     ; Manually moving 8192 bytes at address 0x100000 where our kernel will be
     mov esi, 0x8000
     mov edi, 0x100000
-    mov ecx, 0x2000
+    mov ecx, 0x4000
     rep movsb
 
     ; Update stack pointers
