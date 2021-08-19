@@ -1,4 +1,5 @@
 #include <kpkheap.hpp>
+#include <string.hpp>
 
 using namespace KPKHEAP;
 
@@ -88,7 +89,7 @@ static void pushChunk(chunk *c) {
 }
 
 static chunk* makeChunk(void *addr, size_t size) {
-    if (addr == (void*)KPKHEAP_END) {
+    if (addr >= (void*)KPKHEAP_END) {
         return NULL;
     }
 
@@ -145,7 +146,7 @@ extern "C" void* kpkMalloc(size_t size) {
         ret = makeChunk(topChunk, size);
 
         if (ret != NULL) {
-            topChunk = (void*)((char*)topChunk + size);
+            topChunk = (void*)((char*)topChunk + size + sizeof(ret->metadata));
         }
     }
 
@@ -168,6 +169,10 @@ extern "C" void* kpkZalloc(size_t size) {
 
 extern "C" void kpkFree(void *mem) {
     chunk *it = (chunk*)((char*)mem - sizeof(chunk));
+
+    if (it->metadata.free == 1) {
+        return;
+    }
 
     it->metadata.free = 1;
     pushChunk(it);
