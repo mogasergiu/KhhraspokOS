@@ -13,11 +13,11 @@ SECTIONS
     .rodata : ALIGN(4096)
     {
         startCtors = .;
-        *(SORT(.ctors*))
+        KEEP(*(SORT(.ctors*)))
         endCtors = .;
 
         startDtors = .;
-        *(SORT(.dtors*))
+        KEEP(*(SORT(.dtors*)))
         endDtors = .;
 
         *(.rodata*)
