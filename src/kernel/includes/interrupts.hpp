@@ -16,6 +16,7 @@
 #define	PIC1_IRQ_TIMER 0x0
 #define	PIC1_IRQ_KEYBOARD 0x1
 // IRQ 0x2 is reserved for Slave PIC communication
+#define PIC1_IRQ_SLAVE_COMM 0x2
 #define	PIC1_IRQ_SERIAL2 0x3
 #define	PIC1_IRQ_SERIAL1 0x4
 #define	PIC1_IRQ_PARALLEL2 0x5
@@ -28,6 +29,8 @@
 #define	PIC2_IRQ_CMOSTIMER 0x0
 #define	PIC2_IRQ_CGA 0x1
 // IRQ'S 0x2 and 0x3 are reserved
+#define PIC2_IRQ_RESERVED_INT_2 0x2
+#define PIC2_IRQ_RESERVED_INT_3 0x3
 #define	PIC2_IRQ_AUXILIARY 0x4
 #define	PIC2_IRQ_FPU 0x5
 #define	PIC2_IRQ_HDDC 0x6
@@ -207,6 +210,7 @@ namespace INTERRUPTS {
     namespace IntHandlers {
         extern "C" void pitIRQHandler();
         extern "C" void keyboardIRQHandler();
+        extern "C" void doNothingIRQHandler();
     }
 
     namespace IntCallbacks {
