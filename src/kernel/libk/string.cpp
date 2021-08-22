@@ -127,3 +127,36 @@ int strncmp(const char *str1, const char *str2, size_t n) {
     }
 }
 
+char* strtok(char *str, const char *delim) {
+    static char *start, *end;
+
+    if (str != NULL) {
+        start = str;
+
+    } else {
+        if (end == NULL) {
+            return NULL;
+        }
+
+        start = end + 1;
+        str = end + 1;
+    }
+
+    while (*str) {
+        for (int idx = 0; delim[idx] != 0; idx++) {
+            if (*str == delim[idx]) {
+                *str = 0;
+
+                end = str;
+
+                return start;
+            }
+        }
+
+        str++;
+    }
+
+    end = NULL;
+
+    return start;
+}
