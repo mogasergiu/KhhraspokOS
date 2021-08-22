@@ -103,3 +103,27 @@ int strcmp(const char *str1, const char *str2) {
         return str1[idx] - str2[idx];
     }
 }
+
+int strncmp(const char *str1, const char *str2, size_t n) {
+    uint32_t idx = 0;
+
+    while (idx < n && (str1[idx] != 0 && str2[idx] != 0) &&
+            str1[idx] == str2[idx]) {
+        idx++;
+    }
+
+    if (idx == n) {
+        idx--;
+    }
+
+    if (str1[idx] == 0 && str2[idx] != 0) {
+        return 1;
+
+    } else if (str1[idx] != 0 && str2[idx] == 0) {
+        return -1;
+
+    } else {
+        return str1[idx] - str2[idx];
+    }
+}
+

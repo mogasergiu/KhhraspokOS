@@ -50,4 +50,6 @@ void* memset(void *addr, int8_t byte, size_t bytesNo);
 
 int strcmp(const char *str1, const char *str2);
 
+int strncmp(const char *str1, const char *str2, size_t n);
+
 #endif /* STRING_HPP */
