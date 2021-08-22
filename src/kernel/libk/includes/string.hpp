@@ -48,4 +48,6 @@ void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo);
  */
 void* memset(void *addr, int8_t byte, size_t bytesNo);
 
+int strcmp(const char *str1, const char *str2);
+
 #endif /* STRING_HPP */
