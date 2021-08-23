@@ -40,10 +40,10 @@ size_t strcpy(char *stringDst, const char *stringSrc) {
  * @bytesNo: number of bytes to be copied
  * @return: number of copied bytes
  */
-size_t strncpy(char *stringDst, const char *stringSrc,size_t bytesNo) {
+size_t strncpy(char *stringDst, const char *stringSrc, size_t bytesNo) {
     size_t length = 0;
 
-    for (; length < bytesNo; length++) {
+    for (; length < bytesNo && stringSrc[length] != 0; length++) {
         stringDst[length] = stringSrc[length];
     }
 

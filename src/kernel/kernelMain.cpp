@@ -5,12 +5,14 @@
 #include <kpkheap.hpp>
 #include <paging.hpp>
 #include <drivers.hpp>
+#include <filesystem.hpp>
 
 VIDEO::VGA::TextMode vgaHandler;
 INTERRUPTS::Interrupts intsHandler;
 INTERRUPTS::PIC picHandler;
 INTERRUPTS::PIT pitHandler;
 MMU::PgMgr pageManager;
+FILESYSTEM::Path pathMgr;
 
 void* KPKHEAP::topChunk = (void*)KPKHEAP_START;
 
@@ -44,6 +46,13 @@ extern "C" void kernelMain() {
     secondaryPICinit();
 
     vgaHandler.putString("hello", 15);
+
+    FILESYSTEM::parsedPath *path = pathMgr.parsePath((char*)"/dev1/dev2/dev3");
+
+    vgaHandler.putString(path->nextDir->prevDir->currDir, 15);
+    vgaHandler.putString(path->nextDir->nextDir->prevDir->currDir, 15);
+
+    if (path == NULL) {return;}
 
     while (1) {}
 }
