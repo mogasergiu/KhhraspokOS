@@ -9,13 +9,14 @@ Interrupts::Interrupts() {
     }
 
     this->IDTRDescriptor.limit = sizeof(this->IDTDescriptors) - 1;
-    this->IDTRDescriptor.base = (uint32_t) this->IDTDescriptors;
+    this->IDTRDescriptor.base = (uintptr_t) this->IDTDescriptors;
 
     __asm__ __volatile__ (
-        "movl %0, %%esi;"
-        "lidt 0(%%esi);"
+        "movq %0, %%rsi;"
+        "lidt 0(%%rsi);"
         :
         : "r" ( &this->IDTRDescriptor )
+        : "rsi"
     );
 
     // this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER, pitIRQ);
@@ -32,19 +33,23 @@ void Interrupts::setIDTEntry(uint32_t number, void (*address)()) {
     IDTD *descriptor = this->IDTDescriptors + number;
 
     // Lower part of the interrupt function's offset address
-    descriptor->offset1 = (uint32_t)address & 0x0000ffff;
+    descriptor->offset1 = (uintptr_t)address & 0x0000ffff;
 
     // Code Segment from GDT
     descriptor->selector = 0x8;
 
     // Must always be zero
-    descriptor->zero = 0x0;
+    descriptor->zero8 = 0x0;
 
     // P = 1b, DPL = 00b, S = 0b, type = 1110b
     descriptor->typeAttr = 0x8E;
 
     // Higher part of the interrupt function's offset address
-    descriptor->offset2 = (uint32_t)address >> 0x10;
+    descriptor->offset2 = ((uintptr_t)address & 0xffff0000) >> 0x10;
+
+    descriptor->offset3 = ((uintptr_t)address & 0xffffffff00000000) >> 0x20;
+
+    descriptor->zero32 = 0x0;
 
     sti();
 }

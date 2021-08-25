@@ -9,8 +9,9 @@ INCLUDES = -I$(KERNEL_SOURCES_PATH)/includes -I$(LIBK_PATH)/includes
 FLAGS = -g -ffreestanding -falign-jumps -falign-functions -falign-labels \
         -falign-loops -fstrength-reduce -fomit-frame-pointer \
         -finline-functions -Wno-unused-function -fno-builtin -Werror -Wall \
-        -Wextra -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostdlib \
-        -nostartfiles -nodefaultlibs -O0 -Iinc -std=c++20
+        -Wextra -Wno-unused-label -Wno-unused-parameter -nostdlib \
+        -nostartfiles -nodefaultlibs -O0 -std=c++20 -m64 -mno-mmx \
+	-mno-sse -mno-sse2
 
 all: $(LIBK)
 

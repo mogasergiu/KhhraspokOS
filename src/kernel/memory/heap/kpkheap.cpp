@@ -5,18 +5,18 @@ using namespace KPKHEAP;
 
 static chunk *bucket[KPKBUCKET_SIZE];
 
-static inline uint32_t msb (size_t size)
+static inline uintptr_t msb (size_t size)
 {
-    uint32_t ret = 0;
-    __asm__ __volatile__("bsrl %1, %0" : "=r" (ret) : "r"(size));
+    uintptr_t ret = 0;
+    __asm__ __volatile__("bsrq %1, %0" : "=r" (ret) : "r"(size));
 
     return ret;
 }
 
-static inline uint32_t lsb (size_t size)
+static inline uintptr_t lsb (size_t size)
 {
-    uint32_t ret = 0;
-    __asm__ __volatile__("bsfl %1, %0" : "=r" (ret) : "r"(size));
+    uintptr_t ret = 0;
+    __asm__ __volatile__("bsfq %1, %0" : "=r" (ret) : "r"(size));
 
     return ret;
 }

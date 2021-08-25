@@ -23,23 +23,25 @@
 #define PTE_R 0b000000010
 #define PTE_P 0b000000001
 
+#define PML4T_ADDR 0x1000
+#define PDPT0_aDDR 0x2000
+#define PDT0_ADDR 0x3000
+#define PT0_ADDR 0x4000
+
 #define PDE_ENTRIES_ADDR 0x900000
 #define PTE_ENTRIES_ADDR 0xa00000
 
-#define PDE_TOTAL_ENTRIES 1024
-#define PTE_TOTAL_ENTRIES 1024
+#define P_TOTAL_ENTRIES 512
 #define PAGE_SIZE 4096
 
 namespace MMU {
 
     class PgMgr {
         private:
-            uint32_t *PDE, *currPDE, *currPTE;
+            uintptr_t *PML4T;
 
         public:
             PgMgr();
-
-            uint32_t getPDE();
 
             void mapPage(void *vaddr, void *paddr);
     };

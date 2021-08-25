@@ -1,8 +1,9 @@
 FLAGS = -g -ffreestanding -falign-jumps -falign-functions -falign-labels \
-        -falign-loops -fstrength-reduce -fomit-frame-pointer \
+        -falign-loops -fomit-frame-pointer \
         -finline-functions -Wno-unused-function -fno-builtin -Werror -Wall \
-        -Wextra -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostdlib \
-        -nostartfiles -nodefaultlibs -O0 -Iinc -std=c++20
+        -Wextra -Wno-unused-label -Wno-unused-parameter -nostdlib \
+        -nostartfiles -nodefaultlibs -O0 -std=c++20 -mno-red-zone \
+	-mgeneral-regs-only -m64 -mno-mmx -mno-sse -mno-sse2 -fstrength-reduce
 KERNEL_SOURCES_PATH = ${KHH_HOME}/src/kernel
 LIBK_PATH = $(KERNEL_SOURCES_PATH)/libk
 INCLUDES = -I$(KERNEL_SOURCES_PATH)/includes -I$(LIBK_PATH)/includes
@@ -88,7 +89,7 @@ $(KERNEL_PATH_PARSER_OBJECT): $(KERNEL_PATH_PARSER_SOURCE)
 	${TARGET}-g++ $(FLAGS) $(INCLUDES) -c $^ -fno-rtti -o $@
 
 $(PRE_KERNEL_OBJECT): $(PRE_KERNEL_SOURCE)
-	nasm -f elf32 -g $^ -o $@
+	nasm -f elf64 -g $^ -o $@
 
 .PHONY: clean
 

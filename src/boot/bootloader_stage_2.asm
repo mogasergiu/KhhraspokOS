@@ -3,6 +3,7 @@ ORG 0x7e00
 [BITS 32]
 
 DATA_SEGMENT_OFFSET equ 0x10
+CODE_SEGMENT_OFFSET equ 0x8
 
 startProtectedMode: 
     ; Set up new segment registers
@@ -13,15 +14,27 @@ startProtectedMode:
     mov fs, ax
     mov ss, ax
 
+    call enablePaging
+
+    lgdt [gdtDescriptor64]
+
+    jmp CODE_SEGMENT_OFFSET:startLongMode
+
+%include "enablePaging.asm"
+%include "globalDescriptorTable.asm"
+
+[BITS 64]
+
+startLongMode:
     ; Manually moving 8192 bytes at address 0x100000 where our kernel will be
-    mov esi, 0x8000
-    mov edi, 0x100000
-    mov ecx, 0x4000
+    mov rsi, 0x8000
+    mov rdi, 0x100000
+    mov rcx, 0x6000
     rep movsb
 
     ; Update stack pointers
-    mov ebp, 0x200000
-    mov esp, ebp
+    mov rbp, 0x200000
+    mov rsp, rbp
 
     ; Jump to pre-kernel
     call 0x100000

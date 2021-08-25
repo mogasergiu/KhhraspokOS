@@ -17,28 +17,65 @@ extern endCtors
 extern startDtors
 extern endDtors
 
+%macro IRQpush 0
+    push rax
+    push rbx
+    push rcx
+    push rdx
+    push rdi
+    push rsi
+    push rbp
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
+%endmacro
+
+%macro IRQpop 0
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rbp
+    pop rsi
+    pop rdi
+    pop rdx
+    pop rcx
+    pop rbx
+    pop rax
+%endmacro
+
 section .text
 _start:
+    xor rbx, rbx
     mov ebx, startCtors
     jmp .ctorsIterate
 
 .callConstructor:
-    call [ebx]
-    add ebx, 4
+    call [rbx]
+    add rbx, 8
 .ctorsIterate:
-    cmp ebx, endCtors
+    cmp rbx, endCtors
     jb .callConstructor
 
     ; Enter the kernel
     call kernelMain
 
-    mov  ebx, endDtors
+    mov  rbx, endDtors
     jmp  .dtorsIterate
 .callDestructor:
-    sub  ebx, 4
-    call [ebx]
+    sub  rbx, 8
+    call [rbx]
 .dtorsIterate:
-    cmp  ebx, startDtors
+    cmp  rbx, startDtors
     ja   .callDestructor
  
     cli
@@ -49,73 +86,73 @@ _start:
     jmp  .hang
 
 pitIRQHandler:
-    pushad
+    IRQpush
     cli
     call pitIRQ
-    popad
+    IRQpop
     sti
-    iret
+    iretq
 
 doNothingIRQHandler:
-    pushad
+    IRQpush
     cli
-    push 0x20
-    push 0x20
+    mov rdi, 0x20
+    mov rsi, 0x20
     call outByte
-    add esp, 0x8
-    popad
+    IRQpop
     sti
-    iret
+    iretq
 
 keyboardIRQHandler:
-    pushad
+    IRQpush
     cli
     call keyboardIRQ
-    popad
+    IRQpop
     sti
-    iret
+    iretq
 
 inByte:
-    push ebp
-    mov ebp, esp
+    push rbp
+    mov rbp, rsp
 
-    xor eax, eax
-    mov edx, [ebp+8]
+    xor rax, rax
+    mov rdx, rdi
     in al, dx
 
-    pop ebp
+    pop rbp
     ret
 
 inWord:
-    push ebp
-    mov ebp, esp
+    push rbp
+    mov rbp, rsp
 
-    xor eax, eax
-    mov edx, [ebp+8]
+    xor rax, rax
+    mov rdx, rdi
     in ax, dx
 
-    pop ebp
+    pop rbp
     ret
 
 outByte:
-    push ebp
-    mov ebp, esp
+    push rbp
+    mov rbp, rsp
 
-    mov eax, [ebp+12]
-    mov edx, [ebp+8]
+    mov rax, rsi
+    mov rdx, rdi
     out dx, al
 
-    pop ebp
+    pop rbp
     ret
 
 outWord:
-    push ebp
-    mov ebp, esp
+    push rbp
+    mov rbp, rsp
 
-    mov eax, [ebp+12]
-    mov edx, [ebp+8]
+    mov rax, rsi
+    mov rdx, rdi
     out dx, ax
 
-    pop ebp
+    pop rbp
     ret
+
 

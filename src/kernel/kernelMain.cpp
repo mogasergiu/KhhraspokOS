@@ -47,12 +47,5 @@ extern "C" void kernelMain() {
 
     vgaHandler.putString("hello", 15);
 
-    FILESYSTEM::parsedPath *path = pathMgr.parsePath((char*)"/dev1/dev2/dev3");
-
-    vgaHandler.putString(path->nextDir->prevDir->currDir, 15);
-    vgaHandler.putString(path->nextDir->nextDir->prevDir->currDir, 15);
-
-    if (path == NULL) {return;}
-
-    while (1) {}
+    while (1) {};
 }

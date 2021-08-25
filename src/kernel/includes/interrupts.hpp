@@ -34,7 +34,7 @@
 #define	PIC2_IRQ_AUXILIARY 0x4
 #define	PIC2_IRQ_FPU 0x5
 #define	PIC2_IRQ_HDDC 0x6
-// IRQ 0x7 is reserved
+#define PIC2_IRQ_RESERVED_INT_7 0x7
 
 // PIC End of Interrupt
 #define PIC_EOI 0x20
@@ -181,23 +181,6 @@
         :                                                                      \
     )
 
-#define initInt()                                                              \
-    __asm__ __volatile__(                                                      \
-        "pushal;"                                                              \
-        "cli;"                                                                 \
-        :                                                                      \
-        :                                                                      \
-    )
-
-#define endInt()                                                               \
-    __asm__ __volatile__(                                                      \
-        "popal;"                                                               \
-        "sti;"                                                                 \
-        "iret;"                                                                \
-        :                                                                      \
-        :                                                                      \
-    )
-
 /********************************************************************
  * INTERRUPTS namespace - covers every interrupts related component *
  ********************************************************************/
@@ -241,13 +224,18 @@ namespace INTERRUPTS {
                 uint16_t selector;
 
                 // Always zero
-                uint8_t zero;
+                uint8_t zero8;
 
                 // Contains P, DPL, S and Gate Type
                 uint8_t typeAttr;
 
                 // Higher part of the interrupt function's offset address
                 uint16_t offset2;
+
+                uint32_t offset3;
+
+                uint32_t zero32;
+
             } __attribute__((packed)) IDTDescriptors[MAX_IDT_ENTRIES];
 
             // IDT Register descriptor structure
@@ -256,7 +244,7 @@ namespace INTERRUPTS {
                 uint16_t limit;
 
                 // Linear address where the IDT starts (INT 0) 
-                uint32_t base;
+                uint64_t base;
             } __attribute__((packed)) IDTRDescriptor;
 
             // Constructor - sets up IDTR, zeroes out IDT and loads IDT (lidt)
