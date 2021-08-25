@@ -38,6 +38,8 @@ startRealMode:
     ; Load second stage bootloader for protected mode
     call realModeDiskOperations.LBARead
 
+    call getMemoryRegions
+
     ; Clear Interrupts
     cli
 
@@ -68,6 +70,8 @@ startRealMode:
 
 ; Include the Global Descriptor Table
 %include "globalDescriptorTable.asm"
+
+%include "realModeMemoryOps.asm"
 
 ; Specify padding up to boot signature
 times 510 - ($ - $$) db 0

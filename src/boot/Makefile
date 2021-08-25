@@ -3,7 +3,8 @@ BINARIES = ${KHH_HOME}/bin
 STAGE_1_SOURCES = $(BOOTLOADER_SOURCES_PATH)/bootloader_stage_1.asm \
                 $(BOOTLOADER_SOURCES_PATH)/globalDescriptorTable.asm \
                 $(BOOTLOADER_SOURCES_PATH)/realModeDiskOperations.asm \
-                $(BOOTLOADER_SOURCES_PATH)/realModePrint.asm
+                $(BOOTLOADER_SOURCES_PATH)/realModePrint.asm \
+		$(BOOTLOADER_SOURCES_PATH)/realModeMemoryOps.asm
 STAGE_2_SOURCES = $(BOOTLOADER_SOURCES_PATH)/bootloader_stage_2.asm
 STAGE_1_BOOTLOADER = $(BINARIES)/bootloader_stage_1.bin
 STAGE_2_BOOTLOADER = $(BINARIES)/bootloader_stage_2.bin

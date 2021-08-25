@@ -3,7 +3,7 @@
 #include <string.hpp>
 #include <kernel.hpp>
 #include <kpkheap.hpp>
-#include <paging.hpp>
+#include <memory.hpp>
 #include <drivers.hpp>
 #include <filesystem.hpp>
 
@@ -14,6 +14,8 @@ INTERRUPTS::PIT pitHandler;
 MMU::PgMgr pageManager;
 FILESYSTEM::Path pathMgr;
 
+uint8_t MMU::memRegionCount = *(uint8_t*)MEM_REGION_COUNT_ADDR;
+MMU::memRegionDescriptor* MMU::memMap = (MMU::memRegionDescriptor*)MEM_MAP_ADDR;
 void* KPKHEAP::topChunk = (void*)KPKHEAP_START;
 
 static inline void secondaryPICinit() {
@@ -38,6 +40,8 @@ static inline void secondaryPICinit() {
 static inline void secondaryPreKernel() {
     KPKHEAP::topChunk = (void*)KPKHEAP_START;
     DRIVERS::DISK::nail = 0;
+    MMU::memRegionCount = *(uint8_t*)MEM_REGION_COUNT_ADDR;
+    MMU::memMap = (MMU::memRegionDescriptor*)MEM_MAP_ADDR;
 }
 
 extern "C" void kernelMain() {

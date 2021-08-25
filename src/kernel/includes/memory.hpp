@@ -5,6 +5,9 @@
 #ifndef PAGING_HPP
 #define PAGING_HPP
 
+#define MEM_REGION_COUNT_ADDR 0x500
+#define MEM_MAP_ADDR 0x510
+
 #define PDE_G 0b100000000
 #define PDE_S 0b010000000
 #define PDE_A 0b000100000
@@ -35,6 +38,15 @@
 #define PAGE_SIZE 4096
 
 namespace MMU {
+
+    extern uint8_t memRegionCount;
+
+    extern struct memRegionDescriptor {
+        uint64_t baseAdrr;
+        uint64_t length;
+        uint32_t type;
+        uint32_t attr;
+    } __attribute__((packed)) *memMap;
 
     class PgMgr {
         private:
