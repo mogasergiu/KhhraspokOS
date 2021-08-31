@@ -343,6 +343,38 @@ namespace INTERRUPTS {
 
             
     };
+
+    struct LAPICDescriptor {
+        struct {
+            uint8_t type;
+            uint8_t length;
+        } __attribute__((packed)) hdr;
+        uint8_t acpiId;
+        uint8_t apicId;
+        uint32_t flags;
+    } __attribute__((packed));
+
+    struct IOAPICDescriptor {
+        struct {
+            uint8_t type;
+            uint8_t length;
+        } __attribute__((packed)) hdr;
+        uint8_t apicId;
+        uint8_t reserved;
+        uint32_t addr;
+        uint32_t globalSysIntrBase;
+    } __attribute__((packed));
+
+    struct IntrOverride {
+        struct {
+            uint8_t type;
+            uint8_t length;
+        } __attribute__((packed)) hdr;
+        uint8_t bus;
+        uint8_t src;
+        uint32_t intr;
+        uint16_t flags;
+    } __attribute__((packed));
 }
 
 #endif  /* INTERRUPTS_HPP */

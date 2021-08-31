@@ -6,6 +6,7 @@
 #include <memory.hpp>
 #include <drivers.hpp>
 #include <filesystem.hpp>
+#include <acpi.hpp>
 
 VIDEO::VGA::TextMode vgaHandler;
 INTERRUPTS::Interrupts intsHandler;
@@ -14,8 +15,6 @@ INTERRUPTS::PIT pitHandler;
 MMU::PgMgr pageManager;
 FILESYSTEM::Path pathMgr;
 
-uint8_t MMU::memRegionCount = *(uint8_t*)MEM_REGION_COUNT_ADDR;
-MMU::memRegionDescriptor* MMU::memMap = (MMU::memRegionDescriptor*)MEM_MAP_ADDR;
 void* KPKHEAP::topChunk = (void*)KPKHEAP_START;
 
 static inline void secondaryPICinit() {
@@ -33,6 +32,10 @@ static inline void secondaryPICinit() {
             continue;
         }
 
+        intsHandler.setIDTEntry(i, INTERRUPTS::IntHandlers::doNothingIRQHandler);
+    }
+
+    for (int i = PIC2_IRQ8 + PIC2_IRQ_HDDC + 1; i < MAX_IDT_ENTRIES; i++) {
         intsHandler.setIDTEntry(i, INTERRUPTS::IntHandlers::doNothingIRQHandler);
     }
 }
