@@ -4,6 +4,7 @@ PML4T equ 0x1000
 PDPT0 equ 0x2003
 PDT0 equ 0x3003
 PT0 equ 0x4003
+PT1 equ 0x5003
 
 enablePaging:
     mov edi, PML4T
@@ -18,16 +19,26 @@ enablePaging:
     mov dword [edi], PDT0
     add edi, 0x1000
     mov dword [edi], PT0
+    mov dword [edi + 8], PT1
     add edi, 0x1000
+
 
     mov ebx, 0x3
     mov ecx, 512
 
-.setEntry:
+.setEntryPT0:
     mov dword [edi], ebx
     add ebx, 0x1000
     add edi, 8
-    loop .setEntry
+    loop .setEntryPT0
+
+    mov ecx, 512
+
+.setEntryPT1:
+    mov dword [edi], ebx
+    add ebx, 0x1000
+    add edi, 8
+    loop .setEntryPT1
 
     mov eax, cr4
     or eax, 1 << 5
