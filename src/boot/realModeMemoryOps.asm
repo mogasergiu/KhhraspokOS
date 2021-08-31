@@ -18,6 +18,7 @@ getMemoryRegions
     mov edx, SMAP
     xor ebx, ebx
     mov si, memRegionsCount
+    mov byte [si], 0x0
 
 .scanRegions:
     mov eax, 0xe820
@@ -33,5 +34,6 @@ getMemoryRegions
     jmp .scanRegions
 
 .doneScanning:
+    inc byte [si]
     ret
 
