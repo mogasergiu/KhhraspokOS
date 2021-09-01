@@ -248,7 +248,7 @@ namespace INTERRUPTS {
             } __attribute__((packed)) IDTRDescriptor;
 
             // Constructor - sets up IDTR, zeroes out IDT and loads IDT (lidt)
-            Interrupts();
+            void initInterrupts();
 
             /*
              * Helper function to add an entry in the IDT
@@ -271,7 +271,7 @@ namespace INTERRUPTS {
     class PIC {
         public:
             // Constructor - sets up Programmable Interrupt Controller
-            PIC();
+            void initPIC();
 
             /*
              * Function to write to the PIC'S Command Register
@@ -312,7 +312,7 @@ namespace INTERRUPTS {
     class PIT {
         public:
             // Constructor - Initializes the PIT
-            PIT();
+            void initPIT();
 
             /*
              * Getter method to retrieve the number of system ticks

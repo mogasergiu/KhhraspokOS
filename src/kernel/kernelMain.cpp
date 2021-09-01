@@ -50,7 +50,17 @@ static inline void secondaryPreKernel() {
 extern "C" void kernelMain() {
     secondaryPreKernel();
 
+    intsHandler.initInterrupts();
+    picHandler.initPIC();
+    pitHandler.initPIT();
     secondaryPICinit();
+
+    sti();
+
+    ACPI::parseACPI();
+
+    char *ptr = (char*)0xffff0000;
+    ptr[0] = 'a';
 
     vgaHandler.putString("hello", 15);
 

@@ -11,7 +11,7 @@ extern "C" void IntCallbacks::pitIRQ() {
 }
 
 // Constructor - Initializes the PIT
-PIT::PIT() {
+void PIT::initPIT() {
     this->sendOCW(PIT_OCW_BIN | PIT_OCW_MODE_SQUAREWAVEGENERATOR | PIT_OCW_RL_LMSB);
 
     // send LSB

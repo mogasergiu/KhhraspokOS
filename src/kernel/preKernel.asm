@@ -55,6 +55,7 @@ extern endDtors
 
 section .text
 _start:
+    cli
     xor rbx, rbx
     mov ebx, startCtors
     jmp .ctorsIterate

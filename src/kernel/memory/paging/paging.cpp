@@ -8,13 +8,16 @@ using namespace MMU;
 MMU::memRegionDescriptor* MMU::memMap = (memRegionDescriptor*)MEM_MAP_ADDR;
 size_t MMU::usedMem = KERNEL_USED_MEM;
 size_t MMU::reservedMem;
-size_t MMU::freeMem = START_MEM;
+size_t MMU::freeMem;
 uint8_t MMU::memRegionCount = *(uint8_t*)MEM_REGION_COUNT_ADDR;
 MMU::PgFrAllocator MMU::PgMgr::pgAllocator;
 
 void PgFrAllocator::initPgAlloc() {
-    size_t memSize = MMU::freeMem, pg;
+    size_t memSize, pg;
     MMU::memRegionCount = *(uint8_t*)MEM_REGION_COUNT_ADDR;
+    MMU::freeMem = MMU::memMap[MMU::memRegionCount - 1].baseAddr +
+                       MMU::memMap[MMU::memRegionCount - 1].length;
+    memSize = MMU::freeMem;
 
     this->PgsMap = (BitMap*)KPKHEAP::kpkZalloc(sizeof(*this->PgsMap));
     this->PgsMap->initBitMap((memSize  / PAGE_SIZE));
@@ -110,7 +113,9 @@ void PgFrAllocator::allocPgs(void* addr, size_t count) {
 PgMgr::PgMgr() {
     this->pgAllocator.initPgAlloc();
 
-    size_t memSize = START_MEM;
+    size_t memSize = MMU::memMap[MMU::memRegionCount - 1].baseAddr +
+                       MMU::memMap[MMU::memRegionCount - 1].length;
+;
 
     this->PML4 = (PML4struct*)PML4T_ADDR;
  

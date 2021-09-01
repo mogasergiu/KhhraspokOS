@@ -7,7 +7,7 @@ extern "C" void IntCallbacks::keyboardIRQ() {
 }
 
 // Constructor - sets up the Programmable Interrupt Controller
-PIC::PIC() {
+void PIC::initPIC() {
     uint8_t icw = 0;
 
     // Send ICW1
