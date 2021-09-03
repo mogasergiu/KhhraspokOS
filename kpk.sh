@@ -16,6 +16,10 @@ elif [[ $1 == "clean" ]]; then
 elif [[ $1 == "run" ]]; then
     qemu-system-x86_64  -smp cores=4,threads=2 -hda KhhraspokOS.bin
 
+elif [[ $1 == "dump" ]]; then
+    qemu-system-x86_64  -smp cores=4,threads=2 -hda KhhraspokOS.bin -d int,exec\
+                                                                    --no-reboot
+
 elif [[ $1 == "debug" ]]; then
     qemu-system-x86_64  -smp cores=4,threads=2 -hda KhhraspokOS.bin -s -S
 
@@ -25,6 +29,7 @@ elif [[ $1 == "help" ]]; then
     echo "build         Build the project - obtain the final binary: Khhraspok.bin"
     echo "clean         Clean everything - fresh repo"
     echo "run           Run the Operating System!"
+    echo "dump          See CPU crash dump"
     echo "debug         Start qemu remote debugging session on port 1234"
     echo "help          Show this list"
 
