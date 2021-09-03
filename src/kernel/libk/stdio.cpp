@@ -1,4 +1,5 @@
 #include <video.hpp>
+#include <stdlib.hpp>
 #include <stdarg.h>
 
 void putc(const char c) {
@@ -10,6 +11,8 @@ void pwarn(const char *s) {
 }
 
 static void printHex(int64_t num) {
+    vgaHandler.putString("0x", 15);
+
     int64_t hex = 0, remainder;
     char hexChar;
 
@@ -17,7 +20,7 @@ static void printHex(int64_t num) {
         remainder = hexByte % 0x10;
 
         if(remainder < 10) {
-	    remainder =remainder + 0x30;
+	    remainder = remainder + 0x30;
 
         } else {
 	    remainder = remainder + 0x37;
@@ -42,6 +45,10 @@ void perror(const char *format, ...) {
             switch (format[i]) {
                 case 's':
                     vgaHandler.putString(va_arg(ap, const char*), 12);
+                    break;
+
+                case 'd':
+                    vgaHandler.putString(itoa(va_arg(ap, int), 10), 12);
                     break;
 
                 case 'x':
@@ -72,6 +79,10 @@ void printf(const char *format, ...) {
             switch (format[i]) {
                 case 's':
                     vgaHandler.putString(va_arg(ap, const char*), 15);
+                    break;
+
+                case 'd':
+                    vgaHandler.putString(itoa(va_arg(ap, int), 10), 15);
                     break;
 
                 case 'x':

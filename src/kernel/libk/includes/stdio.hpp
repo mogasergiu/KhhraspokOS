@@ -7,7 +7,7 @@
 #define CATCH_FIRE(condition, message) \
     do { \
         if ((condition)) { \
-            perror("[%x]: %s\n", __LINE__, (message)); \
+            perror("[%s:%d]: %s\n",__FILE__,  __LINE__, (message)); \
             perror(""); \
             __asm__ __volatile__( \
                 "hlt" \
