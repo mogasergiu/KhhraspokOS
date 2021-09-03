@@ -1,11 +1,15 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <portsIO.hpp>
+#include <acpi.hpp>
 
 #ifndef INTERRUPTS_HPP
 #define INTERRUPTS_HPP
 
 #define MAX_IDT_ENTRIES 256
+#define MAX_CPU_COUNT 16
+
+#define APIC_ADDR 0x500
 
 #define DIVISOR 100
 #define INPUT_FREQ 1193180
@@ -340,42 +344,32 @@ namespace INTERRUPTS {
              * @return: value found in the Channel Register
              */
             void sendChannel(uint8_t channel, uint8_t value) const;
-
-            
     };
 
-    struct LAPICDescriptor {
-        struct {
-            uint8_t type;
-            uint8_t length;
-        } __attribute__((packed)) hdr;
-        uint8_t acpiId;
-        uint8_t apicId;
-        uint32_t flags;
-    } __attribute__((packed));
+    class APIC {
+        private:
+            uint8_t lapicCount;
+            uint8_t* lapicAddr;
+            ACPI::LAPICEntry *lapic[MAX_CPU_COUNT];
+            ACPI::IOAPICEntry *ioapic;
+            uint8_t ioapicIntrSrcOverrideCount;
+            ACPI::IOAPICIntrSrcOverride *ioapiciso[MAX_CPU_COUNT];
+            uint8_t ioapicNmiSrcCount;
+            ACPI::IOAPICNMISrc *ioapicns[MAX_CPU_COUNT];
+            uint8_t lapicNmiCount;
+            ACPI::LAPICNMI *lapicn[MAX_CPU_COUNT];
+            ACPI::LAPICAddrOverride *lapicao;
+            uint8_t lx2apicCount;
+            ACPI::Lx2APIC *lx2apic[MAX_CPU_COUNT];
 
-    struct IOAPICDescriptor {
-        struct {
-            uint8_t type;
-            uint8_t length;
-        } __attribute__((packed)) hdr;
-        uint8_t apicId;
-        uint8_t reserved;
-        uint32_t addr;
-        uint32_t globalSysIntrBase;
-    } __attribute__((packed));
-
-    struct IntrOverride {
-        struct {
-            uint8_t type;
-            uint8_t length;
-        } __attribute__((packed)) hdr;
-        uint8_t bus;
-        uint8_t src;
-        uint32_t intr;
-        uint16_t flags;
-    } __attribute__((packed));
+        public:
+            void parseMADT();
+    };
 }
+
+extern INTERRUPTS::Interrupts intsHandler;
+extern INTERRUPTS::PIC picHandler;
+extern INTERRUPTS::PIT pitHandler;
 
 #endif  /* INTERRUPTS_HPP */
 

@@ -4,6 +4,8 @@
 
 using namespace FILESYSTEM;
 
+FILESYSTEM::Path pathMgr;
+
 Path::Path() {
     this->cwd[0] = this->oldcwd[0] = '/';
 }

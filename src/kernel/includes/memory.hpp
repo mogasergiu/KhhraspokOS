@@ -6,10 +6,10 @@
 #ifndef PAGING_HPP
 #define PAGING_HPP
 
-#define MEM_REGION_COUNT_ADDR 0x500
-#define MEM_MAP_ADDR 0x510
+#define MEM_REGION_COUNT_ADDR 0x520
+#define MEM_MAP_ADDR 0x521
 
-#define KERNEL_USED_MEM 0x400000
+#define KERNEL_USED_MEM 0x2000000
 #define KERNEL_START_ADDR 0x100000
 
 #define START_MEM 0x10000000
@@ -107,5 +107,7 @@ namespace MMU {
             void mapPg(void *vaddr, void *paddr);
     };
 }
+
+extern MMU::PgMgr pageManager;
 
 #endif /* PAGING_HPP */

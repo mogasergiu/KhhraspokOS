@@ -3,6 +3,7 @@
 using namespace INTERRUPTS;
 
 uint32_t INTERRUPTS::ticks = 0;
+INTERRUPTS::PIT pitHandler;
 
 extern "C" void IntCallbacks::pitIRQ() {
     INTERRUPTS::ticks++;

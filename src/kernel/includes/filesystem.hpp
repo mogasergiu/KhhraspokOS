@@ -32,4 +32,6 @@ namespace FILESYSTEM {
     };
 };
 
+extern FILESYSTEM::Path pathMgr;
+
 #endif  /* FILESYSTEM_HPP */

@@ -37,4 +37,6 @@ namespace KPKHEAP {
     extern "C" void kpkFree(void *mem);
 } 
 
+extern void* KPKHEAP::topChunk;
+
 #endif  /* KPKHEAP_HPP */

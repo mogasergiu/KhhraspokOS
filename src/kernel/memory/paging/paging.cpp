@@ -11,6 +11,7 @@ size_t MMU::reservedMem;
 size_t MMU::freeMem;
 uint8_t MMU::memRegionCount = *(uint8_t*)MEM_REGION_COUNT_ADDR;
 MMU::PgFrAllocator MMU::PgMgr::pgAllocator;
+MMU::PgMgr pageManager;
 
 void PgFrAllocator::initPgAlloc() {
     size_t memSize, pg;
@@ -33,7 +34,7 @@ void PgFrAllocator::initPgAlloc() {
         }
     }
 
-    for (pg = 0; pg < 0x8000; pg += PAGE_SIZE) {
+    for (pg = 0; pg < 0x9000; pg += PAGE_SIZE) {
         this->PgsMap->set(pg / PAGE_SIZE, true);
     }
 

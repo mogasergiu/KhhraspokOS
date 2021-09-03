@@ -4,6 +4,7 @@
 using namespace KPKHEAP;
 
 static chunk *bucket[KPKBUCKET_SIZE];
+void* KPKHEAP::topChunk = (void*)KPKHEAP_START;
 
 static inline uintptr_t msb (size_t size)
 {
@@ -146,7 +147,7 @@ extern "C" void* kpkMalloc(size_t size) {
         ret = makeChunk(topChunk, size);
 
         if (ret != NULL) {
-            topChunk = (void*)((char*)topChunk + size + sizeof(ret->metadata));
+            KPKHEAP::topChunk = (void*)((char*)topChunk + size + sizeof(ret->metadata));
         }
     }
 

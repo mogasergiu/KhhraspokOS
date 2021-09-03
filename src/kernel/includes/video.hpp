@@ -93,4 +93,6 @@ namespace VIDEO {
     };
 }
 
+extern VIDEO::VGA::TextMode vgaHandler;
+
 #endif /* VIDEO_HPP */

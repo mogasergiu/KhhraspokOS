@@ -8,15 +8,6 @@
 #include <filesystem.hpp>
 #include <acpi.hpp>
 
-VIDEO::VGA::TextMode vgaHandler;
-INTERRUPTS::Interrupts intsHandler;
-INTERRUPTS::PIC picHandler;
-INTERRUPTS::PIT pitHandler;
-MMU::PgMgr pageManager;
-FILESYSTEM::Path pathMgr;
-
-void* KPKHEAP::topChunk = (void*)KPKHEAP_START;
-
 static inline void secondaryPICinit() {
     intsHandler.setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER,
                             INTERRUPTS::IntHandlers::pitIRQHandler);
@@ -40,16 +31,7 @@ static inline void secondaryPICinit() {
     }
 }
 
-static inline void secondaryPreKernel() {
-    KPKHEAP::topChunk = (void*)KPKHEAP_START;
-    DRIVERS::DISK::nail = 0;
-    MMU::memRegionCount = *(uint8_t*)MEM_REGION_COUNT_ADDR;
-    MMU::memMap = (MMU::memRegionDescriptor*)MEM_MAP_ADDR;
-}
-
 extern "C" void kernelMain() {
-    secondaryPreKernel();
-
     intsHandler.initInterrupts();
     picHandler.initPIC();
     pitHandler.initPIT();
@@ -58,6 +40,8 @@ extern "C" void kernelMain() {
     sti();
 
     ACPI::parseACPI();
+
+    ACPI::madt->hdr.signature++;
 
     char *ptr = (char*)0xffff0000;
     ptr[0] = 'a';

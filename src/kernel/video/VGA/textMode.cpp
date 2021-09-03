@@ -3,6 +3,8 @@
 
 using namespace VIDEO;
 
+VIDEO::VGA::TextMode vgaHandler;
+
 // Constructor - sets up line, column, address and VGA buffer
 VGA::TextMode::TextMode() {
     this->column = this->line = 0;

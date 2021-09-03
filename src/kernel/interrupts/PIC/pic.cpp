@@ -2,6 +2,8 @@
 
 using namespace INTERRUPTS;
 
+INTERRUPTS::PIC picHandler;
+
 extern "C" void IntCallbacks::keyboardIRQ() {
     PIO::outByte(PIC1_REG_COMMAND, PIC_EOI);
 }

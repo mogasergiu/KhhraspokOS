@@ -2,6 +2,8 @@
 
 using namespace INTERRUPTS;
 
+INTERRUPTS::Interrupts intsHandler;
+
 // Constructor - sets up IDTR, zeroes out IDT and loads IDT (lidt)
 void Interrupts::initInterrupts() {
     for (uint32_t i = 0; i < sizeof(this->IDTDescriptors); i++) {
