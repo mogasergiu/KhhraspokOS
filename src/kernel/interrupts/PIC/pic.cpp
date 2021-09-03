@@ -5,7 +5,7 @@ using namespace INTERRUPTS;
 INTERRUPTS::PIC picHandler;
 
 extern "C" void IntCallbacks::keyboardIRQ() {
-    PIO::outByte(PIC1_REG_COMMAND, PIC_EOI);
+    PMIO::pOutByte(PIC1_REG_COMMAND, PIC_EOI);
 }
 
 // Constructor - sets up the Programmable Interrupt Controller
@@ -37,10 +37,10 @@ void PIC::initPIC() {
  */
 void PIC::writeCMDR(uint8_t cmd, uint8_t picNum) {
     if (picNum == 1) {
-        PIO::outByte(PIC2_REG_COMMAND, cmd);
+        PMIO::pOutByte(PIC2_REG_COMMAND, cmd);
 
     } else if (picNum == 0) {
-        PIO::outByte(PIC1_REG_COMMAND, cmd);
+        PMIO::pOutByte(PIC1_REG_COMMAND, cmd);
     }
 }
 
@@ -52,10 +52,10 @@ void PIC::writeCMDR(uint8_t cmd, uint8_t picNum) {
  */
 void PIC::writeIMR(uint8_t data, uint8_t picNum) {
     if (picNum == 1) {
-        PIO::outByte(PIC2_REG_IMR, data);
+        PMIO::pOutByte(PIC2_REG_IMR, data);
 
     } else if (picNum == 0) {
-        PIO::outByte(PIC1_REG_IMR, data);
+        PMIO::pOutByte(PIC1_REG_IMR, data);
     }
 }
 
@@ -74,7 +74,7 @@ uint8_t PIC::readDR(uint8_t picNum) {
         portNum = PIC1_REG_DATA;
     }
 
-    return PIO::inByte(portNum);
+    return PMIO::pInByte(portNum);
 }
 
 /*
@@ -92,7 +92,7 @@ uint8_t PIC::readSR(uint8_t picNum) {
         portNum = PIC1_REG_STATUS;
     }
 
-    return PIO::inByte(portNum);
+    return PMIO::pInByte(portNum);
 }
 
 

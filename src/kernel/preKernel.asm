@@ -2,10 +2,16 @@ global _start
 global pitIRQHandler
 global keyboardIRQHandler
 global doNothingIRQHandler
-global inByte
-global inWord
-global outByte
-global outWord
+global pInByte
+global pInWord
+global pOutByte
+global pOutWord
+global mInByte
+global mInWord
+global mInDWord
+global mOutByte
+global mOutWord
+global mOutDWord
 
 extern kernelMain
 extern pitIRQ
@@ -55,6 +61,8 @@ extern endDtors
 
 section .text
 _start:
+    nop
+    nop
     cli
     xor rbx, rbx
     mov ebx, startCtors
@@ -99,7 +107,7 @@ doNothingIRQHandler:
     cli
     mov rdi, 0x20
     mov rsi, 0x20
-    call outByte
+    call pOutByte
     IRQpop
     sti
     iretq
@@ -112,7 +120,7 @@ keyboardIRQHandler:
     sti
     iretq
 
-inByte:
+pInByte:
     push rbp
     mov rbp, rsp
 
@@ -123,7 +131,7 @@ inByte:
     pop rbp
     ret
 
-inWord:
+pInWord:
     push rbp
     mov rbp, rsp
 
@@ -134,7 +142,7 @@ inWord:
     pop rbp
     ret
 
-outByte:
+pOutByte:
     push rbp
     mov rbp, rsp
 
@@ -145,7 +153,7 @@ outByte:
     pop rbp
     ret
 
-outWord:
+pOutWord:
     push rbp
     mov rbp, rsp
 
@@ -156,4 +164,57 @@ outWord:
     pop rbp
     ret
 
+mInByte:
+    push rbp
+    mov rbp, rsp
+
+    movzx rax, byte [rax]
+
+    pop rbp
+    ret
+
+mInWord:
+    push rbp
+    mov rbp, rsp
+
+    movzx rax, word [rax]
+
+    pop rbp
+    ret
+
+mInDWord:
+    push rbp
+    mov rbp, rsp
+
+    mov rax, [rax]
+
+    pop rbp
+    ret
+
+mOutByte:
+    push rbp
+    mov rbp, rsp
+
+    mov byte [rdi], sil
+
+    pop rbp
+    ret
+
+mOutWord:
+    push rbp
+    mov rbp, rsp
+
+    mov word [rdi], si
+
+    pop rbp
+    ret
+
+mOutDWord:
+    push rbp
+    mov rbp, rsp
+
+    mov dword [rdi], esi
+
+    pop rbp
+    ret
 

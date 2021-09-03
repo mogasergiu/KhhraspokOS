@@ -10,37 +10,37 @@ static inline void readLBA(size_t lba, size_t lbaNo, uint16_t* buffer)
 {
     // Send 0xe0 for the "master" or 0xf0 for the "slave"
     // ORed with the highest 4 bits of the LBA to port 0x1f6
-    PIO::outByte(ATA_DRIVE_REG, (lba >> 24) | 0xe0);
+    PMIO::pOutByte(ATA_DRIVE_REG, (lba >> 24) | 0xe0);
 
     // Send the sectorcount to port 0x1f2
-    PIO::outByte(ATA_SECTOR_COUNT_REG, lbaNo);
+    PMIO::pOutByte(ATA_SECTOR_COUNT_REG, lbaNo);
 
     // Send the low 8 bits of the LBA to port 0x1f3
-    PIO::outByte(ATA_SECTOR_NUMBER_REG, (unsigned char)(lba & 0xff));
+    PMIO::pOutByte(ATA_SECTOR_NUMBER_REG, (unsigned char)(lba & 0xff));
 
     // Send the next 8 bits of the LBA to port 0x1f4
-    PIO::outByte(ATA_CYLINDER_LOW_REG, (unsigned char)(lba >> 8));
+    PMIO::pOutByte(ATA_CYLINDER_LOW_REG, (unsigned char)(lba >> 8));
 
     // Send the next 8 bits of the LBA to port 0x1f5
-    PIO::outByte(ATA_CYLINDER_HIGH_REG, (unsigned char)(lba >> 16));
+    PMIO::pOutByte(ATA_CYLINDER_HIGH_REG, (unsigned char)(lba >> 16));
 
     // Send the "READ SECTORS" command (0x20) to port 0x1f7
-    PIO::outByte(ATA_COMMAND_REG, 0x20);
+    PMIO::pOutByte(ATA_COMMAND_REG, 0x20);
 
     for (size_t count = 0; count < lbaNo; count++)
     {
         // Check if disk needs servicing
-        uint8_t byte = PIO::inByte(ATA_STATUS_REG);
+        uint8_t byte = PMIO::pInByte(ATA_STATUS_REG);
         while(!(byte & 0x08))
         {
-            byte = PIO::inByte(ATA_STATUS_REG);
+            byte = PMIO::pInByte(ATA_STATUS_REG);
         }
 
         // Transfer 256 16-bit values, a uint16_t at a time, into your buffer
         // from I/O port 0x1f0
         for (int i = 0; i < 256; i++)
         {
-            buffer[count] = PIO::inWord(ATA_DATA_REG);
+            buffer[count] = PMIO::pInWord(ATA_DATA_REG);
             count++;
         }
     }

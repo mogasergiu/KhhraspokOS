@@ -8,7 +8,7 @@ INTERRUPTS::PIT pitHandler;
 extern "C" void IntCallbacks::pitIRQ() {
     INTERRUPTS::ticks++;
 
-    PIO::outByte(PIC1_REG_COMMAND, PIC_EOI);
+    PMIO::pOutByte(PIC1_REG_COMMAND, PIC_EOI);
 }
 
 // Constructor - Initializes the PIT
@@ -37,7 +37,7 @@ uint32_t PIT::getTicks() const {
 * @ocw: the OCW to send
 */
 void PIT::sendOCW(uint8_t ocw) const {
-    PIO::outByte(PIT_REG_CW, ocw);
+    PMIO::pOutByte(PIT_REG_CW, ocw);
 };
 
 /*
@@ -48,11 +48,11 @@ void PIT::sendOCW(uint8_t ocw) const {
 uint8_t PIT::readChannel(uint8_t channel) const {
     switch (channel) {
         case PIT_OCW_SC_0:
-            return PIO::inByte(PIT_REG_CHANNEL_0);
+            return PMIO::pInByte(PIT_REG_CHANNEL_0);
         case PIT_OCW_SC_1:
-            return PIO::inByte(PIT_REG_CHANNEL_1);
+            return PMIO::pInByte(PIT_REG_CHANNEL_1);
         default:
-            return PIO::inByte(PIT_REG_CHANNEL_2);
+            return PMIO::pInByte(PIT_REG_CHANNEL_2);
     }
 }
 
@@ -65,11 +65,11 @@ uint8_t PIT::readChannel(uint8_t channel) const {
 void PIT::sendChannel(uint8_t channel, uint8_t value) const {
     switch (channel) {
         case PIT_OCW_SC_0:
-            return PIO::outByte(PIT_REG_CHANNEL_0, value);
+            return PMIO::pOutByte(PIT_REG_CHANNEL_0, value);
         case PIT_OCW_SC_1:
-            return PIO::outByte(PIT_REG_CHANNEL_1, value);
+            return PMIO::pOutByte(PIT_REG_CHANNEL_1, value);
         default:
-            return PIO::outByte(PIT_REG_CHANNEL_2, value);
+            return PMIO::pOutByte(PIT_REG_CHANNEL_2, value);
     }
 }
 
