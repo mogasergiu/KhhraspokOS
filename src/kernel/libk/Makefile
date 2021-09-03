@@ -6,8 +6,11 @@ LIBK_STRING_OBJECT = $(BUILD_PATH)/string.o
 LIBK_STRING_SOURCE = $(LIBK_PATH)/string.cpp
 LIBK_DS_OBJECT = $(BUILD_PATH)/ds.o
 LIBK_DS_SOURCE = $(LIBK_PATH)/ds.cpp
+LIBK_STDIO_OBJECT = $(BUILD_PATH)/stdio.o
+LIBK_STDIO_SOURCE = $(LIBK_PATH)/stdio.cpp
 LIBK_OBJECTS = $(LIBK_STRING_OBJECT) \
-	       $(LIBK_DS_OBJECT);
+	       $(LIBK_DS_OBJECT) \
+	       $(LIBK_STDIO_OBJECT)
 INCLUDES = -I$(KERNEL_SOURCES_PATH)/includes -I$(LIBK_PATH)/includes
 FLAGS = -g -ffreestanding -falign-jumps -falign-functions -falign-labels \
         -falign-loops -fstrength-reduce -fomit-frame-pointer \
@@ -25,6 +28,9 @@ $(LIBK_STRING_OBJECT): $(LIBK_STRING_SOURCE)
 	${TARGET}-g++ $(FLAGS) $(INCLUDES) -c $^ -fno-rtti -o $@
 
 $(LIBK_DS_OBJECT): $(LIBK_DS_SOURCE)
+	${TARGET}-g++ $(FLAGS) $(INCLUDES) -c $^ -fno-rtti -o $@
+
+$(LIBK_STDIO_OBJECT): $(LIBK_STDIO_SOURCE)
 	${TARGET}-g++ $(FLAGS) $(INCLUDES) -c $^ -fno-rtti -o $@
 
 .PHONY: clean
