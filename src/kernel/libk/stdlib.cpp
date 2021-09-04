@@ -10,7 +10,7 @@ static void reverse(char *str, int length) {
     }
 }
   
-char* itoa(int num, int base) {
+extern "C" char* itoa(int num, int base) {
     static char str[20];
 
     int i = 0;

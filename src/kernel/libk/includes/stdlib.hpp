@@ -4,6 +4,6 @@
 #ifndef STDLIB_HPP
 #define STDLIB_HPP
 
-char* itoa(int num, int base);
+extern "C" char* itoa(int num, int base);
 
 #endif  /* STDLIB_HPP */

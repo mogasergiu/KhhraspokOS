@@ -2,11 +2,11 @@
 #include <stdlib.hpp>
 #include <stdarg.h>
 
-void putc(const char c) {
+extern "C" void putc(const char c) {
     vgaHandler.putChar(c, 15);
 }
 
-void pwarn(const char *s) {
+extern "C" void pwarn(const char *s) {
     vgaHandler.putString(s, 14);
 }
 
@@ -35,7 +35,7 @@ static void printHex(int64_t num) {
     }
 }
 
-void perror(const char *format, ...) {
+extern "C" void perror(const char *format, ...) {
     va_list ap;
     va_start(ap, format);
 
@@ -69,7 +69,7 @@ void perror(const char *format, ...) {
     va_end(ap);
 }
 
-void printf(const char *format, ...) {
+extern "C" void printf(const char *format, ...) {
     va_list ap;
     va_start(ap, format);
 

@@ -5,7 +5,7 @@
  * @string: the string whose length is to be retrieved
  * @return: length of given string
  */
-size_t strlen(const char *string) {
+extern "C" size_t strlen(const char *string) {
     size_t length = 0;
 
     while (string[length]) {
@@ -21,7 +21,7 @@ size_t strlen(const char *string) {
  * @stringSrc: the source address
  * @return: number of copied bytes
  */
-size_t strcpy(char *stringDst, const char *stringSrc) {
+extern "C" size_t strcpy(char *stringDst, const char *stringSrc) {
     size_t length = 0;
 
     while (stringSrc[length]) {
@@ -40,7 +40,7 @@ size_t strcpy(char *stringDst, const char *stringSrc) {
  * @bytesNo: number of bytes to be copied
  * @return: number of copied bytes
  */
-size_t strncpy(char *stringDst, const char *stringSrc, size_t bytesNo) {
+extern "C" size_t strncpy(char *stringDst, const char *stringSrc, size_t bytesNo) {
     size_t length = 0;
 
     for (; length < bytesNo && stringSrc[length] != 0; length++) {
@@ -58,7 +58,7 @@ size_t strncpy(char *stringDst, const char *stringSrc, size_t bytesNo) {
  * @bytesNo: number of bytes to be copied
  * @return: number of copied bytes
  */
-void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo) {
+extern "C" void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo) {
     char *_destAddr = (char*)destAddr;
     char *_srcAddr = (char*)srcAddr;
 
@@ -76,7 +76,7 @@ void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo) {
  * @byte: the byte to overwrite with
  * bytesNo: how many bytes to overwrite
  */
-void* memset(void *addr, int8_t byte, size_t bytesNo) {
+extern "C" void* memset(void *addr, int8_t byte, size_t bytesNo) {
     char *_addr = (char*)addr;
 
     for (size_t l = 0; l < bytesNo; l++) {
@@ -86,7 +86,7 @@ void* memset(void *addr, int8_t byte, size_t bytesNo) {
     return addr;
 }
 
-int strcmp(const char *str1, const char *str2) {
+extern "C" int strcmp(const char *str1, const char *str2) {
     uint32_t idx = 0;
 
     while ((str1[idx] != 0 && str2[idx] != 0) && str1[idx] == str2[idx]) {
@@ -104,7 +104,7 @@ int strcmp(const char *str1, const char *str2) {
     }
 }
 
-int strncmp(const char *str1, const char *str2, size_t n) {
+extern "C" int strncmp(const char *str1, const char *str2, size_t n) {
     uint32_t idx = 0;
 
     while (idx < n && (str1[idx] != 0 && str2[idx] != 0) &&
@@ -127,7 +127,7 @@ int strncmp(const char *str1, const char *str2, size_t n) {
     }
 }
 
-char* strtok(char *str, const char *delim) {
+extern "C" char* strtok(char *str, const char *delim) {
     static char *start, *end;
 
     if (str != NULL) {

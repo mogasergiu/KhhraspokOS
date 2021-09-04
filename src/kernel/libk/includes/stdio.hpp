@@ -17,12 +17,12 @@
         } \
     } while (0)
 
-void putc(const char c);
+extern "C" void putc(const char c);
 
-void pwarn(const char *s);
+extern "C" void pwarn(const char *s);
 
-void perror(const char *format, ...);
+extern "C" void perror(const char *format, ...);
 
-void printf(const char *format, ...);
+extern "C" void printf(const char *format, ...);
 
 #endif  /* STDIO_HPP */

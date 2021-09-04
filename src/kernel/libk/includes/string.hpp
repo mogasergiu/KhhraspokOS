@@ -9,7 +9,7 @@
  * @string: the string whose length is to be retrieved
  * @return: length of given string
  */
-size_t strlen(const char *string);
+extern "C" size_t strlen(const char *string);
 
 /*
  * Copies the string from the source address to the destionation address
@@ -17,7 +17,7 @@ size_t strlen(const char *string);
  * @stringSrc: the source address
  * @return: number of copied bytes
  */
-size_t strcpy(char *stringDst, const char *stringSrc);
+extern "C" size_t strcpy(char *stringDst, const char *stringSrc);
 
 /*
  * Copies the first given number of bytes from the string at the source address
@@ -27,7 +27,7 @@ size_t strcpy(char *stringDst, const char *stringSrc);
  * @bytesNo: number of bytes to be copied
  * @return: number of copied bytes
  */
-size_t strncpy(char *stringDst, const char *stringSrc, size_t bytesNo);
+extern "C" size_t strncpy(char *stringDst, const char *stringSrc, size_t bytesNo);
 
 /*
  * Copies the first given number of bytes from the the source address
@@ -37,7 +37,7 @@ size_t strncpy(char *stringDst, const char *stringSrc, size_t bytesNo);
  * @bytesNo: number of bytes to be copied
  * @return: number of copied bytes
  */
-void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo);
+extern "C" void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo);
 
 /*
  * Overwrites the first given number of bytes at given address with
@@ -46,12 +46,12 @@ void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo);
  * @byte: the byte to overwrite with
  * bytesNo: how many bytes to overwrite
  */
-void* memset(void *addr, int8_t byte, size_t bytesNo);
+extern "C" void* memset(void *addr, int8_t byte, size_t bytesNo);
 
-int strcmp(const char *str1, const char *str2);
+extern "C" int strcmp(const char *str1, const char *str2);
 
-int strncmp(const char *str1, const char *str2, size_t n);
+extern "C" int strncmp(const char *str1, const char *str2, size_t n);
 
-char* strtok(char *str, const char *delim);
+extern "C" char* strtok(char *str, const char *delim);
 
 #endif /* STRING_HPP */
