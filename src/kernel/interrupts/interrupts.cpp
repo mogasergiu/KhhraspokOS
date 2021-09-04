@@ -6,12 +6,26 @@ INTERRUPTS::Interrupts intsHandler;
 
 // Constructor - sets up IDTR, zeroes out IDT and loads IDT (lidt)
 void Interrupts::initInterrupts() {
+    picHandler.initPIC();
+    pitHandler.initPIT();
+
     for (uint32_t i = 0; i < sizeof(this->IDTDescriptors); i++) {
         ((char*)this->IDTDescriptors)[i] = 0;
     }
 
     this->IDTRDescriptor.limit = sizeof(this->IDTDescriptors) - 1;
     this->IDTRDescriptor.base = (uintptr_t) this->IDTDescriptors;
+
+    uintptr_t *idtd = (uintptr_t*)IDTD_ADDR;
+    *idtd = (uintptr_t)(&this->IDTRDescriptor);
+
+    for (int i = 0; i < MAX_IDT_ENTRIES; i++) {
+        this->setIDTEntry(i, IntHandlers::doNothingIRQHandler);
+    }
+
+    this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER, IntHandlers::pitIRQHandler);
+    this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_KEYBOARD,
+                        IntHandlers::keyboardIRQHandler);
 
     __asm__ __volatile__ (
         "movq %0, %%rsi;"

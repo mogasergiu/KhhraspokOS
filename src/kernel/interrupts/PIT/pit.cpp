@@ -1,4 +1,5 @@
 #include <interrupts.hpp>
+#include <stdio.hpp>
 
 using namespace INTERRUPTS;
 
@@ -7,6 +8,8 @@ INTERRUPTS::PIT pitHandler;
 
 extern "C" void IntCallbacks::pitIRQ() {
     INTERRUPTS::ticks++;
+
+    printf("ticks: %d; ", INTERRUPTS::ticks);
 
     PMIO::pOutByte(PIC1_REG_COMMAND, PIC_EOI);
 }

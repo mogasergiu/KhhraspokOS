@@ -69,6 +69,13 @@ void APIC::parseMADT() {
                 entry += this->lx2apic[this->lx2apicCount++]->hdr.length;
 
                 break;
+
+            default:
+                pwarn("Unknown MADT entry found, stopped parsing MADT!");
+
+                printf("Found %d lapics", *this->lapicCount);
+
+                return;
         }
     }
 

@@ -10,6 +10,7 @@
 #define MAX_CPU_COUNT 16
 
 #define APIC_ADDR 0x500
+#define IDTD_ADDR 0x50a
 
 #define DIVISOR 100
 #define INPUT_FREQ 1193180

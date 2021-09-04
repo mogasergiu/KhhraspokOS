@@ -27,6 +27,10 @@ void PIC::initPIC() {
     // Send ICW4
     this->writeIMR(PIC_ICW4_UPM, PIC1);
     this->writeIMR(PIC_ICW4_UPM, PIC2);
+
+    this->writeIMR(0xff, PIC1);
+    this->writeIMR(0xff, PIC2);
+
 };
 
 /*
