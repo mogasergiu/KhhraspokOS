@@ -10,8 +10,6 @@
 #include <stdio.hpp>
 
 extern "C" void kernelMain() { 
-    ACPI::parseACPI();
-
     apicHandler.parseMADT();
 
     intsHandler.initInterrupts();

@@ -51,7 +51,7 @@ static void parseRSDP(RSDP *rsdp) {
     }
 }
 
-void ACPI::parseACPI() {
+void __attribute__((constructor)) ACPI::parseACPI() {
     uint8_t *ptr;
 
     for (ptr = (uint8_t*)EBDA_START; ptr < (uint8_t*)EBDA_END; ptr += 16) {

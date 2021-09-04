@@ -201,7 +201,7 @@ namespace ACPI {
         uint32_t acpiID;
     } __attribute__((packed));
 
-    void parseACPI();
+    void __attribute__((constructor)) parseACPI();
 }
 
 #endif  /* ACPI_HPP */
