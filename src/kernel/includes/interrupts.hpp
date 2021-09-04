@@ -348,21 +348,22 @@ namespace INTERRUPTS {
 
     class APIC {
         private:
-            uint8_t lapicCount;
-            uint8_t* lapicAddr;
-            ACPI::LAPICEntry *lapic[MAX_CPU_COUNT];
-            ACPI::IOAPICEntry *ioapic;
-            uint8_t ioapicIntrSrcOverrideCount;
+            uint8_t *lapicCount;
+            uintptr_t *lapicAddr;
+            ACPI::LAPIC *lapic[MAX_CPU_COUNT];
+            ACPI::IOAPIC *ioapic;
+            uint8_t ioapicisoCount;
             ACPI::IOAPICIntrSrcOverride *ioapiciso[MAX_CPU_COUNT];
-            uint8_t ioapicNmiSrcCount;
+            uint8_t ioapicnsCount;
             ACPI::IOAPICNMISrc *ioapicns[MAX_CPU_COUNT];
-            uint8_t lapicNmiCount;
+            uint8_t lapicnCount;
             ACPI::LAPICNMI *lapicn[MAX_CPU_COUNT];
             ACPI::LAPICAddrOverride *lapicao;
             uint8_t lx2apicCount;
             ACPI::Lx2APIC *lx2apic[MAX_CPU_COUNT];
 
         public:
+            APIC();
             void parseMADT();
     };
 }
@@ -370,6 +371,7 @@ namespace INTERRUPTS {
 extern INTERRUPTS::Interrupts intsHandler;
 extern INTERRUPTS::PIC picHandler;
 extern INTERRUPTS::PIT pitHandler;
+extern INTERRUPTS::APIC apicHandler;
 
 #endif  /* INTERRUPTS_HPP */
 

@@ -3,7 +3,7 @@
 static void reverse(char *str, int length) {
     --length;
 
-    for (int i = 0; i <= length; i++, length--) {
+    for (int i = 0; i < length; i++, length--) {
         str[i] ^= str[length];
         str[length] ^= str[i];
         str[i] ^= str[length];

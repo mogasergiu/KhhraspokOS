@@ -7,6 +7,7 @@
 #include <drivers.hpp>
 #include <filesystem.hpp>
 #include <acpi.hpp>
+#include <stdio.hpp>
 
 static inline void secondaryPICinit() {
     intsHandler.setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER,
@@ -47,6 +48,15 @@ extern "C" void kernelMain() {
     ptr[0] = 'a';
 
     vgaHandler.putString("hello", 15);
+    printf("%s\n%s", "hello", "hello");
+    pwarn("ERROR!");
+    putc('a');
+
+    printf("%x.%x.%x\n", ptr, 1234, 0xff431ad);
+
+    CATCH_FIRE(1, "END!");
+
+    apicHandler.parseMADT();
 
     while (1) {};
 }

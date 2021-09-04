@@ -5,7 +5,7 @@
 #define VIDEO_HPP
 
 #define VGA_WIDTH 80
-#define VGA_HEIGHT 20
+#define VGA_HEIGHT 25
 #define VGA_START_ADDRESS 0xb8000
 
 /*********************************************************

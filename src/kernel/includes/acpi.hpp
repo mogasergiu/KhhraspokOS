@@ -7,42 +7,66 @@
 #define EBDA_START 0xe0000
 #define EBDA_END 0xfffff
 
+#define IDTD_ADDR 0x50a
+#define LAPIC_ADDR 0x500
+#define ACTIVE_CPUS 0x509
+
 #define RSD_PTR 0x2052545020445352
+
 #define MADT_PTR 0x43495041
+#define MADT_ENTRY_LAPIC 0x0
+#define MADT_ENTRY_IOAPIC 0x1
+#define MADT_ENTRY_IOAPICISO 0x2
+#define MADT_ENTRY_IOAPICNMIS 0x3
+#define MADT_ENTRY_LAPICNMI 0x4
+#define MADT_ENTRY_LAPICAO 0x5
+#define MADT_ENTRY_Lx2APIC 0x9
 
 namespace ACPI {
-    struct Hdr {
+    struct ACPIHdr {
         uint32_t signature;
         uint32_t length;
         uint8_t revision;
         uint8_t checksum;
-        uint8_t oemid[6];
-        uint8_t oemtid[8];
-        uint32_t oemRevision;
-        uint32_t creatorId;
+        uint8_t OEMID[6];
+        uint8_t OEMTableID[8];
+        uint32_t OEMevision;
+        uint32_t creatorID;
         uint32_t creatorRevision;
     } __attribute__((packed));
 
     struct GenericAddressStructure {
-        uint8_t addsSpace;
+        uint8_t addrSpace;
         uint8_t bitWidth;
         uint8_t bitOffset;
         uint8_t accessSize;
         uint64_t addr;
     } __attribute__((packed));
 
+    struct RSDP {
+        char signature[8];
+        uint8_t checksum;
+        char OEMId[6];
+        uint8_t revision;
+        uint32_t rsdtAddr;
+        uint32_t Length;
+        uint64_t xsdtAddr;
+        uint8_t extendedChecksum;
+        uint8_t reserved[3];
+    } __attribute__ ((packed));
+
     struct RSDT {
-        Hdr h;
-        uint32_t *ptrSDT;
+        ACPIHdr hdr;
+        uint32_t entries[0];
     } __attribute__((packed));
 
     struct XSDT {
-        Hdr h;
-        uint64_t *ptrSDT;
+        ACPIHdr hdr;
+        uint64_t entries[0];
     } __attribute__((packed));
 
     struct FADT {
-        Hdr h;
+        ACPIHdr hdr;
         uint32_t firmwareCtrl;
         uint32_t fsdt;
         uint8_t  reserved;
@@ -97,9 +121,84 @@ namespace ACPI {
     } __attribute__((packed));
 
     struct MADT {
-        Hdr header;
-        uint32_t localApicAddr;
+        ACPIHdr hdr;
+        uint32_t LAPICAddr;
         uint32_t flags;
+    } __attribute__((packed));
+
+    extern MADT *madt;
+
+    struct LAPIC {
+        struct {
+            uint8_t type;
+            uint8_t length;
+        } __attribute__((packed)) hdr;
+        uint8_t acpiID;
+        uint8_t apicID;
+        uint32_t flags;
+    } __attribute__((packed));
+
+    struct IOAPIC {
+        struct {
+            uint8_t type;
+            uint8_t length;
+        } __attribute__((packed)) hdr;
+        uint8_t apicID;
+        uint8_t reserved;
+        uint32_t addr;
+        uint32_t globalSysIntrBase;
+    } __attribute__((packed));
+
+    struct IOAPICIntrSrcOverride {
+        struct {
+            uint8_t type;
+            uint8_t length;
+        } __attribute__((packed)) hdr;
+        uint8_t busSrc;
+        uint8_t IRQSrc;
+        uint32_t glblSysIntr;
+        uint16_t flags;
+    } __attribute__((packed));
+
+    struct IOAPICNMISrc {
+        struct {
+            uint8_t type;
+            uint8_t length;
+        } __attribute__((packed)) hdr;
+        uint8_t NMISrc;
+        uint8_t reserved;
+        uint16_t flags;
+        uint32_t glblSysIntr;
+    } __attribute__((packed));
+
+    struct LAPICNMI {
+        struct {
+            uint8_t type;
+            uint8_t length;
+        } __attribute__((packed)) hdr;
+        uint8_t acpiID;
+        uint16_t flags;
+        uint8_t LINT;
+    } __attribute__((packed));
+
+    struct LAPICAddrOverride {
+        struct {
+            uint8_t type;
+            uint8_t length;
+        } __attribute__((packed)) hdr;
+        uint16_t reserved;
+        uint64_t lapicAddr;
+    } __attribute__((packed));
+
+    struct Lx2APIC {
+        struct {
+            uint8_t type;
+            uint8_t length;
+        } __attribute__((packed)) hdr;
+        uint16_t reserved;
+        uint32_t Lx2ApicID;
+        uint32_t flags;
+        uint32_t acpiID;
     } __attribute__((packed));
 
     void parseACPI();
