@@ -349,7 +349,8 @@ namespace INTERRUPTS {
 
     class APIC {
         private:
-            uint8_t *lapicCount;
+            uint8_t *activeCPUs;
+            uint8_t lapicCount;
             uintptr_t *lapicAddr;
             ACPI::LAPIC *lapic[MAX_CPU_COUNT];
             ACPI::IOAPIC *ioapic;

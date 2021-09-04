@@ -10,8 +10,10 @@ INTERRUPTS::APIC apicHandler;
 APIC::APIC() {
     this->lapicAddr = (uintptr_t*)LAPIC_ADDR;
 
-    this->lapicCount = (uint8_t*)ACTIVE_CPUS;
-    *this->lapicCount = 0;
+    this->activeCPUs = (uint8_t*)ACTIVE_CPUS;
+    *this->activeCPUs = 0;
+
+    this->lapicCount = 0;
 }
 
 void APIC::parseMADT() {
@@ -23,9 +25,9 @@ void APIC::parseMADT() {
         entry < (uint8_t*)ACPI::madt + ACPI::madt->hdr.length;) {
         switch (*entry) {
             case MADT_ENTRY_LAPIC:
-                this->lapic[*this->lapicCount] = (ACPI::LAPIC*)entry;
+                this->lapic[this->lapicCount] = (ACPI::LAPIC*)entry;
 
-                entry += this->lapic[(*this->lapicCount)++]->hdr.length;
+                entry += this->lapic[this->lapicCount++]->hdr.length;
 
                 break;
 
@@ -73,11 +75,11 @@ void APIC::parseMADT() {
             default:
                 pwarn("Unknown MADT entry found, stopped parsing MADT!");
 
-                printf("Found %d lapics", *this->lapicCount);
+                printf("Found %d lapics", this->lapicCount);
 
                 return;
         }
     }
 
-   printf("Found %d lapics", *this->lapicCount);
+   printf("Found %d lapics", this->lapicCount);
 }
