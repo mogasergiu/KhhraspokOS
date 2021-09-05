@@ -31,6 +31,7 @@ void Interrupts::initInterrupts() {
     __asm__ __volatile__ (
         "movq %0, %%rsi;"
         "lidt 0(%%rsi);"
+        "sti;"
         :
         : "r" ( &this->IDTRDescriptor )
         : "rsi"
