@@ -1,7 +1,7 @@
 [BITS 16]
 
-memRegionsCount equ 0x500
-memoryMap equ 0x510
+memRegionsCount equ 0x520
+memoryMap equ 0x521
 SMAP equ 0x534d4150
 
 struc memMapEntry
@@ -11,7 +11,7 @@ struc memMapEntry
     .attr resd 1
 endstruc
 
-getMemoryRegions
+getMemoryRegions:
     xor ax, ax
     mov es, ax
     mov di, memoryMap
