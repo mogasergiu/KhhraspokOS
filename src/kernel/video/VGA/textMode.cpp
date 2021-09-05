@@ -26,18 +26,17 @@ VGA::TextMode::TextMode() {
  */
 void VGA::TextMode::putChar(const char character, const uint8_t color) {
     if (this->line == VGA_HEIGHT) {
-        // Clear screen (fill with black zeroes)
-        for (uint8_t l = 0; l < VGA_HEIGHT; l++) {
-            for (uint8_t c = 0; c < VGA_WIDTH; c++) {
-                this->address[l * VGA_WIDTH + c] = 0x0032;
-            }
-        }
+        memcpy(this->address, this->address + VGA_WIDTH,
+                                                (VGA_HEIGHT - 1) * VGA_WIDTH);
+        memset(this->address + (VGA_HEIGHT - 1) * VGA_WIDTH, 0, VGA_WIDTH);
 
         this->line = 0;
         this->column = 0;
     }
     // If character is newline, move to next line and reset column
     if (character == '\n') {
+        memset(this->address + VGA_WIDTH * this->line + this->column, 0,
+                                                    VGA_WIDTH - this->column);
         this->line++;
         this->column = 0;
 
