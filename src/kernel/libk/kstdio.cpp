@@ -1,12 +1,12 @@
 #include <video.hpp>
-#include <stdlib.hpp>
+#include <kstdlib.hpp>
 #include <stdarg.h>
 
-extern "C" void putc(const char c) {
+extern "C" void kputc(const char c) {
     vgaHandler.putChar(c, 15);
 }
 
-extern "C" void pwarn(const char *s) {
+extern "C" void kpwarn(const char *s) {
     vgaHandler.putString(s, 14);
 }
 
@@ -35,7 +35,7 @@ static void printHex(int64_t num) {
     }
 }
 
-extern "C" void perror(const char *format, ...) {
+extern "C" void kperror(const char *format, ...) {
     va_list ap;
     va_start(ap, format);
 
@@ -69,7 +69,7 @@ extern "C" void perror(const char *format, ...) {
     va_end(ap);
 }
 
-extern "C" void printf(const char *format, ...) {
+extern "C" void kprintf(const char *format, ...) {
     va_list ap;
     va_start(ap, format);
 

@@ -1,7 +1,7 @@
 #include <memory.hpp>
 #include <kpkheap.hpp>
 #include <video.hpp>
-#include <string.hpp>
+#include <kstring.hpp>
 
 using namespace MMU;
 

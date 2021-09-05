@@ -1,5 +1,5 @@
 #include <video.hpp>
-#include <string.hpp>
+#include <kstring.hpp>
 
 using namespace VIDEO;
 

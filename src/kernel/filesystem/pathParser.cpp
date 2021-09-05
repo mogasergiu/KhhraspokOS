@@ -1,5 +1,5 @@
 #include <filesystem.hpp>
-#include <string.hpp>
+#include <kstring.hpp>
 #include <kpkheap.hpp>
 
 using namespace FILESYSTEM;

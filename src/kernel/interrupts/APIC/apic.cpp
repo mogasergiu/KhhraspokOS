@@ -1,7 +1,7 @@
 #include <acpi.hpp>
 #include <interrupts.hpp>
 #include <io.hpp>
-#include <stdio.hpp>
+#include <kstdio.hpp>
 
 using namespace INTERRUPTS;
 
@@ -19,7 +19,7 @@ APIC::APIC() {
 void APIC::parseMADT() {
     *this->lapicAddr = (uintptr_t)ACPI::madt->LAPICAddr;
 
-    printf("LAPIC addr %x -> %x\n", this->lapicAddr, *this->lapicAddr);
+    kprintf("LAPIC addr %x -> %x\n", this->lapicAddr, *this->lapicAddr);
 
     for (uint8_t *entry = (uint8_t*)ACPI::madt + sizeof(*ACPI::madt);
         entry < (uint8_t*)ACPI::madt + ACPI::madt->hdr.length;) {
@@ -73,15 +73,15 @@ void APIC::parseMADT() {
                 break;
 
             default:
-                pwarn("Unknown MADT entry found, stopped parsing MADT!");
+                kpwarn("Unknown MADT entry found, stopped parsing MADT!");
 
-                printf("Found %d lapics", this->lapicCount);
+                kprintf("Found %d lapics", this->lapicCount);
 
                 return;
         }
     }
 
-   printf("Found %d lapics", this->lapicCount);
+   kprintf("Found %d lapics", this->lapicCount);
 }
 
 void APIC::IOAPICout(uint8_t reg, uint32_t value) {

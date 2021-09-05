@@ -1,4 +1,4 @@
-#include <string.hpp>
+#include <kstring.hpp>
 
 /*
  * Retrieve the length of a given string

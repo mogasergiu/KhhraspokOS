@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
-#include <string.hpp>
-#include <ds.hpp>
+#include <kstring.hpp>
+#include <kdsa.hpp>
 
 #ifndef PAGING_HPP
 #define PAGING_HPP
