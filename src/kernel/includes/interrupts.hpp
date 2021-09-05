@@ -168,6 +168,57 @@
 // 0b11 READ-back command (8254 only)
 #define PIT_OCW_SC_RB 0b11000000
 
+#define IOREGSEL 0x00
+#define IOWIN 0x10
+#define IOAPICID 0x00
+#define IOAPICVER 0x01
+#define IOAPICARB 0x02
+#define IOREDTBL 0x10
+
+#define LAPIC_ID 0x0020
+#define LAPIC_VERSION 0x0030
+#define LAPIC_TPR 0x0080
+#define LAPIC_APR 0x0090
+#define LAPIC_PPR 0x00a0
+#define LAPIC_EOI 0x00b0
+#define LAPIC_RRD 0x00c0
+#define LAPIC_LDR 0x00d0
+#define LAPIC_DFR 0x00e0
+#define LAPIC_SIVR 0x00f0
+#define LAPIC_ISR 0x0100
+#define LAPIC_TMR 0x0180
+#define LAPIC_IRR 0x0200
+#define LAPIC_ESR 0x0280
+#define LAPIC_CMCI 0x02f0
+#define LAPIC_ICR0 0x0300
+#define LAPIC_ICR1 0x0310
+#define LAPIC_LTR 0x0320
+#define LAPIC_TSR 0x0330
+#define LAPIC_PMCR 0x0340
+#define LAPIC_LINT0 0x0350
+#define LAPIC_LINT1 0x0360
+#define LAPIC_LINTERR 0x0370
+#define LAPIC_TICR 0x0380
+#define LAPIC_TCCR 0x0390
+#define LAPIC_TDCR 0x03e0
+#define LAPIC_ICR_NORMAL 0x00000000
+#define LAPIC_ICR_LOWEST 0x00000100
+#define LAPIC_ICR_SMI 0x00000200
+#define LAPIC_ICR_NMI 0x00000400
+#define LAPIC_ICR_INIT 0x00000500
+#define LAPIC_ICR_SIPI 0x00000600
+#define LAPIC_ICR_PHYSICAL 0x00000000
+#define LAPIC_ICR_LOGICAL 0x00000800
+#define LAPIC_ICR_IDLE 0x00000000
+#define LAPIC_ICR_PENDING 0x00001000
+#define LAPIC_ICR_DEASSERT 0x00000000
+#define LAPIC_ICR_ASSERT 0x00004000
+#define LAPIC_ICR_EDGE 0x00000000
+#define LAPIC_ICR_LEVEL 0x00008000
+#define LAPIC_ICR_NO_SHORTHAND 0x00000000
+#define LAPIC_ICR_ITSELF 0x00040000
+#define LAPIC_ICR_ALL_CPUS 0x00080000
+#define LAPIC_ICR_ALL_CPUS_BUT_ITSELF 0x000c0000
 
 /*********************************************
  * CLI and STI assembly instructions inlined *
@@ -319,6 +370,8 @@ namespace INTERRUPTS {
             // Constructor - Initializes the PIT
             void initPIT();
 
+            void sleep(uint64_t ms30) const;
+
             /*
              * Getter method to retrieve the number of system ticks
              * @return: number of system ticks
@@ -349,10 +402,6 @@ namespace INTERRUPTS {
 
     class APIC {
         private:
-            uint8_t *activeCPUs;
-            uint8_t lapicCount;
-            uintptr_t *lapicAddr;
-            ACPI::LAPIC *lapic[MAX_CPU_COUNT];
             ACPI::IOAPIC *ioapic;
             uint8_t ioapicisoCount;
             ACPI::IOAPICIntrSrcOverride *ioapiciso[MAX_CPU_COUNT];
@@ -363,10 +412,24 @@ namespace INTERRUPTS {
             ACPI::LAPICAddrOverride *lapicao;
             uint8_t lx2apicCount;
             ACPI::Lx2APIC *lx2apic[MAX_CPU_COUNT];
+            ACPI::LAPIC *lapic[MAX_CPU_COUNT];
+            uintptr_t *lapicAddr;
+            uint8_t lapicCount;
 
         public:
+            uint8_t *activeCPUs;
             APIC();
+            void IOAPICout(uint8_t reg, uint32_t value);
+            uint32_t IOAPICin(uint8_t reg);
+            void LAPICout(uint32_t reg, uint32_t value);
+            uint32_t LAPICin(uint32_t reg);
+            void initAPICs();
+            void setIOAPICEntry(uint8_t idx, uintptr_t addr);
             void parseMADT();
+            uint8_t getLAPICID();
+            void sendLAPICEOI();
+            uint8_t getIOAPICVersion();
+            uint8_t getIOAPICEntriesCount();
     };
 }
 

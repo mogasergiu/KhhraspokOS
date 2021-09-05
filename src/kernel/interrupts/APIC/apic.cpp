@@ -11,7 +11,7 @@ APIC::APIC() {
     this->lapicAddr = (uintptr_t*)LAPIC_ADDR;
 
     this->activeCPUs = (uint8_t*)ACTIVE_CPUS;
-    *this->activeCPUs = 0;
+    *this->activeCPUs = 1;
 
     this->lapicCount = 0;
 }
@@ -82,4 +82,79 @@ void APIC::parseMADT() {
     }
 
    printf("Found %d lapics", this->lapicCount);
+}
+
+void APIC::IOAPICout(uint8_t reg, uint32_t value) {
+    MMIO::mOutDWord((uint8_t*)((uintptr_t)this->ioapic->addr) + IOREGSEL, reg);
+    MMIO::mOutDWord((uint8_t*)((uintptr_t)this->ioapic->addr) + IOWIN, value);
+}
+
+uint32_t APIC::IOAPICin(uint8_t reg) {
+    MMIO::mOutDWord((uint8_t*)((uintptr_t)this->ioapic->addr) + IOREGSEL, reg);
+    return MMIO::mInDWord((uint8_t*)((uintptr_t)this->ioapic->addr) + IOWIN);
+}
+
+void APIC::setIOAPICEntry(uint8_t idx, uint64_t addr) {
+    this->IOAPICout(IOREDTBL + (idx << 1), (uint32_t)addr);
+
+    this->IOAPICout(IOREDTBL + (idx << 1) + 1, (uint32_t)(addr >> 32));
+}
+
+uint8_t APIC::getIOAPICVersion() {
+    return (uint8_t)this->IOAPICin(IOAPICVER);
+}
+
+uint8_t APIC::getIOAPICEntriesCount() {
+    return (uint8_t)((this->IOAPICin(IOAPICVER) >> 16) & 0xff) + 1;
+}
+
+void APIC::LAPICout(uint32_t reg, uint32_t value) {
+    MMIO::mOutDWord((uint8_t*)((uintptr_t)*this->lapicAddr) + reg, value);
+}
+
+uint32_t APIC::LAPICin(uint32_t reg) {
+    return MMIO::mInDWord((uint8_t*)((uintptr_t)*this->lapicAddr) + reg);
+}
+
+uint8_t APIC::getLAPICID() {
+    return this->LAPICin(LAPIC_ID) >> 24;
+}
+
+void APIC::sendLAPICEOI() {
+    MMIO::mOutDWord((uint8_t*)*this->lapicAddr + LAPIC_EOI, 0);
+}
+
+void APIC::initAPICs() {
+    this->parseMADT();
+
+    this->LAPICout(LAPIC_SIVR, 0x100 | 0xff);
+
+    this->LAPICout(LAPIC_LDR, 0x01000000);
+
+    this->LAPICout(LAPIC_TPR, 0);
+
+    this->LAPICout(LAPIC_DFR, 0xffffffff);
+
+    uint8_t pitIRQ = PIC1_IRQ_TIMER;
+    uint8_t keyboardIRQ = PIC1_IRQ_KEYBOARD;
+    for (int i = 0; i < this->ioapicisoCount; i++) {
+        if (this->ioapiciso[i]->IRQSrc == PIC1_IRQ_TIMER) {
+            pitIRQ = this->ioapiciso[i]->glblSysIntr;
+
+        } else if (this->ioapiciso[i]->IRQSrc == PIC1_IRQ_KEYBOARD) {
+            keyboardIRQ = this->ioapiciso[i]->glblSysIntr;
+        }
+    }
+
+    for (uint8_t entry = 0; entry < this->getIOAPICEntriesCount(); entry++) {
+        if (entry == pitIRQ || entry == keyboardIRQ) {
+            continue;
+        }
+
+        this->setIOAPICEntry(entry, 1 << 16);
+    }
+
+    this->setIOAPICEntry(pitIRQ, PIC1_IRQ0 + PIC1_IRQ_TIMER);
+
+    this->setIOAPICEntry(keyboardIRQ, PIC1_IRQ0 + PIC1_IRQ_KEYBOARD);
 }

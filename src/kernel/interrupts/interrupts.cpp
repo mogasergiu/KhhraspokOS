@@ -7,6 +7,7 @@ INTERRUPTS::Interrupts intsHandler;
 // Constructor - sets up IDTR, zeroes out IDT and loads IDT (lidt)
 void Interrupts::initInterrupts() {
     picHandler.initPIC();
+    apicHandler.initAPICs();
     pitHandler.initPIT();
 
     for (uint32_t i = 0; i < sizeof(this->IDTDescriptors); i++) {

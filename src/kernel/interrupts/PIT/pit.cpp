@@ -9,9 +9,14 @@ INTERRUPTS::PIT pitHandler;
 extern "C" void IntCallbacks::pitIRQ() {
     INTERRUPTS::ticks++;
 
-    printf("ticks: %d; ", INTERRUPTS::ticks);
+    // PMIO::pOutByte(PIC1_REG_COMMAND, PIC_EOI);
+    apicHandler.sendLAPICEOI();
+}
 
-    PMIO::pOutByte(PIC1_REG_COMMAND, PIC_EOI);
+void PIT::sleep(uint64_t ms30) const {
+    uint64_t start = INTERRUPTS::ticks;
+
+    for (; INTERRUPTS::ticks - start < ms30;);
 }
 
 // Constructor - Initializes the PIT
