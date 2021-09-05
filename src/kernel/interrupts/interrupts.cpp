@@ -4,6 +4,36 @@ using namespace INTERRUPTS;
 
 INTERRUPTS::Interrupts intsHandler;
 
+static void wakeAPs() {
+    for (uint8_t i = 0, id = apicHandler.getLAPICID();
+        i < apicHandler.getLAPICCount(); i++) {
+        uint8_t _id = apicHandler.getLAPICID(i);
+
+        if (id != _id) {
+            apicHandler.sendLAPICIPI(_id, LAPIC_ICR_INIT |
+                                          LAPIC_ICR_PHYSICAL |
+                                          LAPIC_ICR_ASSERT |
+                                          LAPIC_ICR_EDGE |
+                                          LAPIC_ICR_DEFAULT);
+        }
+    }
+
+    pitHandler.sleep(10);
+
+    for (uint8_t i = 0, id = apicHandler.getLAPICID();
+        i < apicHandler.getLAPICCount(); i++) {
+        uint8_t _id = apicHandler.getLAPICID(i);
+
+        if (id != _id) {
+            apicHandler.sendLAPICIPI(_id, 0x8 | LAPIC_ICR_SIPI |
+                                          LAPIC_ICR_PHYSICAL |
+                                          LAPIC_ICR_ASSERT |
+                                          LAPIC_ICR_EDGE |
+                                          LAPIC_ICR_DEFAULT);
+        }
+    }
+}
+
 // Constructor - sets up IDTR, zeroes out IDT and loads IDT (lidt)
 void Interrupts::initInterrupts() {
     picHandler.initPIC();
@@ -37,6 +67,7 @@ void Interrupts::initInterrupts() {
         : "rsi"
     );
 
+    wakeAPs();
     // this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER, pitIRQ);
 }
 

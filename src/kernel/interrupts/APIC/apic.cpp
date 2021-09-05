@@ -120,9 +120,25 @@ uint8_t APIC::getLAPICID() {
     return this->LAPICin(LAPIC_ID) >> 24;
 }
 
+uint8_t APIC::getLAPICID(uint8_t id) {
+    return this->lapic[id]->apicID;
+}
+
 void APIC::sendLAPICEOI() {
     MMIO::mOutDWord((uint8_t*)*this->lapicAddr + LAPIC_EOI, 0);
 }
+
+uint8_t APIC::getLAPICCount() {
+    return this->lapicCount;
+}
+
+void APIC::sendLAPICIPI(uint8_t remoteLAPICID, uint32_t flags) {
+    this->LAPICout(LAPIC_ICR1, remoteLAPICID << 24);
+    this->LAPICout(LAPIC_ICR0, flags);
+
+    while (this->LAPICin(LAPIC_ICR0) & LAPIC_ICR_PENDING);
+}
+
 
 void APIC::initAPICs() {
     this->parseMADT();

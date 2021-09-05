@@ -215,7 +215,7 @@
 #define LAPIC_ICR_ASSERT 0x00004000
 #define LAPIC_ICR_EDGE 0x00000000
 #define LAPIC_ICR_LEVEL 0x00008000
-#define LAPIC_ICR_NO_SHORTHAND 0x00000000
+#define LAPIC_ICR_DEFAULT 0x00000000
 #define LAPIC_ICR_ITSELF 0x00040000
 #define LAPIC_ICR_ALL_CPUS 0x00080000
 #define LAPIC_ICR_ALL_CPUS_BUT_ITSELF 0x000c0000
@@ -419,6 +419,7 @@ namespace INTERRUPTS {
         public:
             uint8_t *activeCPUs;
             APIC();
+            uint8_t getLAPICCount();
             void IOAPICout(uint8_t reg, uint32_t value);
             uint32_t IOAPICin(uint8_t reg);
             void LAPICout(uint32_t reg, uint32_t value);
@@ -427,7 +428,9 @@ namespace INTERRUPTS {
             void setIOAPICEntry(uint8_t idx, uintptr_t addr);
             void parseMADT();
             uint8_t getLAPICID();
+            uint8_t getLAPICID(uint8_t id);
             void sendLAPICEOI();
+            void sendLAPICIPI(uint8_t remoteLAPICID, uint32_t flags);
             uint8_t getIOAPICVersion();
             uint8_t getIOAPICEntriesCount();
     };
