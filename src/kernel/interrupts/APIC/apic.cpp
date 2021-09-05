@@ -19,8 +19,6 @@ APIC::APIC() {
 void APIC::parseMADT() {
     *this->lapicAddr = (uintptr_t)ACPI::madt->LAPICAddr;
 
-    kprintf("LAPIC addr %x -> %x\n", this->lapicAddr, *this->lapicAddr);
-
     for (uint8_t *entry = (uint8_t*)ACPI::madt + sizeof(*ACPI::madt);
         entry < (uint8_t*)ACPI::madt + ACPI::madt->hdr.length;) {
         switch (*entry) {
@@ -73,15 +71,11 @@ void APIC::parseMADT() {
                 break;
 
             default:
-                kpwarn("Unknown MADT entry found, stopped parsing MADT!");
-
-                kprintf("Found %d lapics", this->lapicCount);
+                kpwarn("Unknown MADT entry found, stopped parsing MADT!\n");
 
                 return;
         }
     }
-
-   kprintf("Found %d lapics", this->lapicCount);
 }
 
 void APIC::IOAPICout(uint8_t reg, uint32_t value) {

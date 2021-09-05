@@ -9,11 +9,19 @@
 #include <acpi.hpp>
 #include <kstdio.hpp>
 
+uint8_t cpuCount = 1;
+
+extern "C" void APEntry() {
+    ++cpuCount;
+
+    __asm__ __volatile__("hlt"::);
+}
+
 extern "C" void kernelMain() { 
     intsHandler.initInterrupts();
 
     while (1) {
         pitHandler.sleep(20);
-        kprintf("CPUS: %d\n", *apicHandler.activeCPUs);
+        kprintf("CPUS: %d\n", cpuCount);
     };
 }

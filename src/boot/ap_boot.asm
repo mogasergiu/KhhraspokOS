@@ -93,7 +93,7 @@ APLongMode:
     mov rax, ACTIVE_CPUS
     lock inc byte [rax]
 
-    jmp $
+    call 0x100000
 
 times 1024 - ($ - $$) db 0
 

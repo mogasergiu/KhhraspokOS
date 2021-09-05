@@ -16,6 +16,7 @@ global mOutDWord
 extern kernelMain
 extern pitIRQ
 extern keyboardIRQ
+extern APEntry
 
 ; Export constructor and destructor sections
 extern startCtors
@@ -63,6 +64,18 @@ section .text
 _start:
     nop
     nop
+
+.nopJmp
+    jmp short .BSPJumpToCtors
+
+.APJumpToCpp:
+    call APEntry
+
+    hlt
+
+.BSPJumpToCtors:
+    mov word [.nopJmp],0x9090
+
     cli
     xor rbx, rbx
     mov ebx, startCtors
