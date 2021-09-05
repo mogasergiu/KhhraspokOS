@@ -168,7 +168,7 @@ mInByte:
     push rbp
     mov rbp, rsp
 
-    movzx rax, byte [rax]
+    movzx rax, byte [rdi]
 
     pop rbp
     ret
@@ -177,7 +177,7 @@ mInWord:
     push rbp
     mov rbp, rsp
 
-    movzx rax, word [rax]
+    movzx rax, word [rdi]
 
     pop rbp
     ret
@@ -186,7 +186,7 @@ mInDWord:
     push rbp
     mov rbp, rsp
 
-    mov rax, [rax]
+    mov rax, [rdi]
 
     pop rbp
     ret
