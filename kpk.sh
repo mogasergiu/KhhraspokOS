@@ -14,14 +14,14 @@ elif [[ $1 == "clean" ]]; then
     rm -rf build/ bin/
 
 elif [[ $1 == "run" ]]; then
-    qemu-system-x86_64  -smp cores=4,threads=2 -hda KhhraspokOS.bin
+    qemu-system-x86_64  -smp cores=2,threads=2 -hda KhhraspokOS.bin
 
 elif [[ $1 == "dump" ]]; then
-    qemu-system-x86_64  -smp cores=4,threads=2 -hda KhhraspokOS.bin -d int,exec\
+    qemu-system-x86_64  -smp cores=2,threads=2 -hda KhhraspokOS.bin -d int,exec\
                                                                     --no-reboot
 
 elif [[ $1 == "debug" ]]; then
-    qemu-system-x86_64  -smp cores=4,threads=2 -hda KhhraspokOS.bin -s -S
+    qemu-system-x86_64  -smp cores=2,threads=2 -hda KhhraspokOS.bin -s -S
 
 elif [[ $1 == "help" ]]; then
     echo "./kpk.sh <option>"
