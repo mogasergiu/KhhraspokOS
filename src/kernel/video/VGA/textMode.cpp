@@ -1,5 +1,6 @@
 #include <video.hpp>
 #include <kstring.hpp>
+#include <io.hpp>
 
 using namespace VIDEO;
 
@@ -17,6 +18,10 @@ VGA::TextMode::TextMode() {
             this->address[l * VGA_WIDTH + c] = 0x0032;
         }
     }
+
+    // disable cursor
+    PMIO::pOutByte(0x3D4, 0x0A);
+    PMIO::pOutByte(0x3D5, 0x20);
 }
 
 /*
