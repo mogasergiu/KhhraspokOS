@@ -1,5 +1,6 @@
 #include <acpi.hpp>
 #include <interrupts.hpp>
+#include <kstdio.hpp>
 
 using namespace ACPI;
 
@@ -25,6 +26,8 @@ static void parseRSDP(RSDP *rsdp) {
         XSDT *xsdt = (XSDT*)((uintptr_t)rsdp->xsdtAddr);
 
         if (xsdt != NULL) {
+            kpwarn("Found XSDT instead of RSDT!");
+
             for (int entry = 0; (uint8_t*)&xsdt->entries[entry] < (uint8_t*)xsdt + xsdt->hdr.length;
                     entry++) {
                 ACPIHdr *hdr = (ACPIHdr*)((uintptr_t)xsdt->entries[entry]);

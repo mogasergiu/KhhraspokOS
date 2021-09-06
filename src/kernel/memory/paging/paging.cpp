@@ -59,14 +59,12 @@ void* PgFrAllocator::reqPg() {
 
         this->allocPg((void*)(this->bitmapIdx * PAGE_SIZE));
 
-        __asm__ __volatile__("mov %0, %%r15"::"r" ((void*)(this->bitmapIdx * PAGE_SIZE)));
-
         this->bitmapIdx++;
 
         return (void*)((this->bitmapIdx - 1) * PAGE_SIZE);
     }
 
-    return NULL; // Page Frame Swap to file
+    return NULL;
 }
 
 void PgFrAllocator::freePg(void* addr) {
@@ -121,7 +119,6 @@ PgMgr::PgMgr() {
     this->PML4 = (PML4struct*)PML4T_ADDR;
  
     for (size_t pg = KERNEL_USED_MEM; pg < memSize; pg += PAGE_SIZE) {
-        __asm__ __volatile__("mov %0, %%r12"::"r" (pg));
         this->mapPg((void*)pg, (void*)pg);
     }
 }
@@ -179,11 +176,6 @@ void PgMgr::mapPg(void *vaddr, void *paddr) {
     pt = getPgAddr(pd->entries[idx]);
 
     idx = PTidx(vaddr);
-
-//    tmpPg = (pgTbl*)this->pgAllocator.reqPg();
-
-//    __asm__ __volatile__("mov %0, %%r11"::"r"(tmpPg));
-//    memset(tmpPg, 0, PAGE_SIZE);
 
     setPgAddr(pte, paddr);
     setPgFlag(pte, PDE_P | PDE_R);

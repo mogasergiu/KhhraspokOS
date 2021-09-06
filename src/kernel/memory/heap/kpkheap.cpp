@@ -1,5 +1,6 @@
 #include <kpkheap.hpp>
 #include <kstring.hpp>
+#include <kstdio.hpp>
 
 using namespace KPKHEAP;
 
@@ -91,6 +92,7 @@ static void pushChunk(chunk *c) {
 
 static chunk* makeChunk(void *addr, size_t size) {
     if (addr >= (void*)KPKHEAP_END) {
+        kpwarn("No more Kernel Heap Space!");
         return NULL;
     }
 

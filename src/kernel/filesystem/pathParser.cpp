@@ -29,6 +29,7 @@ parsedPath* Path::parsePath(char *path) const {
     parsedPath *pathScout = newPath;
 
     char *ptr = strtok(path, "/");
+
     do {
         strncpy(pathScout->currDir, ptr, FILESYSTEM_DIR_MAX_SIZE);
 

@@ -19,7 +19,7 @@ extern "C" void kernelMain() {
     intsHandler.initInterrupts();
 
     while (1) {
-        pitHandler.sleep(20);
+        pitHandler.sleep(100);
         kprintf("CPUS: %d\n", *apicHandler.activeCPUs);
     };
 }

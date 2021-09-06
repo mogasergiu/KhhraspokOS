@@ -28,6 +28,7 @@ void PIC::initPIC() {
     this->writeIMR(PIC_ICW4_UPM, PIC1);
     this->writeIMR(PIC_ICW4_UPM, PIC2);
 
+    // Mask all interrupts
     this->writeIMR(0xff, PIC1);
     this->writeIMR(0xff, PIC2);
 

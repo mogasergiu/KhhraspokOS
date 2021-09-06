@@ -1,6 +1,7 @@
 #include <drivers.hpp>
 #include <kpkheap.hpp>
 #include <kstring.hpp>
+#include <kstdio.hpp>
 
 using namespace DRIVERS;
 
@@ -51,9 +52,7 @@ void DISK::readDisk(size_t size, uint16_t *buffer) {
     size_t lbaNo = size / SECTOR_SIZE + 2;
 
     uint16_t *buffer2 = (uint16_t*)KPKHEAP::kpkZalloc(lbaNo * SECTOR_SIZE);
-    if (buffer2 == NULL) {
-        return;
-    }
+    CATCH_FIRE(buffer2 == NULL, "Could not allocate disk buffer!");
 
     readLBA(lba, lbaNo, buffer2);
 
