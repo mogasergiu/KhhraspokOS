@@ -9,9 +9,13 @@ namespace PMIO {
 
     extern "C" uint16_t pInWord(uint16_t port);
 
+    extern "C" uint32_t pInDWord(uint16_t port);
+
     extern "C" void pOutByte(uint16_t port, uint8_t byte);
 
     extern "C" void pOutWord(uint16_t port, uint16_t word);
+
+    extern "C" void pOutDWord(uint16_t port, uint32_t dword);
 };
 
 namespace MMIO {

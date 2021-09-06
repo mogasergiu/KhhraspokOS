@@ -155,6 +155,17 @@ pInWord:
     pop rbp
     ret
 
+pInDWord:
+    push rbp
+    mov rbp, rsp
+
+    xor rax, rax
+    mov rdx, rdi
+    in eax, dx
+
+    pop rbp
+    ret
+
 pOutByte:
     push rbp
     mov rbp, rsp
@@ -173,6 +184,17 @@ pOutWord:
     mov rax, rsi
     mov rdx, rdi
     out dx, ax
+
+    pop rbp
+    ret
+
+pOutDWord:
+    push rbp
+    mov rbp, rsp
+
+    mov rax, rsi
+    mov rdx, rdi
+    out dx, eax
 
     pop rbp
     ret
