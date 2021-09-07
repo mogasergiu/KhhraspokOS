@@ -4,8 +4,10 @@ global keyboardIRQHandler
 global doNothingIRQHandler
 global pInByte
 global pInWord
+global pInDWord
 global pOutByte
 global pOutWord
+global pOutDWord
 global mInByte
 global mInWord
 global mInDWord
@@ -141,7 +143,7 @@ pInByte:
     mov rdx, rdi
     in al, dx
 
-    pop rbp
+    leave
     ret
 
 pInWord:
@@ -152,7 +154,7 @@ pInWord:
     mov rdx, rdi
     in ax, dx
 
-    pop rbp
+    leave
     ret
 
 pInDWord:
@@ -163,7 +165,7 @@ pInDWord:
     mov rdx, rdi
     in eax, dx
 
-    pop rbp
+    leave
     ret
 
 pOutByte:
@@ -174,7 +176,7 @@ pOutByte:
     mov rdx, rdi
     out dx, al
 
-    pop rbp
+    leave
     ret
 
 pOutWord:
@@ -185,7 +187,7 @@ pOutWord:
     mov rdx, rdi
     out dx, ax
 
-    pop rbp
+    leave
     ret
 
 pOutDWord:
@@ -196,7 +198,7 @@ pOutDWord:
     mov rdx, rdi
     out dx, eax
 
-    pop rbp
+    leave
     ret
 
 mInByte:
@@ -205,7 +207,7 @@ mInByte:
 
     movzx rax, byte [rdi]
 
-    pop rbp
+    leave
     ret
 
 mInWord:
@@ -214,7 +216,7 @@ mInWord:
 
     movzx rax, word [rdi]
 
-    pop rbp
+    leave
     ret
 
 mInDWord:
@@ -223,7 +225,7 @@ mInDWord:
 
     mov rax, [rdi]
 
-    pop rbp
+    leave
     ret
 
 mOutByte:
@@ -232,7 +234,7 @@ mOutByte:
 
     mov byte [rdi], sil
 
-    pop rbp
+    leave
     ret
 
 mOutWord:
@@ -241,7 +243,7 @@ mOutWord:
 
     mov word [rdi], si
 
-    pop rbp
+    leave
     ret
 
 mOutDWord:
@@ -250,6 +252,6 @@ mOutDWord:
 
     mov dword [rdi], esi
 
-    pop rbp
+    leave
     ret
 
