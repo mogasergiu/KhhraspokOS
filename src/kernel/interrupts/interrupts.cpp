@@ -6,24 +6,25 @@ using namespace INTERRUPTS;
 INTERRUPTS::Interrupts intsHandler;
 
 void APIC::initLAPICTimer() {
-    static uint32_t ticks = 0;
+    static uint32_t ticks;
 
     if (ticks == 0) {
         apicHandler.LAPICout(LAPIC_TDCR, 0x3);
 
         apicHandler.LAPICout(LAPIC_TICR, 0xffffffff);
 
-        apicHandler.LAPICout(LAPIC_LTR, 0x22);
+        apicHandler.LAPICout(LAPIC_LTR, LAPIC_TIMER_IDT_ENTRY);
 
         pitHandler.sleep(10);
 
-        apicHandler.LAPICout(LAPIC_LTR, 0x10000);
+        apicHandler.LAPICout(LAPIC_LTR, LAPIC_TIMER_DISABLE);
 
         ticks = 0xffffffff - apicHandler.LAPICin(LAPIC_TCCR);
     }
 
 
-    apicHandler.LAPICout(LAPIC_LTR, 0x22 | 0x20000);
+    apicHandler.LAPICout(LAPIC_LTR, LAPIC_TIMER_IDT_ENTRY |
+                                    LAPIC_TIMER_PERIODIC_MODE);
 
     apicHandler.LAPICout(LAPIC_TDCR, 0x3);
 
@@ -83,8 +84,9 @@ void Interrupts::initInterrupts() {
     this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER, IntHandlers::pitIRQHandler);
     this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_KEYBOARD,
                         IntHandlers::keyboardIRQHandler);
-    intsHandler.setIDTEntry(0x22, IntHandlers::lapicTimerIRQHandler);
-    intsHandler.setIDTEntry(0xff, IntHandlers::SpuriousInterruptHandler);
+    this->setIDTEntry(LAPIC_TIMER_IDT_ENTRY, IntHandlers::lapicTimerIRQHandler);
+    this->setIDTEntry(SPURIOUS_INTERRUPT_IDT_ENTRY,
+                            IntHandlers::SpuriousInterruptHandler);
 
     __asm__ __volatile__ (
         "movq %0, %%rsi;"

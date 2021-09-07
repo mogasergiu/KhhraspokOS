@@ -15,6 +15,8 @@
 #define DIVISOR 100
 #define INPUT_FREQ 1193180
 
+#define SPURIOUS_INTERRUPT_IDT_ENTRY 0xff
+
 /******************************************
  * x86 Hardware Interrupts for Master PIC *
  ******************************************/
@@ -219,6 +221,10 @@
 #define LAPIC_ICR_ITSELF 0x00040000
 #define LAPIC_ICR_ALL_CPUS 0x00080000
 #define LAPIC_ICR_ALL_CPUS_BUT_ITSELF 0x000c0000
+
+#define LAPIC_TIMER_IDT_ENTRY 0x22
+#define LAPIC_TIMER_DISABLE 0x10000
+#define LAPIC_TIMER_PERIODIC_MODE 0x20000
 
 /*********************************************
  * CLI and STI assembly instructions inlined *
