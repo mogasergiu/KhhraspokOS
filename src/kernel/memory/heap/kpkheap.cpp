@@ -146,7 +146,7 @@ extern "C" void* kpkMalloc(size_t size) {
     chunk *ret = checkBucket(size);
 
     if (ret == NULL) {
-        ret = makeChunk(topChunk, size);
+        ret = makeChunk(KPKHEAP::topChunk, size);
 
         if (ret != NULL) {
             KPKHEAP::topChunk = (void*)((char*)topChunk + size + sizeof(ret->metadata));

@@ -11,7 +11,7 @@ extern "C" void kpwarn(const char *s) {
 }
 
 static void printHex(int64_t num) {
-    vgaHandler.putString("0x", 15);
+    vgaHandler.putString("0x0", 15);
 
     int64_t hex = 0, remainder;
     char hexChar;
