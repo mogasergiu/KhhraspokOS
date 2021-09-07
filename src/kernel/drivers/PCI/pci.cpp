@@ -85,9 +85,9 @@ static inline void gatherPCIDevInfo(uint8_t bus, uint8_t device, uint8_t func) {
                                         PCI_HEADER_TYPE_OFFSET);
 }
 
-void printPCIDevice(PCI::PCIDevType *dev) {
-    kprintf("Found PCI Device: %x (Deviceevice ID), %x (Vendor ID), %x (Class Code),"
-           "%x (Subclass), %x (Prog IF), %x (Revision ID), %x (hdrType).\n",
+static void printPCIDevice(PCI::PCIDevType *dev) {
+    kprintf("Found PCI Device: %x (Device ID), %x (Vendor ID), %x (Class Code),"
+           "%x (Subclass), %x (Prog IF), %x (Revision ID), %x (Header Type).\n",
            dev->deviceID,
            dev->vendorID,
            dev->classCode,
@@ -95,6 +95,12 @@ void printPCIDevice(PCI::PCIDevType *dev) {
            dev->progIF,
            dev->revisionID,
            dev->hdrType);
+}
+
+void PCI::printPCIDevices() {
+    for (int i = 0; i < PCI::PCIDevicesCount; i++) {
+        printPCIDevice(&PCI::pciDevs[i]);
+    }
 }
 
 static void checkDevice(uint8_t bus, uint8_t device) {
@@ -118,7 +124,6 @@ static void checkDevice(uint8_t bus, uint8_t device) {
             if(PCI::pciDevs[PCI::PCIDevicesCount].vendorID != 0xffff) {
                 gatherPCIDevInfo(bus, device, func);
 
-                printPCIDevice(&PCI::pciDevs[PCI::PCIDevicesCount]);
             } else {                
                 PCI::PCIDevicesCount--;
             }

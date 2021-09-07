@@ -18,6 +18,8 @@ extern "C" void APEntry() {
 extern "C" void kernelMain() { 
     intsHandler.initInterrupts();
 
+    DRIVERS::PCI::printPCIDevices();
+
     while (1) {
         pitHandler.sleep(100);
         kprintf("CPUS: %d\n", *apicHandler.activeCPUs);

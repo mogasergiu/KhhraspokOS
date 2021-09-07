@@ -87,8 +87,10 @@ namespace DRIVERS {
 
         extern uint8_t PCIDevicesCount;
 
+        void printPCIDevices();
+
         void __attribute__((constructor)) parsePCI();
-    }
+    };
 };
 
 #endif  /* DRIVERS_HPP */
