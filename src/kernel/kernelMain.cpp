@@ -12,7 +12,27 @@
 uint8_t cpuCount = 1;
 
 extern "C" void APEntry() {
-    __asm__ __volatile__("hlt"::);
+    apicHandler.LAPICout(LAPIC_SIVR, 0x100 | 0xff);
+
+    apicHandler.LAPICout(LAPIC_LDR, 0x01000000);
+
+    apicHandler.LAPICout(LAPIC_TPR, 0);
+
+    apicHandler.LAPICout(LAPIC_DFR, 0xffffffff);
+
+    apicHandler.initLAPICTimer();
+
+    __asm__ __volatile__ (
+        "movq %0, %%rsi;"
+        "lidt 0(%%rsi);"
+        :
+        : "r" (&intsHandler.IDTRDescriptor)
+        : "rsi"
+    );
+
+    sti();
+
+    while(1);
 }
 
 extern "C" void kernelMain() { 
@@ -21,7 +41,7 @@ extern "C" void kernelMain() {
     DRIVERS::PCI::printPCIDevices();
 
     while (1) {
-        pitHandler.sleep(100);
+        pitHandler.sleep(10);
         kprintf("CPUS: %d\n", *apicHandler.activeCPUs);
     };
 }

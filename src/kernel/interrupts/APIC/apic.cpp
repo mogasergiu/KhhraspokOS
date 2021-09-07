@@ -16,6 +16,10 @@ APIC::APIC() {
     this->lapicCount = 0;
 }
 
+extern "C" void IntCallbacks::lapicTimerIRQ() {
+    apicHandler.sendLAPICEOI();
+}
+
 void APIC::parseMADT() {
     *this->lapicAddr = (uintptr_t)ACPI::madt->LAPICAddr;
 
@@ -132,7 +136,6 @@ void APIC::sendLAPICIPI(uint8_t remoteLAPICID, uint32_t flags) {
 
     while (this->LAPICin(LAPIC_ICR0) & LAPIC_ICR_PENDING);
 }
-
 
 void APIC::initAPICs() {
     this->parseMADT();

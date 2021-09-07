@@ -1,8 +1,34 @@
 #include <interrupts.hpp>
+#include <kstdio.hpp>
 
 using namespace INTERRUPTS;
 
 INTERRUPTS::Interrupts intsHandler;
+
+void APIC::initLAPICTimer() {
+    static uint32_t ticks = 0;
+
+    if (ticks == 0) {
+        apicHandler.LAPICout(LAPIC_TDCR, 0x3);
+
+        apicHandler.LAPICout(LAPIC_TICR, 0xffffffff);
+
+        apicHandler.LAPICout(LAPIC_LTR, 0x22);
+
+        pitHandler.sleep(10);
+
+        apicHandler.LAPICout(LAPIC_LTR, 0x10000);
+
+        ticks = 0xffffffff - apicHandler.LAPICin(LAPIC_TCCR);
+    }
+
+
+    apicHandler.LAPICout(LAPIC_LTR, 0x22 | 0x20000);
+
+    apicHandler.LAPICout(LAPIC_TDCR, 0x3);
+
+    apicHandler.LAPICout(LAPIC_TICR, ticks / 100);
+}
 
 static void wakeAPs() {
     for (uint8_t i = 0, id = apicHandler.getLAPICID();
@@ -57,18 +83,20 @@ void Interrupts::initInterrupts() {
     this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER, IntHandlers::pitIRQHandler);
     this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_KEYBOARD,
                         IntHandlers::keyboardIRQHandler);
+    intsHandler.setIDTEntry(0x22, IntHandlers::lapicTimerIRQHandler);
 
     __asm__ __volatile__ (
         "movq %0, %%rsi;"
         "lidt 0(%%rsi);"
-        "sti;"
         :
-        : "r" ( &this->IDTRDescriptor )
+        : "r" (&this->IDTRDescriptor)
         : "rsi"
     );
 
     wakeAPs();
-    // this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER, pitIRQ);
+    apicHandler.initLAPICTimer();
+
+    sti();
 }
 
 /*

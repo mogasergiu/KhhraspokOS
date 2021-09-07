@@ -2,6 +2,7 @@ global _start
 global pitIRQHandler
 global keyboardIRQHandler
 global doNothingIRQHandler
+global lapicTimerIRQHandler
 global pInByte
 global pInWord
 global pInDWord
@@ -19,6 +20,7 @@ extern kernelMain
 extern pitIRQ
 extern keyboardIRQ
 extern APEntry
+extern lapicTimerIRQ
 
 ; Export constructor and destructor sections
 extern startCtors
@@ -120,9 +122,11 @@ pitIRQHandler:
 doNothingIRQHandler:
     IRQpush
     cli
-    mov rdi, 0x20
-    mov rsi, 0x20
-    call pOutByte
+    mov rdi, 0x500
+    mov rdi, [rdi]
+    add rdi, 0xb0
+    xor rsi, rsi
+    call mOutDWord
     IRQpop
     sti
     iretq
@@ -131,6 +135,14 @@ keyboardIRQHandler:
     IRQpush
     cli
     call keyboardIRQ
+    IRQpop
+    sti
+    iretq
+
+lapicTimerIRQHandler:
+    IRQpush
+    cli
+    call lapicTimerIRQ
     IRQpop
     sti
     iretq
@@ -223,7 +235,8 @@ mInDWord:
     push rbp
     mov rbp, rsp
 
-    mov rax, [rdi]
+    xor rax, rax
+    mov eax, dword [rdi]
 
     leave
     ret

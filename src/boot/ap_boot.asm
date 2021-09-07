@@ -76,20 +76,6 @@ APPRotectedModeStart:
 [BITS 64]
 
 APLongMode:
-    mov rax, IDTD
-    lidt [rax]
-
-    mov rax, LAPIC
-    mov rsi, [rax]
-    xor rax, rax
-    add rsi, 0x00f0
-    mov rdi, rsi
-    lodsd
-    or eax, 0x100
-    stosd
-
-    sti
-
     mov rax, ACTIVE_CPUS
     lock inc byte [rax]
 

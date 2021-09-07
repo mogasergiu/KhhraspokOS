@@ -249,6 +249,7 @@ namespace INTERRUPTS {
     namespace IntHandlers {
         extern "C" void pitIRQHandler();
         extern "C" void keyboardIRQHandler();
+        extern "C" void lapicTimerIRQHandler();
         extern "C" void doNothingIRQHandler();
     }
 
@@ -262,6 +263,8 @@ namespace INTERRUPTS {
          * Callback function for Master PIC's connection to the PIT
          */
         extern "C" void pitIRQ();
+
+        extern "C" void lapicTimerIRQ();
     };
 
     /*******************************************************************
@@ -419,6 +422,7 @@ namespace INTERRUPTS {
         public:
             uint8_t *activeCPUs;
             APIC();
+            void initLAPICTimer();
             uint8_t getLAPICCount();
             void IOAPICout(uint8_t reg, uint32_t value);
             uint32_t IOAPICin(uint8_t reg);
