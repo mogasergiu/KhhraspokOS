@@ -29,7 +29,7 @@ startLongMode:
     ; Manually moving 8192 bytes at address 0x100000 where our kernel will be
     mov rsi, 0x8400
     mov rdi, 0x100000
-    mov rcx, 0x6000
+    mov rcx, 0x8000
     rep movsb
 
     ; Update stack pointers
