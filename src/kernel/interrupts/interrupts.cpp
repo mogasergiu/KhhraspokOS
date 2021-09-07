@@ -84,6 +84,7 @@ void Interrupts::initInterrupts() {
     this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_KEYBOARD,
                         IntHandlers::keyboardIRQHandler);
     intsHandler.setIDTEntry(0x22, IntHandlers::lapicTimerIRQHandler);
+    intsHandler.setIDTEntry(0xff, IntHandlers::SpuriousInterruptHandler);
 
     __asm__ __volatile__ (
         "movq %0, %%rsi;"

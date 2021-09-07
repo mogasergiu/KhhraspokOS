@@ -251,6 +251,7 @@ namespace INTERRUPTS {
         extern "C" void keyboardIRQHandler();
         extern "C" void lapicTimerIRQHandler();
         extern "C" void doNothingIRQHandler();
+        extern "C" void SpuriousInterruptHandler();
     }
 
     namespace IntCallbacks {

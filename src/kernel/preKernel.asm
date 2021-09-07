@@ -3,6 +3,7 @@ global pitIRQHandler
 global keyboardIRQHandler
 global doNothingIRQHandler
 global lapicTimerIRQHandler
+global SpuriousInterruptHandler
 global pInByte
 global pInWord
 global pInDWord
@@ -118,6 +119,9 @@ pitIRQHandler:
     IRQpop
     sti
     iretq
+
+SpuriousInterruptHandler:
+    irq
 
 doNothingIRQHandler:
     IRQpush
