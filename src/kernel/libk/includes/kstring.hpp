@@ -48,9 +48,9 @@ extern "C" void* memcpy(void *destAddr, const void *srcAddr, size_t bytesNo);
  */
 extern "C" void* memset(void *addr, int8_t byte, size_t bytesNo);
 
-extern "C" int strcmp(const char *str1, const char *str2);
+extern "C" int strcmp(char *str1, char *str2);
 
-extern "C" int strncmp(const char *str1, const char *str2, size_t n);
+extern "C" int strncmp(char *str1, char *str2, size_t n);
 
 extern "C" char* strtok(char *str, const char *delim);
 

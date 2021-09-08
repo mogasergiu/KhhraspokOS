@@ -86,7 +86,7 @@ extern "C" void* memset(void *addr, int8_t byte, size_t bytesNo) {
     return addr;
 }
 
-extern "C" int strcmp(const char *str1, const char *str2) {
+extern "C" int strcmp(char *str1, char *str2) {
     uint32_t idx = 0;
 
     while ((str1[idx] != 0 && str2[idx] != 0) && str1[idx] == str2[idx]) {
@@ -104,7 +104,7 @@ extern "C" int strcmp(const char *str1, const char *str2) {
     }
 }
 
-extern "C" int strncmp(const char *str1, const char *str2, size_t n) {
+extern "C" int strncmp(char *str1, char *str2, size_t n) {
     uint32_t idx = 0;
 
     while (idx < n && (str1[idx] != 0 && str2[idx] != 0) &&
