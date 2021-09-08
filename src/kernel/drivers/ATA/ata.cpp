@@ -5,8 +5,6 @@
 
 using namespace DRIVERS;
 
-size_t DISK::nail = 0;
-
 static inline void readLBA(size_t lba, size_t lbaNo, uint16_t* buffer)
 {
     // Send 0xe0 for the "master" or 0xf0 for the "slave"
@@ -47,25 +45,21 @@ static inline void readLBA(size_t lba, size_t lbaNo, uint16_t* buffer)
     }
 }
 
-void DISK::readDisk(size_t size, uint16_t *buffer) {
-    size_t lba = DISK::nail / SECTOR_SIZE;
-    size_t lbaNo = size / SECTOR_SIZE + 2;
+void DISK::readDisk(size_t &nail, size_t size, void *buffer) {
+    size_t lba = nail / SECTOR_SIZE;
+    size_t lbaNo = size / SECTOR_SIZE + 1;
 
     uint16_t *buffer2 = (uint16_t*)KPKHEAP::kpkZalloc(lbaNo * SECTOR_SIZE);
     CATCH_FIRE(buffer2 == NULL, "Could not allocate disk buffer!");
 
     readLBA(lba, lbaNo, buffer2);
 
-    uint16_t lbaOffset = DISK::nail % SECTOR_SIZE;
+    uint16_t lbaOffset = nail % SECTOR_SIZE;
 
-    memcpy(buffer, buffer2 + lbaOffset, size);
+    memcpy(buffer, (uint8_t*)buffer2 + lbaOffset, size);
 
-    DISK::nail += size;
+    nail += size;
 
     KPKHEAP::kpkFree(buffer2);
-}
-
-void DISK::setNail(size_t newNail) {
-    DISK::nail = newNail;
 }
 
