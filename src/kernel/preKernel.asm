@@ -121,7 +121,7 @@ pitIRQHandler:
     iretq
 
 SpuriousInterruptHandler:
-    irq
+    iretq
 
 doNothingIRQHandler:
     IRQpush
