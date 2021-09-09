@@ -50,7 +50,11 @@ extern "C" void* memset(void *addr, int8_t byte, size_t bytesNo);
 
 extern "C" int strcmp(char *str1, char *str2);
 
+extern "C" int istrcmp(char *str1, char *str2);
+
 extern "C" int strncmp(char *str1, char *str2, size_t n);
+
+extern "C" int istrncmp(char *str1, char *str2, size_t n);
 
 extern "C" char* strtok(char *str, const char *delim);
 

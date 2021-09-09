@@ -104,6 +104,26 @@ extern "C" int strcmp(char *str1, char *str2) {
     }
 }
 
+extern "C" int istrcmp(char *str1, char *str2) {
+    uint32_t idx = 0;
+
+    while ((str1[idx] != 0 && str2[idx] != 0) && 
+        (str1[idx] == str2[idx] || (str1[idx] + 32) == str2[idx] ||
+        (str1[idx] - 32) == str2[idx])) {
+        idx++;
+    }
+
+    if (str1[idx] == 0 && str2[idx] != 0) {
+        return 1;
+
+    } else if (str1[idx] != 0 && str2[idx] == 0) {
+        return -1;
+
+    } else {
+        return str1[idx] - str2[idx];
+    }
+}
+
 extern "C" int strncmp(char *str1, char *str2, size_t n) {
     uint32_t idx = 0;
 
@@ -127,6 +147,29 @@ extern "C" int strncmp(char *str1, char *str2, size_t n) {
     }
 }
 
+extern "C" int istrncmp(char *str1, char *str2, size_t n) {
+    uint32_t idx = 0;
+
+    while (idx < n && (str1[idx] != 0 && str2[idx] != 0) && 
+        (str1[idx] == str2[idx] || (str1[idx] + 32) == str2[idx] ||
+        (str1[idx] - 32) == str2[idx])) {
+        idx++;
+    }
+
+    if (idx == n) {
+        idx--;
+    }
+
+    if (str1[idx] == 0 && str2[idx] != 0) {
+        return 1;
+
+    } else if (str1[idx] != 0 && str2[idx] == 0) {
+        return -1;
+
+    } else {
+        return str1[idx] - str2[idx];
+    }
+}
 extern "C" char* strtok(char *str, const char *delim) {
     static char *start, *end;
 
