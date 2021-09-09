@@ -47,7 +47,7 @@
 namespace DRIVERS {
 
     namespace DISK {
-        void readDisk(size_t &nail, size_t size, void* buffer);
+        void readDisk(size_t nail, size_t size, void* buffer);
     };
 
     namespace PCI {

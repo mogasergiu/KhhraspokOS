@@ -2,11 +2,11 @@
 #include <kpkheap.hpp>
 #include <kstring.hpp>
 #include <kstdio.hpp>
+#include <interrupts.hpp>
 
 using namespace DRIVERS;
 
-static inline void readLBA(size_t lba, size_t lbaNo, uint16_t* buffer)
-{
+static inline void readLBA(size_t lba, size_t lbaNo, uint16_t* buffer) {
     // Send 0xe0 for the "master" or 0xf0 for the "slave"
     // ORed with the highest 4 bits of the LBA to port 0x1f6
     PMIO::pOutByte(ATA_DRIVE_REG, (lba >> 24) | 0xe0);
@@ -45,7 +45,7 @@ static inline void readLBA(size_t lba, size_t lbaNo, uint16_t* buffer)
     }
 }
 
-void DISK::readDisk(size_t &nail, size_t size, void *buffer) {
+void DISK::readDisk(size_t nail, size_t size, void *buffer) {
     size_t lba = nail / SECTOR_SIZE;
     size_t lbaNo = size / SECTOR_SIZE + 1;
 
@@ -57,8 +57,6 @@ void DISK::readDisk(size_t &nail, size_t size, void *buffer) {
     uint16_t lbaOffset = nail % SECTOR_SIZE;
 
     memcpy(buffer, (uint8_t*)buffer2 + lbaOffset, size);
-
-    nail += size;
 
     KPKHEAP::kpkFree(buffer2);
 }
