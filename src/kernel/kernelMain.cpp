@@ -25,20 +25,21 @@ extern "C" void APEntry() {
     __asm__ __volatile__ (
         "movq %0, %%rsi;"
         "lidt 0(%%rsi);"
+        "hlt"
         :
         : "r" (&intsHandler.IDTRDescriptor)
         : "rsi"
     );
-
-    sti();
-
-    while(1);
 }
 
 extern "C" void kernelMain() { 
     intsHandler.initInterrupts();
 
     DRIVERS::PCI::printPCIDevices();
+
+    char file[] = "/dir/2.txt";
+    char mode[] = "r";
+    fat16Handler.fopen(file, mode);
 
     while (1) {
         pitHandler.sleep(10);

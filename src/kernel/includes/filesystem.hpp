@@ -51,7 +51,7 @@ namespace FILESYSTEM {
 
             size_t setCwd(char *new_cwd);
 
-            parsedPath* parsePath(char *path) const;
+            parsedPath *parsePath(char *path) const;
     };
 
     class VFS {
@@ -121,24 +121,22 @@ namespace FILESYSTEM {
                 ItemHeader16 hdr16;
             } hdr;
             size_t itemsCount;
-            union {
-                ItemHeader16 *hdrs16;
-            } items;
             size_t start, end;
             uint8_t type;
         } __attribute__((packed));
 
         class FAT16 : public VFS {
             private:
-                Header hdr;
-                Item root;
-
                 const char name[10] = "FAT16";
 
             public:
+                Header hdr;
+                Item root;
+                parsedPath *path;
+
                 FAT16();
                 const char *getName() const;
-                int fopen(const char *filename, const char *mode) const;
+                int fopen(char *filename, const char *mode);
         };
     };
 };
