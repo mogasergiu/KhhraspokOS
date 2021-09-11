@@ -39,13 +39,13 @@ extern "C" void kernelMain() {
 
     char file1[] = "/1.txt";
     char mode[] = "r";
-    int fd = fat16Handler.fopen(file1, mode);
+    int fd = vfsHandler.fopen(file1, mode);
     char buffer[30000];
-    fat16Handler.fread(fd, buffer, sizeof(buffer));
+    vfsHandler.fread(fd, buffer, sizeof(buffer));
 
     char file2[] = "/dir/2.txt";
-    fd = fat16Handler.fopen(file2, mode);
-    fat16Handler.fread(fd, buffer, sizeof(buffer));
+    fd = vfsHandler.fopen(file2, mode);
+    vfsHandler.fread(fd, buffer, sizeof(buffer));
 
     while (1) {
         pitHandler.sleep(10);

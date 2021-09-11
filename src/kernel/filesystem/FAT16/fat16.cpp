@@ -8,8 +8,6 @@
 using namespace FILESYSTEM;
 
 FAT::FAT16 fat16Handler;
-VFS *filesystems[CURRENT_FILESYSTEMS_NUMBER];
-FileDescriptor *fileDescriptors[MAX_FILE_DESCRIPTORS_NUMBER];
 
 static char *makeName(FAT::ItemHeader16 *item) {
     static char name[15];
@@ -84,8 +82,6 @@ static size_t findItem(size_t cluster, FAT::ItemHeader16 *item) {
     return nail;
 }
 
-int VFS::fopen(char *filename, const char *mode) {return 0;}
-
 FAT::FAT16::FAT16() {
     size_t nail = 0;
 
@@ -151,15 +147,11 @@ static void findInDir(size_t nail, char *name, FAT::ItemHeader16 *item) {
     } while (item->name[0] != 0);
 }
 
-int FAT::FAT16::fopen(char *filename, const char *mode) {
-    cli();
+int FAT::FAT16::fopenCallback(void *fd, char *filename, const char *mode) {
     this->path = pathMgr.parsePath(filename);
     this->path = this->path->nextDir;
 
     size_t nail = this->root.start;
-
-    FileDescriptor *fd = (FileDescriptor*)KPKHEAP::kpkZalloc(sizeof(*fd));
-    CATCH_FIRE(fd == NULL, "Could not allocate File Descriptor");
 
     FAT::ItemHeader16 *item = (FAT::ItemHeader16*)KPKHEAP::kpkZalloc(sizeof(*item));
     CATCH_FIRE(item == NULL, "Could not allocate FAT16 Item");
@@ -177,7 +169,6 @@ int FAT::FAT16::fopen(char *filename, const char *mode) {
 
         if (nail == 0) {
             KPKHEAP::kpkFree(item);
-            KPKHEAP::kpkFree(fd);
 
             return -1;
         }
@@ -187,38 +178,15 @@ int FAT::FAT16::fopen(char *filename, const char *mode) {
         this->path = this->path->nextDir;
     }
 
-    fd->idx = -1;
-
-    for (int i = 0; i < MAX_FILE_DESCRIPTORS_NUMBER; i++) {
-        if (fileDescriptors[i] == NULL) {
-            fileDescriptors[i] = fd;
-            fd->idx = i;
-
-            break;
-        }
-    }
-
-    if (fd->idx == -1) {
-        KPKHEAP::kpkFree(item);
-        KPKHEAP::kpkFree(fd);
-
-        return -1;
-    }
-
-    fd->nail = fd->nailStart = nail;
-    fd->fs = &fat16Handler;
-    fd->stat.hdr16 = item;
-
-    sti();
-
-    return fd->idx;
+    ((FileDescriptor*)fd)->nail = ((FileDescriptor*)fd)->nailStart = nail;
+    ((FileDescriptor*)fd)->fs = &fat16Handler;
+    ((FileDescriptor*)fd)->stat.hdr16 = item;
+    
+    return 0;
 }
 
-int VFS::fread(int fd, void *buffer, size_t bytesCount) const {return 0;}
-
-int FAT::FAT16::fread(int fd, void *buffer, size_t bytesCount) const {
-    cli();
-    FileDescriptor *fdPtr = fileDescriptors[fd];
+int FAT::FAT16::freadCallback(void *fd, void *buffer, size_t bytesCount) const {
+    FileDescriptor *fdPtr = (FileDescriptor*)fd;
     size_t nailEnd = fdPtr->nailStart + fdPtr->stat.hdr16->size;
 
     if ((fdPtr->nail + bytesCount) >= nailEnd) {
@@ -231,17 +199,11 @@ int FAT::FAT16::fread(int fd, void *buffer, size_t bytesCount) const {
 
     fdPtr->nail += bytesCount;
 
-    sti();
-
     return bytesCount;
 }
 
-int VFS::fseek(int fd, int offset, int whence) const {return 0;}
-
-int FAT::FAT16::fseek(int fd, int offset, int whence) const {
-    cli();
-
-    FileDescriptor *fdPtr = fileDescriptors[fd];
+int FAT::FAT16::fseekCallback(void *fd, int offset, int whence) const {
+    FileDescriptor *fdPtr = (FileDescriptor*)fd;
 
     size_t nailEnd = fdPtr->nailStart + fdPtr->stat.hdr16->size;
 
@@ -271,32 +233,20 @@ int FAT::FAT16::fseek(int fd, int offset, int whence) const {
         fdPtr->eof = true;
     }
 
-    sti();
-
     return 0;
 }
 
-int VFS::fclose(int fd) const {return 0;}
-
-int FAT::FAT16::fclose(int fd) const {
-    cli();
-
-    FileDescriptor *fdPtr = fileDescriptors[fd];
+int FAT::FAT16::fcloseCallback(void *fd) const {
+    FileDescriptor *fdPtr = (FileDescriptor*)fd;
 
     KPKHEAP::kpkFree(fdPtr->stat.hdr16);
     KPKHEAP::kpkFree(fdPtr);
 
-    sti();
-
     return 0;
 }
 
-FileStat* VFS::fstat(int fd) const {return 0;}
-
-FileStat* FAT::FAT16::fstat(int fd) const {
-    cli();
-
-    FileDescriptor *fdPtr = fileDescriptors[fd];
+FileStat* FAT::FAT16::fstatCallback(void *fd) const {
+    FileDescriptor *fdPtr = (FileDescriptor*)fd;
 
     FileStat *fst = (FileStat*)KPKHEAP::kpkZalloc(sizeof(*fst));
 
@@ -322,8 +272,6 @@ FileStat* FAT::FAT16::fstat(int fd) const {
 
     fst->size = fdPtr->stat.hdr16->size;
 
-    sti();
- 
     return fst;
 }
 

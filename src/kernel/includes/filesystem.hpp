@@ -65,13 +65,31 @@ namespace FILESYSTEM {
         uint32_t size;
     } __attribute__((packed));
 
-    class VFS {
+    class FS_TEMPLATE {
         public:
-            virtual int fopen(char *filename, const char *mode);
-            virtual int fread(int fd, void *buffer, size_t bytesCount) const;
-            virtual int fseek(int fd, int offset, int whence) const;
-            virtual int fclose(int fd) const;
-            virtual FileStat* fstat(int fd) const;
+            parsedPath *path;
+
+            virtual int fopenCallback(void *fd, char *filename,
+                                        const char *mode);
+            virtual int freadCallback(void *fd, void *buffer,
+                                        size_t bytesCount) const;
+            virtual int fseekCallback(void *fd, int offset,
+                                        int whence) const;
+            virtual int fcloseCallback(void *fd) const;
+            virtual FileStat* fstatCallback(void *fd) const;
+    };
+
+    class VFS {
+        private:
+            FS_TEMPLATE *filesystems[CURRENT_FILESYSTEMS_NUMBER];
+            void *fileDescriptors[MAX_FILE_DESCRIPTORS_NUMBER];
+
+        public:
+            int fopen(char *filename, const char *mode);
+            int fread(int fd, void *buffer, size_t bytesCount) const;
+            int fseek(int fd, int offset, int whence) const;
+            int fclose(int fd) const;
+            FileStat* fstat(int fd) const;
     };
 
     namespace FAT {
@@ -136,29 +154,29 @@ namespace FILESYSTEM {
             uint8_t type;
         } __attribute__((packed));
 
-        class FAT16 : public VFS {
+        class FAT16 : public FS_TEMPLATE {
             private:
                 const char name[10] = "FAT16";
 
             public:
                 Header hdr;
                 Item root;
-                parsedPath *path;
 
                 FAT16();
                 const char *getName() const;
-                int fopen(char *filename, const char *mode);
-                int fread(int fd, void *buffer, size_t bytesCount) const;
-                int fseek(int fd, int offset, int whence) const;
-                int fclose(int fd) const;
-                FileStat* fstat(int fd) const;
+                int fopenCallback(void *fd, char *filename, const char *mode);
+                int freadCallback(void *fd, void *buffer,
+                                    size_t bytesCount) const;
+                int fseekCallback(void *fd, int offset, int whence) const;
+                int fcloseCallback(void *fd) const;
+                FileStat* fstatCallback(void *fd) const;
         };
     };
 
     struct FileDescriptor {
         int16_t idx;
         size_t nail, nailStart;
-        VFS *fs;
+        FS_TEMPLATE *fs;
         union {
             FAT::ItemHeader16 *hdr16;
         } stat;
@@ -168,7 +186,6 @@ namespace FILESYSTEM {
 
 extern FILESYSTEM::Path pathMgr;
 extern FILESYSTEM::FAT::FAT16 fat16Handler;
-extern FILESYSTEM::VFS *filesystems[CURRENT_FILESYSTEMS_NUMBER];
-extern FILESYSTEM::FileDescriptor *fileDescriptors[MAX_FILE_DESCRIPTORS_NUMBER];
+extern FILESYSTEM::VFS vfsHandler;
 
 #endif  /* FILESYSTEM_HPP */
