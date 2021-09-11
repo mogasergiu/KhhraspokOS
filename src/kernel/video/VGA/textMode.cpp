@@ -31,17 +31,25 @@ VGA::TextMode::TextMode() {
  */
 void VGA::TextMode::putChar(const char character, const uint8_t color) {
     if (this->line == VGA_HEIGHT) {
-        memcpy(this->address, this->address + VGA_WIDTH,
-                                                (VGA_HEIGHT - 1) * VGA_WIDTH);
-        memset(this->address + (VGA_HEIGHT - 1) * VGA_WIDTH, 0, VGA_WIDTH);
+        // Scroll Up!
+        for (int i = 0; i < VGA_HEIGHT - 1; i++) {
+            for (int j = 0; j < VGA_WIDTH; j++) {
+                this->address[i * VGA_WIDTH + j] =
+                                        this->address[(i + 1) * VGA_WIDTH + j];
+            }
+        }
 
-        this->line = 0;
+        for (int i = 0; i < VGA_WIDTH; i++) {
+            this->address[(VGA_HEIGHT - 1) * VGA_WIDTH + i] = 0;
+        }
+
         this->column = 0;
+        this->line--;
     }
     // If character is newline, move to next line and reset column
     if (character == '\n') {
         memset(this->address + VGA_WIDTH * this->line + this->column, 0,
-                                                    VGA_WIDTH - this->column);
+                ((VGA_WIDTH - this->column) << 1));
         this->line++;
         this->column = 0;
 
