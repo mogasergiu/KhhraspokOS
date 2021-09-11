@@ -8,6 +8,8 @@
 using namespace FILESYSTEM;
 
 FAT::FAT16 fat16Handler;
+VFS *filesystems[CURRENT_FILESYSTEMS_NUMBER];
+FileDescriptor *fileDescriptors[MAX_FILE_DESCRIPTORS_NUMBER];
 
 static char *makeName(FAT::ItemHeader16 *item) {
     static char name[15];
@@ -48,7 +50,7 @@ static inline uint16_t getFATEntry(size_t cluster) {
     return entry;
 }
 
-static FAT::ItemHeader16 *findItem(size_t cluster, FAT::ItemHeader16 *item) {
+static size_t findItem(size_t cluster, FAT::ItemHeader16 *item) {
     uint16_t entry = getFATEntry(cluster);
 
     while (entry != 0xffff) {
@@ -57,23 +59,19 @@ static FAT::ItemHeader16 *findItem(size_t cluster, FAT::ItemHeader16 *item) {
             case 0xfff:
                 kpwarn("Last FIle Entry reached!\n");
                 return 0;
-                break;
 
             case FAT16_BAD:
                 kpwarn("Corrupted File found!\n");
                 return 0;
-                break;
 
             case 0xff0:
             case 0xff6:
                 kpwarn("Cannot read Reserved Sector!\n");
                 return 0;
-                break;
 
             case 0x0:
                 kpwarn("File unallocated!\n");
                 return 0;
-                break;
 
             default:
                 cluster = entry;
@@ -83,12 +81,10 @@ static FAT::ItemHeader16 *findItem(size_t cluster, FAT::ItemHeader16 *item) {
 
     size_t nail = findFATOffset(cluster);
 
-    DRIVERS::DISK::readDisk(nail, sizeof(*item), item);
-
-    return item;
+    return nail;
 }
 
-int VFS::fopen(const char *filename, const char *mode) const {return 0;}
+int VFS::fopen(char *filename, const char *mode) {return 0;}
 
 FAT::FAT16::FAT16() {
     size_t nail = 0;
@@ -163,7 +159,8 @@ static void findInDir(size_t nail, char *name, FAT::ItemHeader16 *item) {
 
 int FAT::FAT16::fopen(char *filename, const char *mode) {
     cli();
-    this->path = pathMgr.parsePath(filename)->nextDir;
+    this->path = pathMgr.parsePath(filename);
+    this->path = this->path->nextDir;
 
     size_t nail = this->root.start;
 
@@ -182,14 +179,65 @@ int FAT::FAT16::fopen(char *filename, const char *mode) {
             return -1;
         }
 
-        findItem((item->clusterHigh << 16) + item->clusterLow, item);
+        nail = findItem((item->clusterHigh << 16) + item->clusterLow, item);
 
-        nail = findFATOffset((item->clusterHigh << 16) + item->clusterLow);
+        if (nail == 0) {
+            KPKHEAP::kpkFree(item);
+            KPKHEAP::kpkFree(fd);
+
+            return -1;
+        }
+
+        // nail = findFATOffset((item->clusterHigh << 16) + item->clusterLow);
 
         this->path = this->path->nextDir;
     }
 
+    fd->idx = -1;
+
+    for (int i = 0; i < MAX_FILE_DESCRIPTORS_NUMBER; i++) {
+        if (fileDescriptors[i] == NULL) {
+            fileDescriptors[i] = fd;
+            fd->idx = i;
+
+            break;
+        }
+    }
+
+    if (fd->idx == -1) {
+        KPKHEAP::kpkFree(item);
+        KPKHEAP::kpkFree(fd);
+
+        return -1;
+    }
+
+    fd->nail = fd->nailStart = nail;
+    fd->fs = &fat16Handler;
+    fd->stat.hdr16 = item;
+
     sti();
 
-    return 0;
+    return fd->idx;
+}
+
+int VFS::fread(int fd, void *buffer, size_t bytesCount) const {return 0;}
+
+int FAT::FAT16::fread(int fd, void *buffer, size_t bytesCount) const {
+    cli();
+    FileDescriptor *fdPtr = fileDescriptors[fd];
+    size_t nailEnd = fdPtr->nailStart + fdPtr->stat.hdr16->size;
+
+    if ((fdPtr->nail + bytesCount) >= nailEnd) {
+        bytesCount = nailEnd - fdPtr->nail;
+
+        fdPtr->eof = true;
+    }
+
+    DRIVERS::DISK::readDisk(fdPtr->nail, bytesCount, buffer);
+
+    fdPtr->nail += bytesCount;
+
+    sti();
+
+    return bytesCount;
 }

@@ -37,9 +37,15 @@ extern "C" void kernelMain() {
 
     DRIVERS::PCI::printPCIDevices();
 
-    char file[] = "/dir/2.txt";
+    char file1[] = "/1.txt";
     char mode[] = "r";
-    fat16Handler.fopen(file, mode);
+    int fd = fat16Handler.fopen(file1, mode);
+    char buffer[30000];
+    fat16Handler.fread(fd, buffer, sizeof(buffer));
+
+    char file2[] = "/dir/2.txt";
+    fd = fat16Handler.fopen(file2, mode);
+    fat16Handler.fread(fd, buffer, sizeof(buffer));
 
     while (1) {
         pitHandler.sleep(10);

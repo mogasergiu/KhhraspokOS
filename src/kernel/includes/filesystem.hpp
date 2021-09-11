@@ -56,18 +56,11 @@ namespace FILESYSTEM {
 
     class VFS {
         public:
-            virtual int fopen(const char *filename, const char *mode) const;
-            void seekSet(int fd, uint8_t newSet) const;
+            virtual int fopen(char *filename, const char *mode);
+            virtual int fread(int fd, void *buffer, size_t bytesCount) const;
+            void seekSet(int fd, size_t newSet) const;
     };
 
-    struct FileDescriptor {
-        uint8_t idx;
-        size_t nail;
-        VFS *fs;
-    } __attribute__((packed));
-
-    extern VFS *filesystems[CURRENT_FILESYSTEMS_NUMBER];
-    extern FileDescriptor *fileDescriptors[MAX_FILE_DESCRIPTORS_NUMBER];
 
     namespace FAT {
         struct exHeader16 {
@@ -116,6 +109,12 @@ namespace FILESYSTEM {
             uint32_t size;    
         } __attribute__((packed));
 
+        struct ItemHeader {
+            union {
+                ItemHeader16 hdr16;
+            } hdr;
+        } __attribute__((packed));
+
         struct Item {
             union {
                 ItemHeader16 hdr16;
@@ -137,11 +136,24 @@ namespace FILESYSTEM {
                 FAT16();
                 const char *getName() const;
                 int fopen(char *filename, const char *mode);
+                int fread(int fd, void *buffer, size_t bytesCount) const;
         };
     };
+
+    struct FileDescriptor {
+        int16_t idx;
+        size_t nail, nailStart;
+        VFS *fs;
+        union {
+            FAT::ItemHeader16 *hdr16;
+        } stat;
+        bool eof;
+    } __attribute__((packed));
 };
 
 extern FILESYSTEM::Path pathMgr;
 extern FILESYSTEM::FAT::FAT16 fat16Handler;
+extern FILESYSTEM::VFS *filesystems[CURRENT_FILESYSTEMS_NUMBER];
+extern FILESYSTEM::FileDescriptor *fileDescriptors[MAX_FILE_DESCRIPTORS_NUMBER];
 
 #endif  /* FILESYSTEM_HPP */
