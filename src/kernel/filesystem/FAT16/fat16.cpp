@@ -124,12 +124,6 @@ FAT::FAT16::FAT16() {
 
     this->root.end = this->root.start + this->hdr.rootEntryCount * 32;
 
-/*    this->root.items.hdrs16 = (FAT::ItemHeader16*)
-            KPKHEAP::kpkZalloc(this->hdr.rootEntryCount * sizeof(item));
-
-    DRIVERS::DISK::readDisk(nail, this->hdr.rootEntryCount * sizeof(item),
-                            this->root.items.hdrs16);*/
-
     char rootStr[] = "/";
     strncpy(this->root.hdr.hdr16.name, rootStr, 1);
 }
@@ -281,3 +275,55 @@ int FAT::FAT16::fseek(int fd, int offset, int whence) const {
 
     return 0;
 }
+
+int VFS::fclose(int fd) const {return 0;}
+
+int FAT::FAT16::fclose(int fd) const {
+    cli();
+
+    FileDescriptor *fdPtr = fileDescriptors[fd];
+
+    KPKHEAP::kpkFree(fdPtr->stat.hdr16);
+    KPKHEAP::kpkFree(fdPtr);
+
+    sti();
+
+    return 0;
+}
+
+FileStat* VFS::fstat(int fd) const {return 0;}
+
+FileStat* FAT::FAT16::fstat(int fd) const {
+    cli();
+
+    FileDescriptor *fdPtr = fileDescriptors[fd];
+
+    FileStat *fst = (FileStat*)KPKHEAP::kpkZalloc(sizeof(*fst));
+
+    memcpy(fst->name, fdPtr->stat.hdr16->name, sizeof(fst->name) - 1);
+
+    fst->name[sizeof(fst->name) - 1] = 0;
+
+    memcpy(fst->extension, fdPtr->stat.hdr16->extension, sizeof(fst->extension) - 1);
+
+    fst->extension[sizeof(fst->extension) - 1] = 0;
+
+    fst->type = fdPtr->stat.hdr16->attribute & FAT16_FILE_SUBDIRECTORY ?
+                FAT16_ITEM_DIRECTORY :
+                FAT16_ITEM_FILE;
+
+    fst->creation10s = fdPtr->stat.hdr16->creation10s;
+
+    fst->creationTime = fdPtr->stat.hdr16->creationTime;
+
+    fst->creationDate = fdPtr->stat.hdr16->creationDate;
+
+    fst->lastAccess = fdPtr->stat.hdr16->lastAccess;
+
+    fst->size = fdPtr->stat.hdr16->size;
+
+    sti();
+ 
+    return fst;
+}
+

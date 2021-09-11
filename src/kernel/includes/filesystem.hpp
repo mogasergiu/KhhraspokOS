@@ -54,13 +54,25 @@ namespace FILESYSTEM {
             parsedPath *parsePath(char *path) const;
     };
 
+    struct FileStat {
+        char name[9];
+        char extension[4];
+        uint8_t type;
+        uint8_t creation10s;
+        uint16_t creationTime;
+        uint16_t creationDate;
+        uint16_t lastAccess;
+        uint32_t size;
+    } __attribute__((packed));
+
     class VFS {
         public:
             virtual int fopen(char *filename, const char *mode);
             virtual int fread(int fd, void *buffer, size_t bytesCount) const;
             virtual int fseek(int fd, int offset, int whence) const;
+            virtual int fclose(int fd) const;
+            virtual FileStat* fstat(int fd) const;
     };
-
 
     namespace FAT {
         struct exHeader16 {
@@ -138,6 +150,8 @@ namespace FILESYSTEM {
                 int fopen(char *filename, const char *mode);
                 int fread(int fd, void *buffer, size_t bytesCount) const;
                 int fseek(int fd, int offset, int whence) const;
+                int fclose(int fd) const;
+                FileStat* fstat(int fd) const;
         };
     };
 
