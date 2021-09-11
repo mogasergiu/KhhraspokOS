@@ -43,7 +43,9 @@ static inline uint16_t getFATEntry(size_t cluster) {
 
     uint16_t entry;
 
+    cli();
     DRIVERS::DISK::readDisk(FATEntries + cluster * 2, 2, &entry);
+    sti();
 
     return entry;
 }
@@ -129,7 +131,9 @@ static void findInDir(size_t nail, char *name, FAT::ItemHeader16 *item) {
 
     do {
 
+        cli();
         DRIVERS::DISK::readDisk(nail, sizeof(*item), item);
+        sti();
         nail += sizeof(*item);
 
         nameItem = makeName(item);
@@ -195,7 +199,9 @@ int FAT::FAT16::freadCallback(void *fd, void *buffer, size_t bytesCount) const {
         fdPtr->eof = true;
     }
 
+    cli();
     DRIVERS::DISK::readDisk(fdPtr->nail, bytesCount, buffer);
+    sti();
 
     fdPtr->nail += bytesCount;
 
@@ -240,7 +246,6 @@ int FAT::FAT16::fcloseCallback(void *fd) const {
     FileDescriptor *fdPtr = (FileDescriptor*)fd;
 
     KPKHEAP::kpkFree(fdPtr->stat.hdr16);
-    KPKHEAP::kpkFree(fdPtr);
 
     return 0;
 }

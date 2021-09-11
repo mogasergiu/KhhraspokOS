@@ -45,3 +45,24 @@ extern "C" char* itoa(int num, int base) {
   
     return str;
 }
+
+extern "C" int kfopen(char *filename, const char *mode) {
+   return vfsHandler.fopen(filename, mode);
+} 
+
+extern "C" int kfread(int fd, void *buffer, size_t bytesCount) {
+    return vfsHandler.fread(fd, buffer, bytesCount);
+}
+
+extern "C" int kfseek(int fd, int offset, int whence) {
+    return vfsHandler.fseek(fd, offset, whence);
+}
+
+extern "C" int kfclose(int fd) {
+    return vfsHandler.fclose(fd);
+}
+
+extern "C" FILESYSTEM::FileStat* kfstat(int fd) {
+    return vfsHandler.fstat(fd);
+}
+

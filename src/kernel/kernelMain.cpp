@@ -8,6 +8,7 @@
 #include <filesystem.hpp>
 #include <acpi.hpp>
 #include <kstdio.hpp>
+#include <kstdlib.hpp>
 
 uint8_t cpuCount = 1;
 
@@ -39,13 +40,13 @@ extern "C" void kernelMain() {
 
     char file1[] = "/1.txt";
     char mode[] = "r";
-    int fd = vfsHandler.fopen(file1, mode);
+    int fd = kfopen(file1, mode);
     char buffer[30000];
-    vfsHandler.fread(fd, buffer, sizeof(buffer));
+    kfread(fd, buffer, sizeof(buffer));
 
     char file2[] = "/dir/2.txt";
-    fd = vfsHandler.fopen(file2, mode);
-    vfsHandler.fread(fd, buffer, sizeof(buffer));
+    fd = kfopen(file2, mode);
+    kfread(fd, buffer, sizeof(buffer));
 
     while (1) {
         pitHandler.sleep(10);
