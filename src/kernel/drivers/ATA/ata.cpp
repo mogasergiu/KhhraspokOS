@@ -37,10 +37,9 @@ static inline void readLBA(size_t lba, size_t lbaNo, uint16_t* buffer) {
 
         // Transfer 256 16-bit values, a uint16_t at a time, into your buffer
         // from I/O port 0x1f0
-        for (int i = 0; i < 256; i++)
+        for (size_t i = count * 256; i < (count * 256 + 256); i++)
         {
-            buffer[count] = PMIO::pInWord(ATA_DATA_REG);
-            count++;
+            buffer[i] = PMIO::pInWord(ATA_DATA_REG);
         }
     }
 }
