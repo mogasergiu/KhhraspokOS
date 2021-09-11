@@ -11,9 +11,9 @@
 #define MAX_FILE_DESCRIPTORS_NUMBER 0x100
 #define FILESYSTEM_NAME_MAX_SIZE 0x10
 
-#define SEET_SET 0x0
-#define SEET_CUR 0x1
-#define SEET_END 0x2
+#define SEEK_SET 0x0
+#define SEEK_CUR 0x1
+#define SEEK_END 0x2
 
 #define FAT16_SIGNATURE 0x29
 #define FAT16_ENTRY_SIZE 0x02
@@ -58,7 +58,7 @@ namespace FILESYSTEM {
         public:
             virtual int fopen(char *filename, const char *mode);
             virtual int fread(int fd, void *buffer, size_t bytesCount) const;
-            void seekSet(int fd, size_t newSet) const;
+            virtual int fseek(int fd, int offset, int whence) const;
     };
 
 
@@ -137,6 +137,7 @@ namespace FILESYSTEM {
                 const char *getName() const;
                 int fopen(char *filename, const char *mode);
                 int fread(int fd, void *buffer, size_t bytesCount) const;
+                int fseek(int fd, int offset, int whence) const;
         };
     };
 

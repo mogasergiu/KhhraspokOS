@@ -241,3 +241,43 @@ int FAT::FAT16::fread(int fd, void *buffer, size_t bytesCount) const {
 
     return bytesCount;
 }
+
+int VFS::fseek(int fd, int offset, int whence) const {return 0;}
+
+int FAT::FAT16::fseek(int fd, int offset, int whence) const {
+    cli();
+
+    FileDescriptor *fdPtr = fileDescriptors[fd];
+
+    size_t nailEnd = fdPtr->nailStart + fdPtr->stat.hdr16->size;
+
+    switch (whence) {
+        case SEEK_SET:
+            fdPtr->nail = fdPtr->nailStart;
+
+            break;
+
+        case SEEK_CUR:
+            break;
+
+        case SEEK_END:
+            fdPtr->nail = nailEnd;
+
+            break;
+    }
+
+    if ((fdPtr->nail + offset) > nailEnd ||
+        (fdPtr->nail + offset) < fdPtr->nailStart) {
+        return -1;
+    }
+
+    fdPtr->nail += offset;
+
+    if (fdPtr->nail == nailEnd) {
+        fdPtr->eof = true;
+    }
+
+    sti();
+
+    return 0;
+}
