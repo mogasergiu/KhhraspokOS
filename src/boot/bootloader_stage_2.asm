@@ -26,10 +26,10 @@ startProtectedMode:
 [BITS 64]
 
 startLongMode:
-    ; Manually moving 8192 bytes at address 0x100000 where our kernel will be
+    ; Manually moving bytes at address 0x100000 where our kernel will be
     mov rsi, 0x8400
     mov rdi, 0x100000
-    mov rcx, 0x8000
+    mov rcx, 0x10000
     rep movsb
 
     ; Update stack pointers
