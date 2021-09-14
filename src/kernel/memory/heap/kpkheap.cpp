@@ -149,7 +149,7 @@ extern "C" void* kpkMalloc(size_t size) {
         ret = makeChunk(KPKHEAP::topChunk, size);
 
         if (ret != NULL) {
-            KPKHEAP::topChunk = (void*)((char*)topChunk + size + sizeof(ret->metadata));
+            KPKHEAP::topChunk = (void*)((char*)topChunk + size + sizeof(chunk));
         }
     }
 

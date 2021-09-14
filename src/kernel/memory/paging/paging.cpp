@@ -35,17 +35,21 @@ void PgFrAllocator::initPgAlloc() {
     }
 
     for (pg = 0; pg < 0x9000; pg += PAGE_SIZE) {
-        this->PgsMap->set(pg / PAGE_SIZE, true);
+        this->allocPg((void*)pg);
     }
 
     this->bitmapIdx = pg / PAGE_SIZE;
 
     for (pg = 0x80000; pg < 0xfffff; pg += PAGE_SIZE) {
-        this->PgsMap->set(pg / PAGE_SIZE, true);
+        this->allocPg((void*)pg);
     }
 
     for (pg = KERNEL_START_ADDR; pg < KERNEL_USED_MEM; pg += PAGE_SIZE) {
-        this->PgsMap->set(pg / PAGE_SIZE, true);
+        this->allocPg((void*)pg);
+    }
+
+    for (pg = KPKHEAP_START; pg < KPKHEAP_END; pg += PAGE_SIZE) {
+        this->allocPg((void*)pg);
     }
 }
 
