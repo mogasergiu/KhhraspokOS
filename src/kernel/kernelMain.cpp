@@ -9,10 +9,11 @@
 #include <acpi.hpp>
 #include <kstdio.hpp>
 #include <kstdlib.hpp>
-
-uint8_t cpuCount = 1;
+#include <gdt.hpp>
 
 extern "C" void APEntry() {
+    GDT::loadProperGDT(apicHandler.getLAPICID());
+
     apicHandler.LAPICout(LAPIC_SIVR, 0x100 | 0xff);
 
     apicHandler.LAPICout(LAPIC_LDR, 0x01000000);
@@ -33,7 +34,10 @@ extern "C" void APEntry() {
     );
 }
 
-extern "C" void kernelMain() { 
+extern "C" void kernelMain() {
+    GDT::createProperGDTs();
+    GDT::loadProperGDT(0);
+
     intsHandler.initInterrupts();
 
     DRIVERS::PCI::printPCIDevices();
