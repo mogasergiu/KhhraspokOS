@@ -226,6 +226,10 @@
 #define LAPIC_TIMER_DISABLE 0x10000
 #define LAPIC_TIMER_PERIODIC_MODE 0x20000
 
+#define INT_DEFAULT 0x0
+#define INT_NMI 0x1
+#define INT_SYSCALL 0x2
+
 /*********************************************
  * CLI and STI assembly instructions inlined *
  *********************************************/
@@ -290,7 +294,7 @@ namespace INTERRUPTS {
                 uint16_t selector;
 
                 // Always zero
-                uint8_t zero8;
+                uint8_t ist;
 
                 // Contains P, DPL, S and Gate Type
                 uint8_t typeAttr;
@@ -321,7 +325,7 @@ namespace INTERRUPTS {
              * @number: desired interrupt number of the entry
              * @handler: address of the handler to be placed in the entry
              */
-            void setIDTEntry(uint32_t number, void (*handler)());
+            void setIDTEntry(uint32_t number, void (*handler)(), uint8_t type);
 
             /*
              * Helper function to retrieve an entry in the IDT

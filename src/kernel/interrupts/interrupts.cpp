@@ -58,6 +58,7 @@ static void wakeAPs() {
                                           LAPIC_ICR_EDGE |
                                           LAPIC_ICR_DEFAULT);
         }
+        pitHandler.sleep(10);
     }
 }
 
@@ -78,28 +79,30 @@ void Interrupts::initInterrupts() {
     *idtd = (uintptr_t)(&this->IDTRDescriptor);
 
     for (int i = 0; i < MAX_IDT_ENTRIES; i++) {
-        this->setIDTEntry(i, IntHandlers::doNothingIRQHandler);
+        this->setIDTEntry(i, IntHandlers::doNothingIRQHandler, INT_DEFAULT);
     }
 
-    this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER, IntHandlers::pitIRQHandler);
+    this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_TIMER, IntHandlers::pitIRQHandler,
+                        INT_NMI);
     this->setIDTEntry(PIC1_IRQ0 + PIC1_IRQ_KEYBOARD,
-                        IntHandlers::keyboardIRQHandler);
-    this->setIDTEntry(LAPIC_TIMER_IDT_ENTRY, IntHandlers::lapicTimerIRQHandler);
+                        IntHandlers::keyboardIRQHandler, INT_NMI);
+    this->setIDTEntry(LAPIC_TIMER_IDT_ENTRY, IntHandlers::lapicTimerIRQHandler,
+                        INT_NMI);
     this->setIDTEntry(SPURIOUS_INTERRUPT_IDT_ENTRY,
-                            IntHandlers::SpuriousInterruptHandler);
+                            IntHandlers::SpuriousInterruptHandler, INT_DEFAULT);
 
     __asm__ __volatile__ (
         "movq %0, %%rsi;"
         "lidt 0(%%rsi);"
+        "sti;"
         :
         : "r" (&this->IDTRDescriptor)
         : "rsi"
     );
 
     wakeAPs();
-    apicHandler.initLAPICTimer();
 
-    sti();
+    apicHandler.initLAPICTimer();
 }
 
 /*
@@ -107,9 +110,7 @@ void Interrupts::initInterrupts() {
  * @number: desired interrupt number of the entry
  * @address: address of the function to be placed in the entry
  */
-void Interrupts::setIDTEntry(uint32_t number, void (*address)()) {
-    cli();
-
+void Interrupts::setIDTEntry(uint32_t number, void (*address)(), uint8_t type) {
     IDTD *descriptor = this->IDTDescriptors + number;
 
     // Lower part of the interrupt function's offset address
@@ -119,7 +120,7 @@ void Interrupts::setIDTEntry(uint32_t number, void (*address)()) {
     descriptor->selector = 0x8;
 
     // Must always be zero
-    descriptor->zero8 = 0x0;
+    descriptor->ist = type;
 
     // P = 1b, DPL = 00b, S = 0b, type = 1110b
     descriptor->typeAttr = 0x8E;
@@ -130,7 +131,5 @@ void Interrupts::setIDTEntry(uint32_t number, void (*address)()) {
     descriptor->offset3 = ((uintptr_t)address & 0xffffffff00000000) >> 0x20;
 
     descriptor->zero32 = 0x0;
-
-    sti();
 }
 
