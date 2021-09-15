@@ -12,6 +12,7 @@ size_t MMU::freeMem;
 uint8_t MMU::memRegionCount = *(uint8_t*)MEM_REGION_COUNT_ADDR;
 MMU::PgFrAllocator MMU::PgMgr::pgAllocator;
 MMU::PgMgr pageManager;
+MMU::pgTbl* MMU::userPD;
 
 void PgFrAllocator::initPgAlloc() {
     size_t memSize, pg;
@@ -50,7 +51,7 @@ void PgFrAllocator::initPgAlloc() {
 
     for (pg = KPKHEAP_START; pg < KPKHEAP_END; pg += PAGE_SIZE) {
         this->allocPg((void*)pg);
-    }
+    } 
 }
 
 void* PgFrAllocator::reqPg() {
@@ -113,6 +114,13 @@ void PgFrAllocator::allocPgs(void* addr, size_t count) {
     }
 }
 
+inline static void extractUserPD(void *vaddr) {
+    size_t idx = PML4idx((void*)USERSPACE_START_ADDR);
+    MMU::userPD = getPgAddr(vaddr);
+    idx = PDTidx((void*)USERSPACE_START_ADDR);
+    MMU::userPD = getPgAddr(MMU::userPD->entries[idx]);
+}
+
 PgMgr::PgMgr() {
     this->pgAllocator.initPgAlloc();
 
@@ -125,6 +133,11 @@ PgMgr::PgMgr() {
     for (size_t pg = KERNEL_USED_MEM; pg < memSize; pg += PAGE_SIZE) {
         this->mapPg((void*)pg, (void*)pg, PDE_P | PDE_R);
     }
+
+    this->mapPg((void*)USERSPACE_START_ADDR, (void*)USERSPACE_START_ADDR,
+                PDE_P | PDE_R | PDE_U);
+
+    extractUserPD(this->PML4->entries[PML4idx((void*)USERSPACE_START_ADDR)]);
 }
 
 void PgMgr::mapPg(void *vaddr, void *paddr, uintptr_t flags) {
@@ -141,7 +154,7 @@ void PgMgr::mapPg(void *vaddr, void *paddr, uintptr_t flags) {
         memset(tmpPg, 0, PAGE_SIZE);
 
         setPgAddr(pdt, tmpPg);
-        setPgFlag(pdt, PDE_P | PDE_R);
+        setPgFlag(pdt, flags);
 
         this->PML4->entries[idx] = pdt;
 
@@ -156,7 +169,7 @@ void PgMgr::mapPg(void *vaddr, void *paddr, uintptr_t flags) {
         memset(tmpPg, 0, PAGE_SIZE);
 
         setPgAddr(pd, tmpPg);
-        setPgFlag(pd, PDE_P | PDE_R);
+        setPgFlag(pd, flags);
 
         pdt->entries[idx] = (uint64_t*)pd;
 
@@ -171,7 +184,7 @@ void PgMgr::mapPg(void *vaddr, void *paddr, uintptr_t flags) {
         memset(tmpPg, 0, PAGE_SIZE);
 
         setPgAddr(pt, tmpPg);
-        setPgFlag(pt, PDE_P | PDE_R);
+        setPgFlag(pt, flags);
 
         pd->entries[idx] = (uint64_t*)pt;
 
