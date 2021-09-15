@@ -123,11 +123,11 @@ PgMgr::PgMgr() {
     this->PML4 = (PML4struct*)PML4T_ADDR;
  
     for (size_t pg = KERNEL_USED_MEM; pg < memSize; pg += PAGE_SIZE) {
-        this->mapPg((void*)pg, (void*)pg);
+        this->mapPg((void*)pg, (void*)pg, PDE_P | PDE_R);
     }
 }
 
-void PgMgr::mapPg(void *vaddr, void *paddr) {
+void PgMgr::mapPg(void *vaddr, void *paddr, uintptr_t flags) {
     size_t idx = PML4idx(vaddr);
     pgTbl *pdt = NULL,
           *pd = NULL,
@@ -182,7 +182,7 @@ void PgMgr::mapPg(void *vaddr, void *paddr) {
     idx = PTidx(vaddr);
 
     setPgAddr(pte, paddr);
-    setPgFlag(pte, PDE_P | PDE_R);
+    setPgFlag(pte, flags);
 
     pt->entries[idx] = 0;
     pt->entries[idx] = (uint64_t*)pte;

@@ -104,7 +104,7 @@ namespace MMU {
         public:
             PgMgr();
 
-            void mapPg(void *vaddr, void *paddr);
+            void mapPg(void *vaddr, void *paddr, uintptr_t flags);
     };
 }
 
