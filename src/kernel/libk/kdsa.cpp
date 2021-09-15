@@ -1,5 +1,4 @@
 #include <kdsa.hpp>
-#include <kpkheap.hpp>
 
 void BitMap::initBitMap(size_t len) {
     this->length = len;
