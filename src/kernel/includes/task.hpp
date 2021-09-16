@@ -32,23 +32,23 @@ namespace TASK {
         uint64_t r14;
         uint64_t r15;
 
-        uint16_t cs;
+        uint64_t cs;
         uint64_t flags;
-        uint16_t ss;
+        uint64_t ss;
         uint64_t fs;
-    };
+    }__attribute__((packed));
 
-    extern "C" void ret2User();
+    extern "C" void ret2User(CtxRegisters *ctxReg);
 
     struct TaskHeader {
         struct ThreadHdr {
-            uintptr_t *tlsp[0];
+            uintptr_t tlsp[0];
             size_t tlsSize;
             CtxRegisters ctxReg;
             void *stack;
             uint8_t tid;
             bool statusEnd;
-        } *TCB;
+        }__attribute__((packed)) *TCB;
 
         struct ProcessHdr {
             int8_t pid;
@@ -57,11 +57,11 @@ namespace TASK {
             MMU::pgTbl *pd;
             void *heap;
             bool statusEnd;
-        } *PCB;
+        }__attribute__((packed)) *PCB;
 
         uint32_t size;
         size_t pgCount;
-    };
+    }__attribute__((packed));
 
     class TaskMgr {
         private:
@@ -70,9 +70,9 @@ namespace TASK {
             uint8_t pids;
             uint64_t reapedTasksCount;
 
-            static Queue<uint8_t> tasksToReap;
-            static Queue<uint8_t> bspQue;
-            static Queue<uint8_t> apQue;
+            Queue<uint8_t> tasksToReap;
+            Queue<uint8_t> bspQue;
+            Queue<uint8_t> apQue;
 
         public:
             uint8_t getTasksCount() const;

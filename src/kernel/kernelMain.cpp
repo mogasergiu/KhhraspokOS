@@ -29,11 +29,13 @@ extern "C" void APEntry() {
     __asm__ __volatile__ (
         "movq %0, %%rsi;"
         "lidt 0(%%rsi);"
-        "hlt"
+        "sti;"
         :
         : "r" (&intsHandler.IDTRDescriptor)
         : "rsi"
     );
+
+    while(1);
 }
 
 extern "C" void kernelMain() {
@@ -41,8 +43,6 @@ extern "C" void kernelMain() {
     GDT::loadProperGDT(0);
 
     intsHandler.initInterrupts();
-
-    DRIVERS::PCI::printPCIDevices();
 
     char file1[] = "/1.txt";
     char mode[] = "r";

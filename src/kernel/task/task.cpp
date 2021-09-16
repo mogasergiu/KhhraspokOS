@@ -68,10 +68,13 @@ void TASK::TaskMgr::loadTask(char *fileName) {
 
     task->PCB->pid = ++pids;
 
+    task->PCB->statusEnd = false;
+
     task->TCB->ctxReg.rip = USERSPACE_START_ADDR;
     task->TCB->ctxReg.ss = USER_DATA;
     task->TCB->ctxReg.cs = USER_CODE;
     task->TCB->ctxReg.rsp = task->TCB->ctxReg.rbp = (uint64_t)task->TCB->stack;
+    task->TCB->ctxReg.fs = (uint64_t)task->TCB->tlsp;
 
     kfread(fd, (void*)USERSPACE_START_ADDR, fst->size);
 
@@ -80,4 +83,6 @@ void TASK::TaskMgr::loadTask(char *fileName) {
     memcpy((uint8_t*)task->PCB->heap - PAGE_SIZE, task, sizeof(*task));
 
     MMU::userPD->entries[0] = NULL;
+
+    this->bspQue.push(task->TCB->tid);
 }
