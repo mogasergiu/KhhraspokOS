@@ -119,6 +119,7 @@ inline static void extractUserPD(void *vaddr) {
     MMU::userPD = getPgAddr(vaddr);
     idx = PDTidx((void*)USERSPACE_START_ADDR);
     MMU::userPD = getPgAddr(MMU::userPD->entries[idx]);
+    MMU::userPD->entries[0] = NULL;
 }
 
 PgMgr::PgMgr() {
@@ -138,6 +139,10 @@ PgMgr::PgMgr() {
                 PDE_P | PDE_R | PDE_U);
 
     extractUserPD(this->PML4->entries[PML4idx((void*)USERSPACE_START_ADDR)]);
+}
+
+void* PgMgr::reqPg() {
+    return this->pgAllocator.reqPg();
 }
 
 void PgMgr::mapPg(void *vaddr, void *paddr, uintptr_t flags) {

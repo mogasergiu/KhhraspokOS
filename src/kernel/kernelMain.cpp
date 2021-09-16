@@ -10,6 +10,8 @@
 #include <kstdio.hpp>
 #include <kstdlib.hpp>
 #include <gdt.hpp>
+#include <kdsa.hpp>
+#include <task.hpp>
 
 extern "C" void APEntry() {
     GDT::loadProperGDT(apicHandler.getLAPICID());
@@ -51,6 +53,11 @@ extern "C" void kernelMain() {
     char file2[] = "/dir/2.txt";
     fd = kfopen(file2, mode);
     kfread(fd, buffer, sizeof(buffer));
+
+    kprintf("%x\n", MMU::userPD);
+
+    char file3[] = "/dir/2.txt";
+    taskMgr.loadTask(file3);
 
     while (1) {
         pitHandler.sleep(10);
