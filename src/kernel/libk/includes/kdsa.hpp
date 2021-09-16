@@ -36,6 +36,7 @@ class LinkedList {
 
     public:
         LinkedList() {
+            this->size = 0;
             this->head = NULL;
             this->last = NULL;
         }
@@ -70,12 +71,22 @@ class LinkedList {
                     this->last = newData;
                 }
             }
+
+            this->size++;
         }
 
-        virtual T pop() {
-            auto it = this->get(this->getSize());
+        virtual T* pop() {
+            if (this->getSize() == 0) {
+                kpwarn("List is empty!\n");
+
+                return NULL;
+            }
+
+            T *it = this->get(this->getSize());
 
             this->deleteElem(this->getSize());
+
+            this->size--;
 
             return it;
         }
@@ -98,8 +109,6 @@ class LinkedList {
                         tmp->next = it->next;
                     }
 
-                    KPKHEAP::kpkFree(it);
-
                     return;
                 }
             }
@@ -107,28 +116,25 @@ class LinkedList {
             kpwarn("No such element in list!\n");
         }
 
-        void deleteElem(int idx) {
+        void deleteElem(size_t idx) {
             if(idx == 0) {
-                auto it = this->head;
                 this->head = this->head->next;
-                KPKHEAP::kpkFree(it);
 
             } else {
                 node<T>* curr = this->head, *tmp;
 
-                for(int i = 0; i < idx; ++i) {
+                for(size_t i = 0; i < idx; ++i) {
                     tmp = curr;
                     curr = curr->next;
                 }
 
                 tmp->next = curr->next;
-                KPKHEAP::kpkFree(curr);
             }
         }
 
-        T get(int idx) {
+        T* get(int idx) {
             if(idx == 0) {
-                return this->head->data;
+                return &this->head->data;
 
             } else {
                 node<T>* curr = this->head;
@@ -137,11 +143,11 @@ class LinkedList {
                     curr = curr->next;
                 }
 
-                return curr->data;
+                return &curr->data;
             }
         }
 
-        T operator[](int idx) {
+        T* operator[](int idx) {
             return get(idx);
         }
 };
@@ -163,12 +169,22 @@ class Stack : public LinkedList<T> {
                 this->head->next = NULL;
                 this->head->next = this->last;
             }
+
+            this->size++;
         }
 
-        T pop() {
-            auto it = this->get(0);
+        T* pop() {
+            if (this->getSize() == 0) {
+                kpwarn("Stack is empty!\n");
+
+                return NULL;
+            }
+
+            T *it = this->get(0);
 
             this->deleteElem(0);
+
+            this->size--;
 
             return it;
         }
@@ -199,12 +215,23 @@ class Queue : public LinkedList<T> {
                     this->last = newData;
                 }
             }
+
+            this->size++;
         }
 
-        T pop() {
-            auto it = this->get(this->getSize());
+        T* pop() {
+            kprintf("size %x\n", this->size);
+            if (this->getSize() == 0) {
+                kpwarn("Queue is empty!\n");
 
-            this->deleteElem(this->getSize());
+                return NULL;
+            }
+
+            T *it = this->get(0);
+
+            this->deleteElem((size_t)0);
+
+            this->size--;
 
             return it;
         }
