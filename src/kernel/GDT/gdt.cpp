@@ -21,8 +21,8 @@ EncodedEntry kernelEncodedGDT[] = {
     {.base = 0x00, .limit = 0x00, .type = 0x00},  // NULL Segment
     {.base = 0x00, .limit = 0xffffffff, .type = 0x9a}, // Kernel code segment
     {.base = 0x00, .limit = 0xffffffff, .type = 0x92}, // Kernel data segment
-    {.base = 0x00, .limit = 0xffffffff, .type = 0xfa},  // User code segment
-    {.base = 0x00, .limit = 0xffffffff, .type = 0xf2}  // User data segment
+    {.base = 0x00, .limit = 0xffffffff, .type = 0xf2},  // User data segment
+    {.base = 0x00, .limit = 0xffffffff, .type = 0xfa}  // User code segment
 };
 
 void GDT::encodeGDTEntry(uint8_t *target, EncodedEntry source) {
