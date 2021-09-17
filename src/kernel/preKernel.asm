@@ -290,10 +290,10 @@ ret2User:
     
     push qword [rdi + 64]
 
-;    mov ax, [rdi + 152]
- ;   mov ds, ax
-  ;  mov es, ax
-   ; mov gs, ax
+    mov ax, [rdi + 152]
+    mov ds, ax
+    mov es, ax
+    mov gs, ax
 
     mov rax, qword [rdi + 160]
     xor rdx, rdx

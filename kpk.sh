@@ -5,16 +5,31 @@ export TARGET=x86_64-elf
 export PATH="$PREFIX/bin:$PATH"
 export KHH_HOME="/home/voidwalker/git-repos/KhhraspokOS"
 
+function mountFS() {
+    sudo mkdir /mnt/kpk
+    sudo mount ${KHH_HOME}/KhhraspokOS.bin /mnt/kpk -t vfat
+    cd /mnt/kpk
+    for i in $(seq 1 1000); do echo "Hello world1"; done | sudo tee 1.txt 1>/dev/null
+    sudo mkdir dir
+    for i in $(seq 1 1000); do echo "Hello dir"; done | sudo tee dir/2.txt 1>/dev/null
+    sudo cp ${KHH_HOME}/bin/user/* dir/
+    cd ..
+    sudo umount kpk
+    cd ${KHH_HOME}
+}
+
 if [[ $1 == "build" ]]; then
-    mkdir build/ bin/
+    mkdir -p build/kernel build/user bin/kernel bin/user bin/boot
     make
+    mountFS
 
 elif [[ $1 == "clean" ]]; then
     make clean
-    rm -rf build/ bin/
+    rm -rf build/ bin/ 
+    sudo rm -rf /mnt/kpk/
 
 elif [[ $1 == "run" ]]; then
-    qemu-system-x86_64  -smp cores=2,threads=2 -hda KhhraspokOS.bin
+    qemu-system-x86_64  -smp cores=2,threads=1 -hda KhhraspokOS.bin
 
 elif [[ $1 == "dump" ]]; then
     qemu-system-x86_64  -smp cores=2,threads=2 -hda KhhraspokOS.bin -d int,exec\
