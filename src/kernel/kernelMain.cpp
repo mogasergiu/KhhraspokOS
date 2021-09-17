@@ -30,6 +30,7 @@ extern "C" void APEntry() {
         "movq %0, %%rsi;"
         "lidt 0(%%rsi);"
         "sti;"
+        "hlt;"
         :
         : "r" (&intsHandler.IDTRDescriptor)
         : "rsi"
@@ -44,19 +45,7 @@ extern "C" void kernelMain() {
 
     intsHandler.initInterrupts();
 
-    char file1[] = "/1.txt";
-    char mode[] = "r";
-    int fd = kfopen(file1, mode);
-    char buffer[30000];
-    kfread(fd, buffer, sizeof(buffer));
-
-    char file2[] = "/dir/2.txt";
-    fd = kfopen(file2, mode);
-    kfread(fd, buffer, sizeof(buffer));
-
-    kprintf("%x\n", MMU::userPD);
-
-    char file3[] = "/dir/2.txt";
+    char file3[] = "/dir/test";
     taskMgr.loadTask(file3);
 
     while (1) {

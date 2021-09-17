@@ -82,7 +82,9 @@ void TASK::TaskMgr::loadTask(char *fileName) {
 
     memcpy((uint8_t*)task->PCB->heap - PAGE_SIZE, task, sizeof(*task));
 
-    MMU::userPD->entries[0] = NULL;
+//    MMU::userPD->entries[0] = NULL;
 
     this->bspQue.push(task->TCB->tid);
+
+    ret2User(&task->TCB->ctxReg);
 }

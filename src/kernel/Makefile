@@ -42,7 +42,7 @@ KERNEL_GDT_OBJECT = $(BUILD_PATH)/gdt.o
 KERNEL_TASK_OBJECT = $(BUILD_PATH)/task.o
 PRE_KERNEL_OBJECT = $(BUILD_PATH)/preKernel.o
 LIBK = $(BUILD_PATH)/libk.a
-BUILD_PATH = ${KHH_HOME}/build
+BUILD_PATH = ${KHH_HOME}/build/kernel
 KERNEL_OBJECTS =$(PRE_KERNEL_OBJECT) \
                 $(KERNEL_MAIN_OBJECT) \
                 $(KERNEL_VIDEO_OBJECT) \
@@ -61,7 +61,7 @@ KERNEL_OBJECTS =$(PRE_KERNEL_OBJECT) \
 		$(KERNEL_TASK_OBJECT) \
 		$(KERNEL_PCI_DRIVER_OBJECT)
 KERNEL_LINKED = $(BUILD_PATH)/kernelLinked.o
-KERNEL = ${KHH_HOME}/bin/kernel.bin
+KERNEL = ${KHH_HOME}/bin/kernel/kernel.bin
 LINKER_SCRIPT = -T $(KERNEL_SOURCES_PATH)/linker.ld
 LIBK_LINK = -L$(BUILD_PATH) -lk
 LINKER_FLAGS = -g -relocatable

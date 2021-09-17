@@ -277,8 +277,6 @@ ret2User:
     push rbp
     mov rbp, rsp
 
-    mov rdi, [rdi]
-
     push qword [rdi + 152] ; ss
 
     push qword [rdi + 56] ; rsp
@@ -288,17 +286,20 @@ ret2User:
     or rax, 0x200
     push rax
 
-    push qword [rdi + 128]
+    push qword [rdi + 136]
     
     push qword [rdi + 64]
 
-    mov ax, [rdi + 152]
-    mov ds, ax
-    mov es, ax
-    mov gs, ax
+;    mov ax, [rdi + 152]
+ ;   mov ds, ax
+  ;  mov es, ax
+   ; mov gs, ax
 
     mov rax, qword [rdi + 160]
-    wrfsbase rax
+    xor rdx, rdx
+    mov rcx, 0xc0000100
+
+    wrmsr
 
     mov r15, rdi
     mov rax, qword [r15]
@@ -308,14 +309,14 @@ ret2User:
     mov rdi, qword [r15 + 32]
     mov rsi, qword [r15 + 40]
     mov rbp, qword [r15 + 48]
-    mov r8, qword [r15 + 64]
-    mov r9, qword [r15 + 72]
-    mov r10, qword [r15 + 80]
-    mov r11, qword [r15 + 88]
-    mov r12, qword [r15 + 96]
-    mov r13, qword [r15 + 104]
-    mov r14, qword [r15 + 112]
-    mov r15, qword [r15 + 120]
+    mov r8, qword [r15 + 72]
+    mov r9, qword [r15 + 80]
+    mov r10, qword [r15 + 88]
+    mov r11, qword [r15 + 96]
+    mov r12, qword [r15 + 104]
+    mov r13, qword [r15 + 112]
+    mov r14, qword [r15 + 120]
+    mov r15, qword [r15 + 128]
     
     iretq
 

@@ -1,5 +1,5 @@
 KERNEL_SOURCES_PATH = ${KHH_HOME}/src/kernel
-BUILD_PATH = ${KHH_HOME}/build
+BUILD_PATH = ${KHH_HOME}/build/kernel
 LIBK_PATH = $(KERNEL_SOURCES_PATH)/libk
 LIBK = $(BUILD_PATH)/libk.a
 LIBK_STRING_OBJECT = $(BUILD_PATH)/kstring.o
