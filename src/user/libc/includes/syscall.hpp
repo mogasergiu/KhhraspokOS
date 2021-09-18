@@ -22,4 +22,30 @@
 
 long kpkSyscall(long sysNo, ...);
 
+extern "C" void putch(const char c);
+
+extern "C" size_t puts(const char *str);
+
+extern "C" uint8_t getpid();
+
+extern "C" uint8_t getppid();
+
+extern "C" uint8_t gettid();
+
+extern "C" uint8_t fork();
+
+extern "C" uint8_t execve(char *pathname, char **argv);
+
+extern "C" void* mmap(void *addr, size_t length, int prot);
+
+extern "C" void schedYield();
+
+extern "C" void sleep(size_t ms);
+
+extern "C" int createThread(void* (*func)(), size_t argc, char **argv);
+
+extern "C" int threadJoin(uint8_t tid);
+
+extern "C" int munmap(void *addr, size_t length);
+
 #endif  /*  SYSCALL_HPP  */

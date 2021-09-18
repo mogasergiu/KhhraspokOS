@@ -75,7 +75,7 @@ long kpkSyscall(long sysNo, ...) {
                 "int $0x80;"
                 : "=a"(ret)
                 : "a" (sysNo), "D" (va_arg(ap, char*)),
-                    "S" (va_arg(ap, char*)), "d" (va_arg(ap, char*))
+                    "S" (va_arg(ap, char**))
             );
 
             break;
@@ -121,7 +121,7 @@ long kpkSyscall(long sysNo, ...) {
             __asm__ __volatile__(
                 "int $0x80;"
                 : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, int))
+                : "a" (sysNo), "D" (va_arg(ap, uintptr_t))
             );
 
             break;
@@ -130,8 +130,8 @@ long kpkSyscall(long sysNo, ...) {
             __asm__ __volatile__(
                 "int $0x80;"
                 : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, int)),
-                    "S" (va_arg(ap, char**))
+                : "a" (sysNo), "D" (va_arg(ap, void* (*)())),
+                    "S" (va_arg(ap, size_t)), "d" (va_arg(ap, char**))
             );
 
             break;
@@ -140,7 +140,7 @@ long kpkSyscall(long sysNo, ...) {
             __asm__ __volatile__(
                 "int $0x80;"
                 : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, int))
+                : "a" (sysNo), "D" (va_arg(ap, uintptr_t))
             );
 
             break;
@@ -150,7 +150,7 @@ long kpkSyscall(long sysNo, ...) {
                 "int $0x80;"
                 : "=a"(ret)
                 : "a" (sysNo), "D" (va_arg(ap, void*)),
-                "S" (va_arg(ap, size_t)), "d" (va_arg(ap, int))
+                "S" (va_arg(ap, size_t))
             );
 
             break;
@@ -163,3 +163,56 @@ long kpkSyscall(long sysNo, ...) {
 
     return ret;
 }
+
+extern "C" void putch(const char c) {
+    kpkSyscall(SYS_PUTCH, (int)c);
+}
+
+extern "C" size_t puts(const char *str) {
+    return kpkSyscall(SYS_PUTS, str);
+}
+
+extern "C" uint8_t getpid() {
+    return kpkSyscall(SYS_GETPID);
+}
+
+extern "C" uint8_t getppid() {
+    return kpkSyscall(SYS_GETPPID);
+}
+
+extern "C" uint8_t gettid() {
+    return kpkSyscall(SYS_GETTID);
+}
+
+extern "C" uint8_t fork() {
+    return kpkSyscall(SYS_FORK);
+}
+
+extern "C" uint8_t execve(char *pathname, char **argv) {
+    return kpkSyscall(SYS_EXECVE, pathname, argv);
+}
+
+extern "C" void* mmap(void *addr, size_t length, int prot) {
+    return (void*)kpkSyscall(SYS_MMAP, addr, length, prot);
+}
+
+extern "C" void schedYield() {
+    kpkSyscall(SYS_SCHED_YIELD);
+}
+
+extern "C" void sleep(size_t ms) {
+    kpkSyscall(SYS_SLEEP, ms);
+}
+
+extern "C" int createThread(void* (*func)(), size_t argc, char **argv) {
+    return kpkSyscall(SYS_CREATE_THREAD, func, argc, argv);
+}
+
+extern "C" int threadJoin(uint8_t tid) {
+    return kpkSyscall(SYS_THREAD_JOIN, tid);
+}
+
+extern "C" int munmap(void *addr, size_t length) {
+    return kpkSyscall(SYS_MUNMAP, addr, length);
+}
+
