@@ -5,9 +5,10 @@ global _entry
 
 _entry:
     add rsp, 10000
+printme:
     mov rax, 1
     mov rdi, str
     int 0x80
-    jmp $
+    jmp printme
 
-str: db "Hello from Userspace :D!"
+str: db "2", 10
