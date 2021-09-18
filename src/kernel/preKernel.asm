@@ -32,40 +32,40 @@ extern endCtors
 extern startDtors
 extern endDtors
 
-%macro IRQpush 0
-    push rax
-    push rbx
-    push rcx
-    push rdx
-    push rdi
-    push rsi
-    push rbp
-    push r8
-    push r9
-    push r10
-    push r11
-    push r12
-    push r13
-    push r14
-    push r15
+%macro IRQpop 0
+    pop rax
+    pop rbx
+    pop rcx
+    pop rdx
+    pop rdi
+    pop rsi
+    pop rbp
+    pop r8
+    pop r9
+    pop r10
+    pop r11
+    pop r12
+    pop r13
+    pop r14
+    pop r15
 %endmacro
 
-%macro IRQpop 0
-    pop r15
-    pop r14
-    pop r13
-    pop r12
-    pop r11
-    pop r10
-    pop r9
-    pop r8
-    pop rbp
-    pop rsi
-    pop rdi
-    pop rdx
-    pop rcx
-    pop rbx
-    pop rax
+%macro IRQpush 0
+    push r15
+    push r14
+    push r13
+    push r12
+    push r11
+    push r10
+    push r9
+    push r8
+    push rbp
+    push rsi
+    push rdi
+    push rdx
+    push rcx
+    push rbx
+    push rax
 %endmacro
 
 section .text
@@ -116,8 +116,8 @@ _start:
     jmp  .hang
 
 pitIRQHandler:
-    IRQpush
     cli
+    IRQpush
     call pitIRQ
     IRQpop
     sti
@@ -127,8 +127,8 @@ SpuriousInterruptHandler:
     iretq
 
 doNothingIRQHandler:
-    IRQpush
     cli
+    IRQpush
     mov rdi, 0x500
     mov rdi, [rdi]
     add rdi, 0xb0
@@ -139,40 +139,41 @@ doNothingIRQHandler:
     iretq
 
 keyboardIRQHandler:
-    IRQpush
     cli
+    IRQpush
     call keyboardIRQ
     IRQpop
     sti
     iretq
 
 lapicTimerIRQHandler:
-    IRQpush
     cli
+    IRQpush
+    mov rbp, rsp
     call lapicTimerIRQ
     IRQpop
     sti
     iretq
 
 syscallISRHandler:
-    IRQpush
     cli
+    IRQpush
     call syscallISR
-    pop r15
-    pop r14
-    pop r13
-    pop r12
-    pop r11
-    pop r10
-    pop r9
-    pop r8
-    pop rbp
-    pop rsi
-    pop rdi
-    pop rdx
-    pop rcx
+    add rsp, 8  ; keep rax intact (syscall's return value)
     pop rbx
-    add rsp, 8
+    pop rcx
+    pop rdx
+    pop rdi
+    pop rsi
+    pop rbp
+    pop r8
+    pop r9
+    pop r10
+    pop r11
+    pop r12
+    pop r13
+    pop r14
+    pop r15
     sti
     iretq
 
@@ -303,16 +304,16 @@ ret2User:
 
     push qword [rdi + 152] ; ss
 
-    push qword [rdi + 56] ; rsp
+    push qword [rdi + 144] ; rsp
 
     pushf
     pop rax
     or rax, 0x200
     push rax
 
-    push qword [rdi + 136]
+    push qword [rdi + 128]
     
-    push qword [rdi + 64]
+    push qword [rdi + 120]
 
     mov ax, [rdi + 152]
     mov ds, ax
@@ -333,14 +334,16 @@ ret2User:
     mov rdi, qword [r15 + 32]
     mov rsi, qword [r15 + 40]
     mov rbp, qword [r15 + 48]
-    mov r8, qword [r15 + 72]
-    mov r9, qword [r15 + 80]
-    mov r10, qword [r15 + 88]
-    mov r11, qword [r15 + 96]
-    mov r12, qword [r15 + 104]
-    mov r13, qword [r15 + 112]
-    mov r14, qword [r15 + 120]
-    mov r15, qword [r15 + 128]
+    mov r8, qword [r15 + 56]
+    mov r9, qword [r15 + 64]
+    mov r10, qword [r15 + 72]
+    mov r11, qword [r15 + 80]
+    mov r12, qword [r15 + 88]
+    mov r13, qword [r15 + 96]
+    mov r14, qword [r15 + 104]
+    mov r15, qword [r15 + 112]
+
+    sti
     
     iretq
 

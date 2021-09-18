@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <kdsa.hpp>
 #include <memory.hpp>
+#include <interrupts.hpp>
 
 #ifndef TASK_HPP
 #define TASK_HPP
@@ -21,8 +22,6 @@ namespace TASK {
         uint64_t rdi;
         uint64_t rsi;
         uint64_t rbp;
-        uint64_t rsp;
-        uint64_t rip;
         uint64_t r8;
         uint64_t r9;
         uint64_t r10;
@@ -32,8 +31,10 @@ namespace TASK {
         uint64_t r14;
         uint64_t r15;
 
+        uint64_t rip;
         uint64_t cs;
         uint64_t flags;
+        uint64_t rsp;
         uint64_t ss;
         uint64_t fs;
     }__attribute__((packed));
@@ -42,7 +43,6 @@ namespace TASK {
 
     struct TaskHeader {
         struct ThreadHdr {
-            uintptr_t tlsp[0];
             size_t tlsSize;
             CtxRegisters ctxReg;
             void *stack;
@@ -71,12 +71,12 @@ namespace TASK {
             uint64_t reapedTasksCount;
 
             Queue<uint8_t> tasksToReap;
-            Queue<uint8_t> bspQue;
-            Queue<uint8_t> apQue;
+            Queue<uint8_t> threadsQue[MAX_CPU_COUNT];
 
         public:
             uint8_t getTasksCount() const;
             uint64_t getReapedTasksCount() const;
+            TaskHeader* schedule();
             void loadTask(char *fileName);
             void endTask(char *fileName);
             void endTask(int8_t pid);
