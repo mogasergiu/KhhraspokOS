@@ -1,5 +1,6 @@
 global _start
 global pitIRQHandler
+global syscallISRHandler
 global keyboardIRQHandler
 global doNothingIRQHandler
 global lapicTimerIRQHandler
@@ -20,6 +21,7 @@ global ret2User
 
 extern kernelMain
 extern pitIRQ
+extern syscallISR
 extern keyboardIRQ
 extern APEntry
 extern lapicTimerIRQ
@@ -149,6 +151,28 @@ lapicTimerIRQHandler:
     cli
     call lapicTimerIRQ
     IRQpop
+    sti
+    iretq
+
+syscallISRHandler:
+    IRQpush
+    cli
+    call syscallISR
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rbp
+    pop rsi
+    pop rdi
+    pop rdx
+    pop rcx
+    pop rbx
+    add rsp, 8
     sti
     iretq
 

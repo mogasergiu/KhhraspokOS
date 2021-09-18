@@ -230,6 +230,8 @@
 #define INT_NMI 0x1
 #define INT_SYSCALL 0x2
 
+#define SYSCALL_IDT_ENTRY 0x80
+
 /*********************************************
  * CLI and STI assembly instructions inlined *
  *********************************************/
@@ -258,6 +260,7 @@ namespace INTERRUPTS {
      *********************************************************************/
     namespace IntHandlers {
         extern "C" void pitIRQHandler();
+        extern "C" void syscallISRHandler();
         extern "C" void keyboardIRQHandler();
         extern "C" void lapicTimerIRQHandler();
         extern "C" void doNothingIRQHandler();
@@ -276,6 +279,8 @@ namespace INTERRUPTS {
         extern "C" void pitIRQ();
 
         extern "C" void lapicTimerIRQ();
+
+        extern "C" long syscallISR(long arg1, ...);
     };
 
     /*******************************************************************
