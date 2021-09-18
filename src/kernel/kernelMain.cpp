@@ -30,7 +30,6 @@ extern "C" void APEntry() {
         "movq %0, %%rsi;"
         "lidt 0(%%rsi);"
         "sti;"
-        "hlt;"
         :
         : "r" (&intsHandler.IDTRDescriptor)
         : "rsi"
@@ -45,7 +44,9 @@ extern "C" void kernelMain() {
 
     intsHandler.initInterrupts();
 
-    char file3[] = "/dir/test";
+    char file4[] = "/dir/1";
+    taskMgr.loadTask(file4);
+    char file3[] = "/dir/2";
     taskMgr.loadTask(file3);
 
     while (1) {

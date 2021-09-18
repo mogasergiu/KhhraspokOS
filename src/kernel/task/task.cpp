@@ -9,6 +9,56 @@ using namespace TASK;
 
 TASK::TaskMgr taskMgr;
 
+TaskHeader* TASK::TaskMgr::schedule() {
+    uint8_t id = apicHandler.getLAPICID();
+ 
+    CtxRegisters *ctx;
+    TaskHeader *oldTask;
+    uintptr_t edx, eax;
+     __asm__ __volatile__(
+        "rdmsr;"
+        "mov %%rbp, %0;"
+        : "=r"(ctx), "=a" (eax), "=d" (edx)
+        : "c" (0xc0000100)
+    );
+
+    oldTask = (TaskHeader*)((edx <<  32) + eax);
+
+    if (oldTask != NULL) {
+    if (oldTask->PCB->statusEnd || oldTask->TCB->statusEnd) {
+        this->tasksToReap.push(oldTask->TCB->tid);
+
+    } else {
+        uint64_t fs = oldTask->TCB->ctxReg.fs;
+        memcpy(&oldTask->TCB->ctxReg, ctx, sizeof(*ctx));
+        oldTask->TCB->ctxReg.fs = fs;
+
+        this->threadsQue[id].push(oldTask->TCB->tid);
+    }}
+ 
+    if (this->threadsQue[id].isEmpty()) {
+        return NULL;
+    }
+
+    TaskHeader *task = this->tasks[*this->threadsQue[id].pop()];
+    while (task != NULL && (task->PCB->statusEnd || task->TCB->statusEnd)) {
+        this->tasksToReap.push(task->TCB->tid);
+
+        task = this->tasks[*this->threadsQue[id].pop()];
+    }
+ 
+    MMU::userPD->entries[0] = (uint64_t*)task->PCB->pd;
+    __asm__ __volatile__(
+        "mov %%cr3, %%r15;"
+        "mov %%r15, %%cr3;"
+        :
+        :
+    );
+
+    return task;
+}
+
+
 static inline void* alignPAGE_SIZE(void *addr) {
     uintptr_t _addr = (uintptr_t)addr;
     uintptr_t remainder = _addr % PAGE_SIZE;
@@ -21,8 +71,6 @@ void TASK::TaskMgr::loadTask(char *fileName) {
 
         return;
     }
-
-    this->tasksCount++;
 
     const char mode[] = "r";
 
@@ -74,7 +122,7 @@ void TASK::TaskMgr::loadTask(char *fileName) {
     task->TCB->ctxReg.ss = USER_DATA;
     task->TCB->ctxReg.cs = USER_CODE;
     task->TCB->ctxReg.rsp = task->TCB->ctxReg.rbp = (uint64_t)task->TCB->stack;
-    task->TCB->ctxReg.fs = (uint64_t)task->TCB->tlsp;
+    task->TCB->ctxReg.fs = (uint64_t)task;
 
     kfread(fd, (void*)USERSPACE_START_ADDR, fst->size);
 
@@ -82,9 +130,21 @@ void TASK::TaskMgr::loadTask(char *fileName) {
 
     memcpy((uint8_t*)task->PCB->heap - PAGE_SIZE, task, sizeof(*task));
 
-//    MMU::userPD->entries[0] = NULL;
+    MMU::userPD->entries[0] = NULL;
 
-    this->bspQue.push(task->TCB->tid);
+    __asm__ __volatile__(
+        "mov %%cr3, %%r15;"
+        "mov %%r15, %%cr3;"
+        :
+        :
+    );
 
-    ret2User(&task->TCB->ctxReg);
+    this->threadsQue[1].push(task->TCB->tid);
+
+    this->tasks[task->TCB->tid] = task;
 }
+
+uint8_t TaskMgr::getTasksCount() const {
+    return this->tasksCount;
+}
+

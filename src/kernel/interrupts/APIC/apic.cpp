@@ -2,6 +2,7 @@
 #include <interrupts.hpp>
 #include <io.hpp>
 #include <kstdio.hpp>
+#include <task.hpp>
 
 using namespace INTERRUPTS;
 
@@ -17,7 +18,19 @@ APIC::APIC() {
 }
 
 extern "C" void IntCallbacks::lapicTimerIRQ() {
-    apicHandler.sendLAPICEOI();
+    if (taskMgr.getTasksCount() > 0) {
+        TASK::TaskHeader *task = taskMgr.schedule();
+
+        apicHandler.sendLAPICEOI();
+
+        if (task != NULL) {
+            TASK::ret2User(&task->TCB->ctxReg);
+
+        }
+
+    } else { 
+        apicHandler.sendLAPICEOI();
+    }
 }
 
 void APIC::parseMADT() {

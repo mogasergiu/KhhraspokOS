@@ -220,7 +220,6 @@ class Queue : public LinkedList<T> {
         }
 
         T* pop() {
-            kprintf("size %x\n", this->size);
             if (this->getSize() == 0) {
                 kpwarn("Queue is empty!\n");
 
