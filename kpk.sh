@@ -29,7 +29,7 @@ elif [[ $1 == "clean" ]]; then
     sudo rm -rf /mnt/kpk/
 
 elif [[ $1 == "run" ]]; then
-    qemu-system-x86_64  -smp cores=2,threads=1 -hda KhhraspokOS.bin
+    qemu-system-x86_64  -smp cores=2,threads=1 -hda KhhraspokOS.bin -vga std
 
 elif [[ $1 == "dump" ]]; then
     qemu-system-x86_64  -smp cores=2,threads=2 -hda KhhraspokOS.bin -d int,exec\

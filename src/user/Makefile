@@ -10,15 +10,23 @@ USER_BINARY_PATH = ${KHH_HOME}/bin/user
 USER_TEST_SOURCE = $(USER_SOURCES_PATH)/programs/test.asm
 USER_TEST_OBJECT = $(USER_BUILD_PATH)/test.o
 USER_TEST_BINARY = $(USER_BINARY_PATH)/test
+LIBC_SOURCES = $(USER_SOURCES_PATH)/libc/syscalls.cpp
+		
+LIBC = $(USER_BUILD_PATH)/libc.a
 LINKER_SCRIPT = -T $(USER_SOURCES_PATH)/linker.ld
-LIBC_LINK = -L$(USER_BUILD_PATH) -lk
 LINKER_FLAGS = -g -relocatable
-INCLUDES = -I$(USER_SOURCES_PATH)/includes
+INCLUDES = -I$(USER_SOURCES_PATH)/libc/includes
+LIBC_LINK = -L$(USER_BUILD_PATH) -lc
+LIBC_PATH = $(USER_SOURCES_PATH)/libc
 
-all: $(USER_TEST_BINARY)
+all: $(USER_TEST_BINARY) $(LIBC_OBJECT)
 
-$(USER_TEST_BINARY): $(USER_TEST_OBJECT)
-	${TARGET}-g++ $(LINKER_SCRIPT) $(FLAGS) $(INCLUDES) $^ -fno-rtti -o $@
+$(LIBC):
+	cd $(LIBC_PATH); make
+
+$(USER_TEST_BINARY): $(USER_TEST_OBJECT) $(LIBC)
+	${TARGET}-g++ $(LINKER_SCRIPT) $(FLAGS) $(INCLUDES) $^ $(LIBC_LINK) \
+	-fno-rtti -o $@
 
 $(USER_TEST_OBJECT): $(USER_TEST_SOURCE)
 	nasm -f elf64 -g $^ -o $@
@@ -26,4 +34,5 @@ $(USER_TEST_OBJECT): $(USER_TEST_SOURCE)
 .PHONY: clean
 
 clean:
-	rm -rf $(USER_BINARY_PATH)/ $(USER_BUILD_PATH)/
+	rm -rf $(USER_BINARY_PATH) $(USER_BUILD_PATH)
+	cd $(LIBC_PATH); make clean; cd ../

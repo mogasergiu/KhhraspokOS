@@ -45,8 +45,8 @@ extern "C" void kernelMain() {
 
     intsHandler.initInterrupts();
 
-    char file3[] = "/dir/test";
-    taskMgr.loadTask(file3);
+//    char file3[] = "/dir/test";
+//    taskMgr.loadTask(file3);
 
     while (1) {
         pitHandler.sleep(10);
