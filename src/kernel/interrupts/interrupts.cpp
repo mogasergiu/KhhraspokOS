@@ -165,7 +165,7 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             break;
 
         case SYS_PUTS:
-            vgaHandler.putString((char*)arg1, 15);
+            ret = (long)vgaHandler.putString((char*)arg1, 15);
 
             break;
 
