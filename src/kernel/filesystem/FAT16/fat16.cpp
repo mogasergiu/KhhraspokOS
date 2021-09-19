@@ -169,6 +169,12 @@ int FAT::FAT16::fopenCallback(void *fd, char *filename, const char *mode) {
             return -1;
         }
 
+        this->path = this->path->nextDir;
+        if (this->path == NULL) {
+            nail = findFATOffset((item->clusterHigh << 16) + item->clusterLow);
+            break;
+        }
+
         nail = findItem((item->clusterHigh << 16) + item->clusterLow, item);
 
         if (nail == 0) {
@@ -178,8 +184,6 @@ int FAT::FAT16::fopenCallback(void *fd, char *filename, const char *mode) {
         }
 
         // nail = findFATOffset((item->clusterHigh << 16) + item->clusterLow);
-
-        this->path = this->path->nextDir;
     }
 
     ((FileDescriptor*)fd)->nail = ((FileDescriptor*)fd)->nailStart = nail;
@@ -191,19 +195,16 @@ int FAT::FAT16::fopenCallback(void *fd, char *filename, const char *mode) {
 
 int FAT::FAT16::freadCallback(void *fd, void *buffer, size_t bytesCount) const {
     FileDescriptor *fdPtr = (FileDescriptor*)fd;
-    size_t nailEnd = fdPtr->nailStart + fdPtr->stat.hdr16->size;
+    size_t clusterSize = 0x80 * 512;
+    size_t entry = (fdPtr->stat.hdr16->clusterHigh << 16) + fdPtr->stat.hdr16->clusterLow;
+    size_t nail = fdPtr->nailStart;
 
-    if ((fdPtr->nail + bytesCount) >= nailEnd) {
-        bytesCount = nailEnd - fdPtr->nail;
-
-        fdPtr->eof = true;
+    for (size_t i = 0; entry != 0xffff;
+        entry = getFATEntry(entry), nail = findFATOffset(entry), i += clusterSize) {
+        cli();
+        DRIVERS::DISK::readDisk(nail, clusterSize, (uint8_t*)buffer + i);
+        sti();
     }
-
-    cli();
-    DRIVERS::DISK::readDisk(fdPtr->nail, bytesCount, buffer);
-    sti();
-
-    fdPtr->nail += bytesCount;
 
     return bytesCount;
 }
