@@ -44,10 +44,10 @@ extern "C" void kernelMain() {
 
     intsHandler.initInterrupts();
 
-    char file4[] = "/dir/1";
-    taskMgr.loadTask(file4);
-    char file3[] = "/dir/2";
-    taskMgr.loadTask(file3);
+/*    char file4[] = "/dir/1";
+    taskMgr.loadTask(file4);*/
+//    char file3[] = "/dir/shell";
+//    taskMgr.loadTask(file3);
 
     while (1) {
         pitHandler.sleep(10);

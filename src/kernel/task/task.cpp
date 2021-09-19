@@ -4,6 +4,7 @@
 #include <kpkheap.hpp>
 #include <kstring.hpp>
 #include <gdt.hpp>
+#include <elf.hpp>
 
 using namespace TASK;
 
@@ -47,7 +48,7 @@ TaskHeader* TASK::TaskMgr::schedule() {
         task = this->tasks[*this->threadsQue[id].pop()];
     }
  
-    MMU::userPD->entries[0] = (uint64_t*)task->PCB->pd;
+    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = (uint64_t*)task->PCB->pd;
     __asm__ __volatile__(
         "mov %%cr3, %%r15;"
         "mov %%r15, %%cr3;"
@@ -100,9 +101,9 @@ void TASK::TaskMgr::loadTask(char *fileName) {
         pageManager.mapPg((void*)addr, lastPg, PDE_P | PDE_R | PDE_U);
     }
 
-    task->PCB->pd = (MMU::pgTbl*)MMU::userPD->entries[0];
+    task->PCB->pd = (MMU::pgTbl*)MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)];
 
-    lastPg = (void*)(USERSPACE_START_ADDR + task->size);
+    lastPg = (void*)((uintptr_t)USERSPACE_START_ADDR + task->size);
 
     task->TCB->stack = lastPg;
 
@@ -124,13 +125,17 @@ void TASK::TaskMgr::loadTask(char *fileName) {
     task->TCB->ctxReg.rsp = task->TCB->ctxReg.rbp = (uint64_t)task->TCB->stack;
     task->TCB->ctxReg.fs = (uint64_t)task;
 
-    kfread(fd, (void*)USERSPACE_START_ADDR, fst->size);
+    kfread(fd, (void*)((uintptr_t)USERSPACE_START_ADDR), fst->size);
+
+    ELF *elf = (ELF*)((uintptr_t)USERSPACE_START_ADDR);
+    elf++;
+    elf--;
 
     memcpy(task->PCB->filename, fileName, sizeof(task->PCB->filename));
 
     memcpy((uint8_t*)task->PCB->heap - PAGE_SIZE, task, sizeof(*task));
 
-    MMU::userPD->entries[0] = NULL;
+    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = NULL;
 
     __asm__ __volatile__(
         "mov %%cr3, %%r15;"
