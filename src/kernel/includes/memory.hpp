@@ -9,7 +9,7 @@
 #define MEM_REGION_COUNT_ADDR 0x520
 #define MEM_MAP_ADDR 0x521
 
-#define KERNEL_USED_MEM 0x2000000
+#define KERNEL_USED_MEM 0x400000
 #define KERNEL_START_ADDR 0x100000
 
 #define START_MEM 0x10000000
@@ -52,7 +52,7 @@
 #define ACPI_RECLAIMABLE_MEM 0x3
 #define ACPI_NVS_MEM 0x4
 #define BAD_MEM 0x5
-#define USERSPACE_START_ADDR 0x8000000000
+#define USERSPACE_START_ADDR 0x40000000
 
 #define setPgFlag(pg, flags) (pg = (pgTbl*)(((uintptr_t)pg | flags)))
 #define getPgFlag(pg, flag) ((uintptr_t)pg & (1 << flag))

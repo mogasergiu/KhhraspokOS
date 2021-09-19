@@ -115,11 +115,11 @@ void PgFrAllocator::allocPgs(void* addr, size_t count) {
 }
 
 inline static void extractUserPD(void *vaddr) {
-    size_t idx = PML4idx((void*)USERSPACE_START_ADDR);
+    size_t idx;
     MMU::userPD = getPgAddr(vaddr);
     idx = PDTidx((void*)USERSPACE_START_ADDR);
     MMU::userPD = getPgAddr(MMU::userPD->entries[idx]);
-    MMU::userPD->entries[0] = NULL;
+    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = NULL;
 }
 
 PgMgr::PgMgr() {
