@@ -321,7 +321,8 @@ ret2User:
     mov gs, ax
 
     mov rax, qword [rdi + 160]
-    xor rdx, rdx
+    mov rdx, qword [rdi + 160]
+    shr rdx, 32
     mov rcx, 0xc0000100
 
     wrmsr
