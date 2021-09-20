@@ -1,8 +1,26 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#ifndef PORTS_IO_H
-#define PORTS_IO_H
+#ifndef IO_HPP
+#define IO_HPP
+
+#define rdmsrl(eax, edx, ecx) { \
+    do { \
+        __asm__ __volatile__( \
+            "rdmsr;" \
+            : "=a" (eax), "=d" (edx) \
+            : "c" (ecx) \
+        ); \
+    } while (0);
+
+#define wrmsrl(eax, edx, ecx) { \
+    do { \
+        __asm__ __volatile__( \
+            "wrmsr;" \
+            : \
+            : "a" (eax), "d" (edx), "c" (ecx)\
+        ); \
+    } while (0);
 
 namespace PMIO {
     extern "C" uint8_t pInByte(uint16_t port);
