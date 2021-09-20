@@ -90,28 +90,26 @@ void TASK::TaskMgr::loadTask(char *fileName) {
     task->PCB = (TaskHeader::ProcessHdr*)KPKHEAP::kpkZalloc(sizeof(*task->PCB));
     CATCH_FIRE(task->PCB == NULL, "Could not allocate task PCB!");
 
-    task->size = (uint32_t)((uintptr_t)alignPAGE_SIZE((void*)((uintptr_t)fst->size))) +
-                                (TASK_USABLE_PAGES_COUNT * PAGE_SIZE);
+    void *buffer = KPKHEAP::kpkZalloc(fst->size);
+    CATCH_FIRE(buffer == NULL, "Could not allocate Heap to read the ELF!\n");
 
-    void *lastPg;
-    for (size_t addr = USERSPACE_START_ADDR;
-            addr < (size_t)(USERSPACE_START_ADDR + task->size);
-            addr += PAGE_SIZE, task->pgCount++) {
-        lastPg = pageManager.reqPg();
-        pageManager.mapPg((void*)addr, lastPg, PDE_P | PDE_R | PDE_U);
-    }
+    kfread(fd, buffer, fst->size);
+
+    void *lastVaddr = loadELF(buffer, task);
+    CATCH_FIRE(lastVaddr == NULL, "Could not load ELF!\n");
+
+    KPKHEAP::kpkFree(buffer);
+
+    void *lastPg = pageManager.reqPg();
+    pageManager.mapPg(lastVaddr, lastPg, PDE_P | PDE_R | PDE_U);
 
     task->PCB->pd = (MMU::pgTbl*)MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)];
 
-    lastPg = (void*)((uintptr_t)USERSPACE_START_ADDR + task->size);
-
-    task->TCB->stack = lastPg;
+    task->TCB->stack = (uint8_t*)lastVaddr + PAGE_SIZE;
 
     task->TCB->tid = this->tasksCount++;
 
     task->TCB->statusEnd = false;
-
-    task->PCB->heap = (uint8_t*)lastPg - TASK_STACK_SIZE - TASK_HEAP_SIZE;
 
     task->PCB->ppid = 0;
 
@@ -119,34 +117,23 @@ void TASK::TaskMgr::loadTask(char *fileName) {
 
     task->PCB->statusEnd = false;
 
-    task->TCB->ctxReg.rip = USERSPACE_START_ADDR;
     task->TCB->ctxReg.ss = USER_DATA;
     task->TCB->ctxReg.cs = USER_CODE;
     task->TCB->ctxReg.rsp = task->TCB->ctxReg.rbp = (uint64_t)task->TCB->stack;
-    task->TCB->ctxReg.fs = (uint64_t)task;
-
-    kfread(fd, (void*)((uintptr_t)USERSPACE_START_ADDR), fst->size);
-
-    ELF *elf = (ELF*)((uintptr_t)USERSPACE_START_ADDR);
-    elf++;
-    elf--;
 
     memcpy(task->PCB->filename, fileName, sizeof(task->PCB->filename));
 
-    memcpy((uint8_t*)task->PCB->heap - PAGE_SIZE, task, sizeof(*task));
+    this->threadsQue[0].push(task->TCB->tid);
+
+    this->tasks[task->TCB->tid] = task;
 
     MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = NULL;
-
     __asm__ __volatile__(
         "mov %%cr3, %%r15;"
         "mov %%r15, %%cr3;"
         :
         :
     );
-
-    this->threadsQue[1].push(task->TCB->tid);
-
-    this->tasks[task->TCB->tid] = task;
 }
 
 uint8_t TaskMgr::getTasksCount() const {
