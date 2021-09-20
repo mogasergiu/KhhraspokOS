@@ -36,6 +36,7 @@ namespace TASK {
         uint64_t flags;
         uint64_t rsp;
         uint64_t ss;
+        uint64_t gs;
         uint64_t fs;
     }__attribute__((packed));
 

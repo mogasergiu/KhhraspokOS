@@ -16,11 +16,11 @@ TaskHeader* TASK::TaskMgr::schedule() {
     CtxRegisters *ctx;
     TaskHeader *oldTask;
     uintptr_t edx, eax;
-     __asm__ __volatile__(
+    __asm__ __volatile__(
         "rdmsr;"
         "mov %%rbp, %0;"
         : "=r"(ctx), "=a" (eax), "=d" (edx)
-        : "c" (0xc0000100)
+        : "c" (0xc0000101)
     );
 
     oldTask = (TaskHeader*)((edx <<  32) + eax);
@@ -30,8 +30,10 @@ TaskHeader* TASK::TaskMgr::schedule() {
         this->tasksToReap.push(oldTask->TCB->tid);
 
     } else {
+        uint64_t gs = oldTask->TCB->ctxReg.gs;
         uint64_t fs = oldTask->TCB->ctxReg.fs;
         memcpy(&oldTask->TCB->ctxReg, ctx, sizeof(*ctx));
+        oldTask->TCB->ctxReg.gs = gs;
         oldTask->TCB->ctxReg.fs = fs;
 
         this->threadsQue[id].push(oldTask->TCB->tid);
@@ -49,12 +51,8 @@ TaskHeader* TASK::TaskMgr::schedule() {
     }
  
     MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = (uint64_t*)task->PCB->pd;
-    __asm__ __volatile__(
-        "mov %%cr3, %%r15;"
-        "mov %%r15, %%cr3;"
-        :
-        :
-    );
+
+    flushCR3();
 
     return task;
 }
@@ -120,6 +118,7 @@ void TASK::TaskMgr::loadTask(char *fileName) {
     task->TCB->ctxReg.ss = USER_DATA;
     task->TCB->ctxReg.cs = USER_CODE;
     task->TCB->ctxReg.rsp = task->TCB->ctxReg.rbp = (uint64_t)task->TCB->stack;
+    task->TCB->ctxReg.gs = (uint64_t)task;
 
     memcpy(task->PCB->filename, fileName, sizeof(task->PCB->filename));
 
@@ -128,12 +127,8 @@ void TASK::TaskMgr::loadTask(char *fileName) {
     this->tasks[task->TCB->tid] = task;
 
     MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = NULL;
-    __asm__ __volatile__(
-        "mov %%cr3, %%r15;"
-        "mov %%r15, %%cr3;"
-        :
-        :
-    );
+
+    flushCR3();
 }
 
 uint8_t TaskMgr::getTasksCount() const {

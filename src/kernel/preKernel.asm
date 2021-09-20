@@ -323,6 +323,13 @@ ret2User:
     mov rax, qword [rdi + 160]
     mov rdx, qword [rdi + 160]
     shr rdx, 32
+    mov rcx, 0xc0000101
+
+    wrmsr
+
+    mov rax, qword [rdi + 168]
+    mov rdx, qword [rdi + 168]
+    shr rdx, 32
     mov rcx, 0xc0000100
 
     wrmsr

@@ -60,6 +60,17 @@
 #define setPgAddr(pg, paddr) (pg = (pgTbl*)(((uintptr_t)pg & (uintptr_t)0xfff0000000000fff) | \
                              ((((uintptr_t)paddr >> (uintptr_t)12) & (uintptr_t)0xffffffffff) << (uintptr_t)12)))
 
+#define flushCR3() \
+    do { \
+        __asm__ __volatile__( \
+            "mov %%cr3, %%r15;" \
+            "mov %%r15, %%cr3;" \
+            : \
+            : \
+        ); \
+    } while (0);
+
+
 namespace MMU {
 
     extern uint8_t memRegionCount;
