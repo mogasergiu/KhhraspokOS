@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <task.hpp>
 
 #ifndef ELF_HPP
 #define ELF_HPP
@@ -173,9 +174,15 @@ typedef  struct {
     Elf64_Xword p_align; /*  Alignment  of  segment  */
 }__attribute__((packed)) Elf64_Phdr;
 
-// Segment Types, p_type 
+// Segment Types, p_type
+#define PT_NULL 0
+#define PT_LOAD 1
+#define PT_DYNAMIC 2
+#define PT_INTERP 3
+#define PT_NOTE 4 
 #define PT_SHLIB 5
 #define PT_PHDR 6
+#define PT_TLS 7
 #define PT_LOOS 0x60000000
 #define PT_HIOS 0x6FFFFFFF
 #define PT_LOPROC 0x70000000
@@ -206,6 +213,8 @@ struct ELF {
     Elf64_Phdr phdr;
     Elf64_Dyn dyn;
 }__attribute__((packed));
+
+void* loadELF(void *elf, TASK::TaskHeader *task);
 
 #endif  /*  ELF_HPP  */
 
