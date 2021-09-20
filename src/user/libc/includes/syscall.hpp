@@ -20,8 +20,6 @@
 #define SYS_THREAD_JOIN 13
 #define SYS_MUNMAP 14
 
-long kpkSyscall(long sysNo, ...);
-
 extern "C" void putch(const char c);
 
 extern "C" size_t puts(const char *str);

@@ -2,217 +2,147 @@
 #include <stdarg.h>
 #include <stdio.hpp>
 
-/*
- * I know `putch`, `puts`, `sleep` and others are not real syscalls but I don't
- * see any easier way of getting text to the screen from userspace and I don't
- * need `timespec` structs for now
- */
-long kpkSyscall(long sysNo, ...) {
-    va_list ap;
-    va_start(ap, sysNo);
+extern "C" void putch(const char c) {
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_PUTCH), "D" (c)
+    );
+}
 
-    long ret;
+extern "C" size_t puts(const char *str) {
+    size_t ret;
 
-    switch (sysNo) {
-
-        // SYS_PUTCH
-        case SYS_PUTCH:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, int))
-            );
-
-            break;
-
-        case SYS_PUTS:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, char*))
-            );
-
-            break;
-
-        case SYS_GETPID:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo)
-            );
-
-            break;
-
-        case SYS_GETPPID:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo)
-            );
-
-            break;
-
-        case SYS_GETTID:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo)
-            );
-
-            break;
-
-        case SYS_FORK:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo)
-            );
-
-            break;
-
-        case SYS_EXECVE:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, char*)),
-                    "S" (va_arg(ap, char**))
-            );
-
-            break;
-
-        case SYS_EXIT:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, char*))
-            );
-
-            break;
-
-        case SYS_MMAP:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, void*)),
-                "S" (va_arg(ap, size_t)), "d" (va_arg(ap, int))
-            );
-
-            break;
-
-        case SYS_SCHED_YIELD:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo)
-            );
-
-            break;
-
-        case SYS_SLEEP:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, uint64_t))
-            );
-
-            break;
-
-        case SYS_KILL:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, uintptr_t))
-            );
-
-            break;
-
-        case SYS_CREATE_THREAD:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, void* (*)())),
-                    "S" (va_arg(ap, size_t)), "d" (va_arg(ap, char**))
-            );
-
-            break;
-
-        case SYS_THREAD_JOIN:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, uintptr_t))
-            );
-
-            break;
-
-        case SYS_MUNMAP:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, void*)),
-                "S" (va_arg(ap, size_t))
-            );
-
-            break;
-
-//        default:
-//            printf("%x Syscall does not exit yet!\n");
-    }
-
-    va_end(ap);
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_PUTS), "D" (str)
+    );
 
     return ret;
 }
 
-extern "C" void putch(const char c) {
-    kpkSyscall(SYS_PUTCH, (int)c);
-}
-
-extern "C" size_t puts(const char *str) {
-    return kpkSyscall(SYS_PUTS, str);
-}
-
 extern "C" uint8_t getpid() {
-    return kpkSyscall(SYS_GETPID);
+    uint8_t ret;
+
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_GETPID)
+    );
+
+    return ret;
 }
 
 extern "C" uint8_t getppid() {
-    return kpkSyscall(SYS_GETPPID);
+    uint8_t ret;
+
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_GETPPID)
+    );
+
+    return ret;
 }
 
 extern "C" uint8_t gettid() {
-    return kpkSyscall(SYS_GETTID);
+    uint8_t ret;
+
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_GETTID)
+    );
+
+    return ret;
 }
 
 extern "C" uint8_t fork() {
-    return kpkSyscall(SYS_FORK);
+    uint8_t ret;
+
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_FORK)
+    );
+
+    return ret;
 }
 
 extern "C" uint8_t execve(char *pathname, char **argv) {
-    return kpkSyscall(SYS_EXECVE, pathname, argv);
+    uint8_t ret;
+
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_EXECVE), "D" (pathname), "S" (argv)
+    );
+
+    return ret;
 }
 
 extern "C" void* mmap(void *addr, size_t length, int prot) {
-    return (void*)kpkSyscall(SYS_MMAP, addr, length, prot);
+    void *ret;
+
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_MMAP), "D" (addr), "S" (length), "d" (prot)
+    );
+
+    return ret;
 }
 
 extern "C" void schedYield() {
-    kpkSyscall(SYS_SCHED_YIELD);
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_SCHED_YIELD)
+    );
 }
 
 extern "C" void sleep(size_t ms) {
-    kpkSyscall(SYS_SLEEP, ms);
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_SLEEP), "D" (ms)
+    );
 }
 
 extern "C" int createThread(void* (*func)(), size_t argc, char **argv) {
-    return kpkSyscall(SYS_CREATE_THREAD, func, argc, argv);
+    int ret;
+
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_CREATE_THREAD), "D" (func), "S" (argc), "d" (argv)
+    );
+
+    return ret;
 }
 
 extern "C" int threadJoin(uint8_t tid) {
-    return kpkSyscall(SYS_THREAD_JOIN, tid);
+    int ret;
+
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_THREAD_JOIN), "D" (tid)
+    );
+
+    return ret;
 }
 
 extern "C" int munmap(void *addr, size_t length) {
-    return kpkSyscall(SYS_MUNMAP, addr, length);
+    int ret;
+
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_MUNMAP), "D" (addr), "S" (length)
+    );
+
+    return ret;
 }
 
