@@ -47,8 +47,8 @@ extern "C" void kernelMain() {
 
 /*    char file4[] = "/dir/1";
     taskMgr.loadTask(file4);*/
-    char file3[] = "/dir/shell";
-    taskMgr.loadTask(file3);
+//    char file3[] = "/dir/shell";
+//    taskMgr.loadTask(file3);
 
     while (1) {
         pitHandler.sleep(10);

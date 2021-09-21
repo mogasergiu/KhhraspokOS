@@ -44,6 +44,20 @@
 #define PCI_HEADER_TYPE_OFFSET 0xe
 #define PCI_BIST_OFFSET 0xf
 
+#define PS2_PORT 0x64
+#define PS2_ENABLE_KEYBOARD 0xae
+
+#define KEYBOARD_RELEASED 0x80
+#define KEYBOARD_INPUT_PORT 0x60
+#define KEYBOARD_BUFFER_MAX_SIZE 0x100
+#define KEYBOARD_CAPSLOCK_PRESSED 0x3a
+#define KEYBOARD_RSHIFT_RELEASED 0xb6
+#define KEYBOARD_LSHIFT_RELEASED 0xaa
+#define KEYBOARD_RSHIFT_PRESSED 0x36
+#define KEYBOARD_LSHIFT_PRESSED 0x2a
+#define KEYBOARD_ENTER_PRESSED 0x1c
+#define KEYBOARD_SPACE_PRESSED 0x39
+
 namespace DRIVERS {
 
     namespace DISK {
@@ -87,6 +101,16 @@ namespace DRIVERS {
 
         void __attribute__((constructor)) parsePCI();
     };
+
+    namespace PS2 {
+
+        namespace KEYBOARD {
+
+            extern char buffer[KEYBOARD_BUFFER_MAX_SIZE];
+
+            void __attribute__((constructor)) initKeyboard();
+        }
+    }
 };
 
 #endif  /* DRIVERS_HPP */

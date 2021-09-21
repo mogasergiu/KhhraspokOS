@@ -4,10 +4,6 @@ using namespace INTERRUPTS;
 
 INTERRUPTS::PIC picHandler;
 
-extern "C" void IntCallbacks::keyboardIRQ() {
-    PMIO::pOutByte(PIC1_REG_COMMAND, PIC_EOI);
-}
-
 // Constructor - sets up the Programmable Interrupt Controller
 void PIC::initPIC() {
     uint8_t icw = 0;
