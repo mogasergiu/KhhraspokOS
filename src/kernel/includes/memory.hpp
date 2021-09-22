@@ -119,6 +119,7 @@ namespace MMU {
 
             void mapPg(void *vaddr, void *paddr, uintptr_t flags);
             void *reqPg();
+            void freePg(void *addr);
     };
 }
 

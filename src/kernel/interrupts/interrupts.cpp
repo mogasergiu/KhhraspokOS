@@ -3,6 +3,7 @@
 #include <syscall.hpp>
 #include <stdarg.h>
 #include <video.hpp>
+#include <task.hpp>
 
 using namespace INTERRUPTS;
 
@@ -216,11 +217,7 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             break;
 
         case SYS_EXIT:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, char*))
-            );
+            taskMgr.endTask();
 
             break;
 

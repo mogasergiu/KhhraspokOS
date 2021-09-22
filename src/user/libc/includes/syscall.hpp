@@ -34,6 +34,8 @@ extern "C" uint8_t fork();
 
 extern "C" uint8_t execve(char *pathname, char **argv);
 
+extern "C" void exit();
+
 extern "C" void* mmap(void *addr, size_t length, int prot);
 
 extern "C" void schedYield();

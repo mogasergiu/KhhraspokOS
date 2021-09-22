@@ -47,21 +47,27 @@ namespace TASK {
             size_t tlsSize;
             CtxRegisters ctxReg;
             void *stack;
+            struct {
+                int argc;
+                char **argv;
+            } env;
             uint8_t tid;
             bool statusEnd;
+            size_t pgCount;
+            void *lastVaddr;
         }__attribute__((packed)) *TCB;
 
         struct ProcessHdr {
             int8_t pid;
             int8_t ppid;
             char filename[15];
+            void *lastVaddr;
             MMU::pgTbl *pd;
             void *heap;
             bool statusEnd;
         }__attribute__((packed)) *PCB;
 
         uint32_t size;
-        size_t pgCount;
     }__attribute__((packed));
 
     class TaskMgr {
@@ -70,18 +76,27 @@ namespace TASK {
             uint8_t tasksCount;
             uint8_t pids;
             uint64_t reapedTasksCount;
+            TaskHeader::ProcessHdr *kernelPHdr;
 
             Queue<uint8_t> tasksToReap;
+            Queue<uint8_t> tasksToLoad;
             Queue<uint8_t> threadsQue[MAX_CPU_COUNT];
 
         public:
+            TaskMgr();
             uint8_t getTasksCount() const;
             uint64_t getReapedTasksCount() const;
+            TaskHeader::ProcessHdr* getKernelPHdr() const;
             TaskHeader* schedule();
-            void loadTask(char *fileName);
-            void endTask(char *fileName);
+            void reaper(int argc, char **argv);
+            void loader(int argc, char **argv);
+            void createTask(char *args, uint8_t dpl, int8_t ppid);
+            void createTask(void (TaskMgr::*)(int, char**), uint8_t dpl,
+                                char *args, TASK::TaskHeader::ProcessHdr *PCB);
+            void loadTask(TaskHeader *task);
+            void freeTask(uint8_t tid);
             void endTask(int8_t pid);
-            void endTask(uint8_t tid);
+            void endTask();
     };
 }
 

@@ -45,10 +45,14 @@ extern "C" void kernelMain() {
 
     intsHandler.initInterrupts();
 
-/*    char file4[] = "/dir/1";
-    taskMgr.loadTask(file4);*/
-//    char file3[] = "/dir/shell";
-//    taskMgr.loadTask(file3);
+    char file3[] = "/dir/shell lol pls no";
+    char file4[] = " ";
+
+    cli();
+    taskMgr.createTask(file3, 3, 0);
+    taskMgr.createTask(&TASK::TaskMgr::loader, 0, file4, taskMgr.getKernelPHdr());
+    taskMgr.createTask(&TASK::TaskMgr::reaper, 0, file4, taskMgr.getKernelPHdr());
+    sti();
 
     while (1) {
         pitHandler.sleep(10);

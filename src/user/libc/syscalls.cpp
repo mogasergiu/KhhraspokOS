@@ -102,6 +102,14 @@ extern "C" void schedYield() {
     );
 }
 
+extern "C" void exit() {
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_EXIT)
+    );
+}
+
 extern "C" void sleep(size_t ms) {
     __asm__ __volatile__(
         "int $0x80;"

@@ -18,7 +18,7 @@ APIC::APIC() {
 }
 
 extern "C" void IntCallbacks::lapicTimerIRQ() {
-    if (taskMgr.getTasksCount() > 0) {
+    if (taskMgr.getTasksCount() > 2) {
         TASK::TaskHeader *task = taskMgr.schedule();
 
         apicHandler.sendLAPICEOI();

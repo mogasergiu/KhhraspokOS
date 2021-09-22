@@ -1,6 +1,7 @@
 #include <filesystem.hpp>
 #include <kpkheap.hpp>
 #include <kstdio.hpp>
+#include <kstring.hpp>
 
 using namespace FILESYSTEM;
 
@@ -38,6 +39,10 @@ int VFS::fopen(char *filename, const char *mode) {
     FileDescriptor *fd = (FileDescriptor*)KPKHEAP::kpkZalloc(sizeof(*fd));
     CATCH_FIRE(fd == NULL, "Could not allocate File Descriptor");
 
+    size_t filenameSize = strlen(filename) + 1;
+    char *_filename = (char*)KPKHEAP::kpkZalloc(filenameSize);
+    memcpy(_filename, filename, filenameSize);
+
     fd->idx = -1;
 
     for (int i = 0; i < MAX_FILE_DESCRIPTORS_NUMBER; i++) {
@@ -57,11 +62,14 @@ int VFS::fopen(char *filename, const char *mode) {
 
     fd->fs = DISK_FILESYSTEM;
 
-    if (fd->fs->fopenCallback(fd, filename, mode) != 0) {
+    if (fd->fs->fopenCallback(fd, _filename, mode) != 0) {
         KPKHEAP::kpkFree(fd);
+        KPKHEAP::kpkFree(_filename);
 
         return -1;
     }
+
+    KPKHEAP::kpkFree(_filename);
 
     return fd->idx;
 }

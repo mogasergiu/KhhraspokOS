@@ -145,6 +145,10 @@ void* PgMgr::reqPg() {
     return this->pgAllocator.reqPg();
 }
 
+void PgMgr::freePg(void *addr) {
+    return this->pgAllocator.freePg(addr);
+}
+
 void PgMgr::mapPg(void *vaddr, void *paddr, uintptr_t flags) {
     size_t idx = PML4idx(vaddr);
     pgTbl *pdt = NULL,
