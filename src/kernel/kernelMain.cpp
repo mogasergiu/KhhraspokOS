@@ -48,11 +48,9 @@ extern "C" void kernelMain() {
     char file3[] = "/dir/shell lol pls no";
     char file4[] = " ";
 
-    cli();
     taskMgr.createTask(file3, 3, 0);
-    taskMgr.createTask(&TASK::TaskMgr::loader, 0, file4, taskMgr.getKernelPHdr());
-    taskMgr.createTask(&TASK::TaskMgr::reaper, 0, file4, taskMgr.getKernelPHdr());
-    sti();
+    taskMgr.createTask(&reaper, 0, file4, taskMgr.getKernelPHdr());
+    taskMgr.createTask(&loader, 0, file4, taskMgr.getKernelPHdr());
 
     while (1) {
         pitHandler.sleep(10);

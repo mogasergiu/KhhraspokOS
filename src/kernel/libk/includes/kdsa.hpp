@@ -42,7 +42,7 @@ class LinkedList {
         }
 
         bool isEmpty() {
-            return (this->head == NULL || this->last == NULL);
+            return (this->size == 0 || this->head == NULL || this->last == NULL);
         }
 
         size_t getSize() {

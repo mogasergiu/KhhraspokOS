@@ -14,6 +14,13 @@
 #define TASK_TLS_SIZE 0x2000
 
 namespace TASK {
+    class TaskMgr;
+};
+
+void reaper(int argc, char **argv);
+void loader(int argc, char **argv);
+
+namespace TASK {
     struct CtxRegisters {
         uint64_t rax;
         uint64_t rbx;
@@ -88,10 +95,10 @@ namespace TASK {
             uint64_t getReapedTasksCount() const;
             TaskHeader::ProcessHdr* getKernelPHdr() const;
             TaskHeader* schedule();
-            void reaper(int argc, char **argv);
-            void loader(int argc, char **argv);
+            friend void ::reaper(int argc, char **argv);
+            friend void ::loader(int argc, char **argv);
             void createTask(char *args, uint8_t dpl, int8_t ppid);
-            void createTask(void (TaskMgr::*)(int, char**), uint8_t dpl,
+            void createTask(void (*)(int, char**), uint8_t dpl,
                                 char *args, TASK::TaskHeader::ProcessHdr *PCB);
             void loadTask(TaskHeader *task);
             void freeTask(uint8_t tid);

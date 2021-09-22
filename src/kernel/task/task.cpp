@@ -28,33 +28,33 @@ TaskHeader::ProcessHdr* TaskMgr::getKernelPHdr() const {
     return this->kernelPHdr;
 }
 
-void TaskMgr::reaper(int argc, char **argv) {
+void reaper(int argc, char **argv) {
     uint8_t *deadTid;
 
     while (1) {
-        if (!this->tasksToReap.isEmpty()) {
-            deadTid = this->tasksToReap.pop();
-            freeTask(*deadTid);
+        if (!taskMgr.tasksToReap.isEmpty()) {
+            deadTid = taskMgr.tasksToReap.pop();
+            taskMgr.freeTask(*deadTid);
 
             KPKHEAP::kpkFree(deadTid);
         }
     }
 }
 
-void TaskMgr::loader(int argc, char **argv) {
-    uint8_t *newTid, ap = 1;
+void loader(int argc, char **argv) {
+    uint8_t *newTid, ap = 0;
 
     while (1) {
-        if (!this->tasksToLoad.isEmpty()) {
-            newTid = this->tasksToLoad.pop();
+        if (!taskMgr.tasksToLoad.isEmpty()) {
+            newTid = taskMgr.tasksToLoad.pop();
 
-            if (this->tasks[*newTid] != NULL) {
-                this->threadsQue[ap].push(*newTid);
+            if (taskMgr.tasks[*newTid] != NULL) {
+                taskMgr.threadsQue[ap].push(*newTid);
 
-                ap++;
+/*                ap++;
                 if (ap == MAX_CPU_COUNT) {
                     ap = 1;
-                }
+                }*/
             }
         }
     }
@@ -78,7 +78,7 @@ void TaskMgr::freeTask(uint8_t tid) {
         }
 
         if (task->PCB != NULL) {
-            KPKHEAP::kpkFree(task->TCB);
+            KPKHEAP::kpkFree(task->PCB);
             task->PCB = NULL;
         }
 
@@ -267,7 +267,7 @@ void TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
     this->tasksToLoad.push(task->TCB->tid);
 }
 
-void TASK::TaskMgr::createTask(void (TaskMgr::*func)(int, char**), uint8_t dpl,
+void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
                                 char *args, TASK::TaskHeader::ProcessHdr *PCB) {
     if (this->tasksCount == MAX_TASKS_COUNT) {
         kpwarn("Maximum tasks reached! Retry again later!\n");
@@ -369,7 +369,7 @@ void TASK::TaskMgr::createTask(void (TaskMgr::*func)(int, char**), uint8_t dpl,
 
     MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = NULL;
 
-    if (func == &TASK::TaskMgr::loader || func == &TASK::TaskMgr::reaper) {
+    if (func == &loader) {
         this->threadsQue[0].push(task->TCB->tid);
 
     } else {
@@ -399,9 +399,6 @@ void TaskMgr::endTask(int8_t pid) {
 
         return;
     }
- 
-
-    while (1);
 }
 
 void TaskMgr::endTask() {
@@ -417,7 +414,5 @@ void TaskMgr::endTask() {
     task = (TaskHeader*)((edx <<  32) + eax);
    
     task->TCB->statusEnd = task->PCB->statusEnd = true;
-
-    while (1);
 }
     
