@@ -25,6 +25,7 @@ extern syscallISR
 extern keyboardIRQ
 extern APEntry
 extern lapicTimerIRQ
+extern dumpCPU
 
 ; Export constructor and destructor sections
 extern startCtors
@@ -129,11 +130,8 @@ SpuriousInterruptHandler:
 doNothingIRQHandler:
     cli
     IRQpush
-    mov rdi, 0x500
-    mov rdi, [rdi]
-    add rdi, 0xb0
-    xor rsi, rsi
-    call mOutDWord
+    mov r15, rsp
+    call dumpCPU
     IRQpop
     sti
     iretq
@@ -149,7 +147,7 @@ keyboardIRQHandler:
 lapicTimerIRQHandler:
     cli
     IRQpush
-    mov rbp, rsp
+    mov r15, rsp
     call lapicTimerIRQ
     IRQpop
     sti
