@@ -68,11 +68,18 @@ static void* loadPHDR(void *elf, TASK::TaskHeader *task) {
                 memcpy((void*)phdr[i].p_vaddr, (uint8_t*)elf + phdr[i].p_offset,
                         phdr[i].p_filesz);
 
+                task->PCB->tlsSize = phdr[i].p_filesz;
+
                 lastVaddr = (void*)pg;
 
                 task->TCB->ctxReg.fs = phdr[i].p_vaddr + phdr[i].p_memsz;
 
                 ((uintptr_t*)task->TCB->ctxReg.fs)[0] = task->TCB->ctxReg.fs;
+
+                task->PCB->ogTLS = KPKHEAP::kpkZalloc(task->PCB->tlsSize);
+                memcpy(task->PCB->ogTLS, (uint8_t*)elf + phdr[i].p_offset,
+                        phdr[i].p_filesz);
+
                 break;
 
             default:
