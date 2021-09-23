@@ -138,7 +138,13 @@ PgMgr::PgMgr() {
     this->mapPg((void*)USERSPACE_START_ADDR, (void*)USERSPACE_START_ADDR,
                 PDE_P | PDE_R | PDE_U);
 
-    extractUserPD(this->PML4->entries[PML4idx((void*)USERSPACE_START_ADDR)]);
+    size_t idx = PML4idx((void*)USERSPACE_START_ADDR);
+    this->PML4->entries[idx] = (MMU::pgTbl*)((uint64_t)this->PML4->entries[idx] | PDE_U);
+    MMU::userPD = getPgAddr(this->PML4->entries[idx]);
+    idx = PDTidx((void*)USERSPACE_START_ADDR);
+    MMU::userPD->entries[idx] = (uint64_t*)((uint64_t)MMU::userPD->entries[idx] | PDE_U);
+    MMU::userPD = getPgAddr(MMU::userPD->entries[idx]);
+    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = NULL;
 }
 
 void* PgMgr::reqPg() {
