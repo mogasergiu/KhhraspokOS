@@ -42,7 +42,7 @@ extern "C" void schedYield();
 
 extern "C" void sleep(size_t ms);
 
-extern "C" int createThread(void* (*func)(), size_t argc, char **argv);
+extern "C" int createThread(void (*func)(int argc, char **argv), char *args);
 
 extern "C" int threadJoin(uint8_t tid);
 

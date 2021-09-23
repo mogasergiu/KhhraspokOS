@@ -118,13 +118,13 @@ extern "C" void sleep(size_t ms) {
     );
 }
 
-extern "C" int createThread(void* (*func)(), size_t argc, char **argv) {
+extern "C" int createThread(void (*func)(int argc, char **argv), char *args) {
     int ret;
 
     __asm__ __volatile__(
         "int $0x80;"
         : "=a"(ret)
-        : "a" (SYS_CREATE_THREAD), "D" (func), "S" (argc), "d" (argv)
+        : "a" (SYS_CREATE_THREAD), "D" (func), "S" (args)
     );
 
     return ret;
