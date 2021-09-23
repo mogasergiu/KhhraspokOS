@@ -27,8 +27,8 @@ namespace VIDEO {
                 uint16_t *address;
 
                 // Represents the line we are currently at inside VGA buffer
-                uint8_t line
-;
+                uint8_t line;
+
                 // Represents the column we are currently at inside VGA buffer
                 uint8_t column;
 

@@ -29,7 +29,7 @@ extern "C" void APEntry() {
     __asm__ __volatile__ (
         "movq %0, %%rsi;"
         "lidt 0(%%rsi);"
-        "hlt;"
+//        "hlt;"
         "sti;"
         :
         : "r" (&intsHandler.IDTRDescriptor)

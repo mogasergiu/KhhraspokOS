@@ -51,7 +51,6 @@ namespace TASK {
 
     struct TaskHeader {
         struct ThreadHdr {
-            size_t tlsSize;
             CtxRegisters ctxReg;
             void *stack;
             struct {
@@ -72,6 +71,9 @@ namespace TASK {
             MMU::pgTbl *pd;
             void *heap;
             bool statusEnd;
+            size_t tlsSize;
+            void *ogTLS;
+            size_t threadPoolCount;
         }__attribute__((packed)) *PCB;
 
         uint32_t size;
@@ -97,6 +99,7 @@ namespace TASK {
             TaskHeader* schedule();
             friend void ::reaper(int argc, char **argv);
             friend void ::loader(int argc, char **argv);
+            friend void INTERRUPTS::IntCallbacks::lapicTimerIRQ();
             void createTask(char *args, uint8_t dpl, int8_t ppid);
             void createTask(void (*)(int, char**), uint8_t dpl,
                                 char *args, TASK::TaskHeader::ProcessHdr *PCB);
