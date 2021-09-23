@@ -29,14 +29,13 @@ elif [[ $1 == "clean" ]]; then
     sudo rm -rf /mnt/kpk/
 
 elif [[ $1 == "run" ]]; then
-    qemu-system-x86_64  -smp cores=2,threads=1 -hda KhhraspokOS.bin -vga std
+    qemu-system-x86_64  -smp 4 -hda KhhraspokOS.bin -vga std
 
 elif [[ $1 == "dump" ]]; then
-    qemu-system-x86_64  -smp cores=2,threads=2 -hda KhhraspokOS.bin -d int,exec\
-                                                                    --no-reboot
+    qemu-system-x86_64  -smp 4 -hda KhhraspokOS.bin -d int --no-reboot
 
 elif [[ $1 == "debug" ]]; then
-    qemu-system-x86_64  -smp cores=2,threads=2 -hda KhhraspokOS.bin -s -S
+    qemu-system-x86_64  -smp 4 -hda KhhraspokOS.bin -s -S
 
 elif [[ $1 == "help" ]]; then
     echo "./kpk.sh <option>"
