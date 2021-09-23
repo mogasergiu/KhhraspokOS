@@ -111,6 +111,67 @@ void Interrupts::initInterrupts() {
     apicHandler.initLAPICTimer();
 }
 
+extern "C" void IntHandlers::dumpCPU() {
+    TASK::CtxRegisters *ctx;
+    __asm__ __volatile__(
+        "mov %%r15, %0;"
+        : "=r"(ctx)
+    );
+
+    uint8_t id = apicHandler.getLAPICID();
+    kprintf(      "LAPIC ID: %x\n"
+                  "RAX: %x\n"
+                  "RBX: %x\n"
+                  "RCX: %x\n"
+                  "RDX: %x\n"
+                  "RDI: %x\n"
+                  "RSI: %x\n"
+                  "RBP: %x\n"
+                  "R8: %x\n"
+                  "R9: %x\n"
+                  "R10: %x\n"
+                  "R11: %x\n"
+                  "R12: %x\n"
+                  "R13: %x\n"
+                  "R14: %x\n"
+                  "R15: %x\n"
+                  "CODE: %x\n"
+                  "RIP: %x\n"
+                  "CS: %x\n"
+                  "FLAGS: %x\n"
+                  "RSP: %x\n"
+                  "SS: %x\n"
+                  "GS: %x\n"
+                  "FS: %x\n",
+                   id,
+                   ctx->rax,
+                   ctx->rbx,
+                   ctx->rcx,
+                   ctx->rdx,
+                   ctx->rdi,
+                   ctx->rsi,
+                   ctx->rbp,
+                   ctx->r8,
+                   ctx->r9,
+                   ctx->r10,
+                   ctx->r11,
+                   ctx->r12,
+                   ctx->r13,
+                   ctx->r14,
+                   ctx->r15,
+                   ctx->rip,
+                   ctx->cs,
+                   ctx->flags,
+                   ctx->rsp,
+                   ctx->ss,
+                   ctx->gs,
+                   ctx->fs,
+                   ((uint64_t*)(&ctx->fs))[1]
+    );
+
+    __asm__ __volatile__("hlt"::);
+}
+
 /*
  * Helper function to add an entry in the IDT
  * @number: desired interrupt number of the entry
@@ -259,12 +320,19 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             break;
 
         case SYS_CREATE_THREAD:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, void* (*)())),
-                    "S" (va_arg(ap, size_t)), "d" (va_arg(ap, char**))
-            );
+                TASK::TaskHeader *task;
+                uintptr_t edx, eax;
+
+                __asm__ __volatile__(
+                    "rdmsr;"
+                    : "=a" (eax), "=d" (edx)
+                    : "c" (0xc0000101)
+                );
+
+                task = (TASK::TaskHeader*)((edx <<  32) + eax);
+
+                taskMgr.createTask(va_arg(ap, void (*)(int, char**)), 3,
+                                    va_arg(ap, char*), task->PCB);
 
             break;
 

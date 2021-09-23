@@ -265,6 +265,7 @@ namespace INTERRUPTS {
         extern "C" void lapicTimerIRQHandler();
         extern "C" void doNothingIRQHandler();
         extern "C" void SpuriousInterruptHandler();
+        extern "C" void dumpCPU();
     }
 
     namespace IntCallbacks {
