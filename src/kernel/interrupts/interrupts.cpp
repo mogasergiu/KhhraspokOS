@@ -32,7 +32,7 @@ void APIC::initLAPICTimer() {
 
     apicHandler.LAPICout(LAPIC_TDCR, 0x3);
 
-    apicHandler.LAPICout(LAPIC_TICR, ticks);
+    apicHandler.LAPICout(LAPIC_TICR, ticks << 0x8);
 }
 
 static void wakeAPs() {
@@ -222,12 +222,16 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
 
         // SYS_PUTCH
         case SYS_PUTCH:
+            TASK::acquireLock(&vgaHandler.vLock);
             vgaHandler.putChar((char)arg1, 15);
+            TASK::releaseLock(&vgaHandler.vLock);
 
             break;
 
         case SYS_PUTS:
+            TASK::acquireLock(&vgaHandler.vLock);
             ret = (long)vgaHandler.putString((char*)arg1, 15);
+            TASK::releaseLock(&vgaHandler.vLock);
 
             break;
 

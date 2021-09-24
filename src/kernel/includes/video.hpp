@@ -33,6 +33,8 @@ namespace VIDEO {
                 uint8_t column;
 
             public:
+                volatile uint64_t vLock __attribute__((aligned(8)));
+
                 // Constructor - sets up line, column, address and VGA buffer
                 TextMode();
 
