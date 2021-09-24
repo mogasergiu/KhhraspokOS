@@ -291,27 +291,18 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
         return;
     }
 
+    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = (uint64_t*)PCB->pd;
+    flushCR3();
+
     const char filter[] = " ";
 
-    if (args != NULL) {
-        char *arg = strtok(args, filter);
-        if (arg == NULL) {
-            kpwarn("Incorrect executable/task name!\n");
-
-            return;
-        }
-
-        args += strlen(args) + 1;
-    }
-
+    void *lastPg;
 
     TaskHeader *task = (TaskHeader*)KPKHEAP::kpkZalloc(sizeof(*task));
     CATCH_FIRE(task == NULL, "Could not allocate task!");
 
     task->TCB = (TaskHeader::ThreadHdr*)KPKHEAP::kpkZalloc(sizeof(*task->TCB));
     CATCH_FIRE(task->TCB == NULL, "Could not allocate task TCB!");
-
-    task->PCB = PCB;
 
     uintptr_t flags;
     if (dpl == 3) {
@@ -325,9 +316,38 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
         flags = PDE_P | PDE_R;
     }
 
-    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = (uint64_t*)PCB->pd;
+    task->PCB = PCB;
+    char *arg;
+    int argc = 0;
+    if (args != NULL) {
+        arg = strtok(args, filter);
+        lastPg = pageManager.reqPg();
+        pageManager.mapPg(task->PCB->lastVaddr, lastPg, flags);
 
-    void *lastPg = pageManager.reqPg();
+        task->TCB->pgCount++; 
+        char *argv0 = (char*)task->PCB->lastVaddr;
+        size_t len;
+        while (arg != NULL) {
+            argc++;
+            len = strlen(arg);
+            memcpy(argv0, arg, len);
+            argv0 += len + 1;
+            arg = strtok(NULL, filter);
+        }
+
+        task->TCB->env.argc = argc;
+        task->TCB->env.argv = (char**)argv0;
+        argv0 = (char*)task->PCB->lastVaddr;
+        for (int i = 0; i < argc; i++) {
+            task->TCB->env.argv[i] = argv0;
+            argv0 += strlen(argv0);
+        }
+
+        task->PCB->lastVaddr = (uint8_t*)task->PCB->lastVaddr + PAGE_SIZE;
+    }
+
+
+    lastPg = pageManager.reqPg();
     pageManager.mapPg(task->PCB->lastVaddr, lastPg, flags);
 
     task->TCB->pgCount++; 
@@ -359,44 +379,13 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
         }
 
         memcpy(lastVaddr, PCB->ogTLS, PCB->tlsSize);
+        task->TCB->ctxReg.fs = (uint64_t)lastVaddr + PCB->tlsSize;
     }
 
     lastPg = pageManager.reqPg();
     pageManager.mapPg(task->PCB->lastVaddr, lastPg, flags);
    
     task->TCB->lastVaddr = task->PCB->lastVaddr;
-
-    if (args != NULL) {
-        char *arg = strtok(args, filter);
-        size_t argSize = strlen(arg);
-    int argc = 0;
-    char *argv0 = (char*)task->PCB->lastVaddr;
-    void *lastVaddr = task->PCB->lastVaddr;
-    while (arg != NULL) {
-        argc++;
-
-        strncpy((char*)task->PCB->lastVaddr, arg, argSize);
-
-        lastVaddr = (uint8_t*)lastVaddr + argSize + 1;
-
-        arg = strtok(NULL, filter);
-        argSize = strlen(arg);
-    }
-
-    char **argv = (char**)task->PCB->lastVaddr;
-    for (int i = 0; i < argc; i++) {
-        argv[i] = argv0;
-
-        for (; *argv0 != 0; argv0++);
-        argv0++;
-    }
-
-    task->TCB->env.argv = argv;
-    task->TCB->env.argc = argc;
-    } else {
-    task->TCB->env.argv = NULL;
-    task->TCB->env.argc = 0;
-    }
 
     task->TCB->ctxReg.rdi = task->TCB->env.argc;
     task->TCB->ctxReg.rsi = (uint64_t)task->TCB->env.argv;
@@ -407,7 +396,6 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
     memcpy(task->PCB, PCB, sizeof(*task->PCB));
 
     task->PCB->pd = (MMU::pgTbl*)MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)];
-    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = (uint64_t*)PCB->pd;
     flushCR3();
 
     if (func == &loader) {
