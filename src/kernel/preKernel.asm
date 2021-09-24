@@ -128,33 +128,26 @@ SpuriousInterruptHandler:
     iretq
 
 doNothingIRQHandler:
-    cli
     IRQpush
     mov r15, rsp
     call dumpCPU
     IRQpop
-    sti
     iretq
 
 keyboardIRQHandler:
-    cli
     IRQpush
     call keyboardIRQ
     IRQpop
-    sti
     iretq
 
 lapicTimerIRQHandler:
-    cli
     IRQpush
     mov r15, rsp
     call lapicTimerIRQ
     IRQpop
-    sti
     iretq
 
 syscallISRHandler:
-    cli
     IRQpush
     call syscallISR
     add rsp, 8  ; keep rax intact (syscall's return value)
@@ -172,7 +165,6 @@ syscallISRHandler:
     pop r13
     pop r14
     pop r15
-    sti
     iretq
 
 pInByte:
