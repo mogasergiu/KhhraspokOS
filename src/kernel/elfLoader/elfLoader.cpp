@@ -68,7 +68,7 @@ static void* loadPHDR(void *elf, TASK::TaskHeader *task) {
                 memcpy((void*)phdr[i].p_vaddr, (uint8_t*)elf + phdr[i].p_offset,
                         phdr[i].p_filesz);
 
-                task->PCB->tlsSize = phdr[i].p_filesz;
+                task->PCB->tlsSize = phdr[i].p_memsz;
 
                 lastVaddr = (void*)pg;
 

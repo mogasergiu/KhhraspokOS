@@ -340,7 +340,7 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
         argv0 = (char*)task->PCB->lastVaddr;
         for (int i = 0; i < argc; i++) {
             task->TCB->env.argv[i] = argv0;
-            argv0 += strlen(argv0);
+            argv0 += strlen(argv0) + 1;
         }
 
         task->PCB->lastVaddr = (uint8_t*)task->PCB->lastVaddr + PAGE_SIZE;
@@ -380,6 +380,7 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
 
         memcpy(lastVaddr, PCB->ogTLS, PCB->tlsSize);
         task->TCB->ctxReg.fs = (uint64_t)lastVaddr + PCB->tlsSize;
+        ((uint64_t*)task->TCB->ctxReg.fs)[0] = task->TCB->ctxReg.fs;
     }
 
     lastPg = pageManager.reqPg();

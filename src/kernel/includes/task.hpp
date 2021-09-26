@@ -21,8 +21,8 @@ void reaper(int argc, char **argv);
 void loader(int argc, char **argv);
 
 namespace TASK {
-    extern "C" void acquireLock(void *lock);
-    extern "C" void releaseLock(void *lock);
+    extern "C" void acquireLock(volatile void *lock);
+    extern "C" void releaseLock(volatile void *lock);
     struct CtxRegisters {
         uint64_t rax;
         uint64_t rbx;
