@@ -110,7 +110,7 @@ namespace DRIVERS {
 
             void __attribute__((constructor)) initKeyboard();
 
-            size_t readKeyboard(char *buf);
+            size_t readKeyboard(char *buf, size_t size);
         }
     }
 };

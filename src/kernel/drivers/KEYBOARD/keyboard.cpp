@@ -32,12 +32,13 @@ static void putInBuffer(char c) {
     buffer[buffIdx++] = c;
 }
 
-size_t DRIVERS::PS2::KEYBOARD::readKeyboard(char *buf) {
+size_t DRIVERS::PS2::KEYBOARD::readKeyboard(char *buf, size_t size) {
     if (!lineON) {
         return 0;
     }
 
-    for (int i = 0; i < KEYBOARD_BUFFER_MAX_SIZE; i++, readIdx++) {
+    size = size < KEYBOARD_BUFFER_MAX_SIZE ? size : KEYBOARD_BUFFER_MAX_SIZE;
+    for (size_t i = 0; i < size; i++, readIdx++) {
         if (readIdx == KEYBOARD_BUFFER_MAX_SIZE) {
             readIdx = 0;
         }
