@@ -45,12 +45,11 @@ extern "C" void kernelMain() {
 
     intsHandler.initInterrupts();
 
-    char file3[] = "/dir/shell lol pls no";
-    char file4[] = " ";
+    char shell[] = "/bin/shell";
 
-    taskMgr.createTask(file3, 3, 0);
-    taskMgr.createTask(&reaper, 0, file4, taskMgr.getKernelPHdr());
-    taskMgr.createTask(&loader, 0, file4, taskMgr.getKernelPHdr());
+    taskMgr.createTask(shell, 3, 0);
+    taskMgr.createTask(&reaper, 0, NULL, taskMgr.getKernelPHdr());
+    taskMgr.createTask(&loader, 0, NULL, taskMgr.getKernelPHdr());
 
     while (1);
 }

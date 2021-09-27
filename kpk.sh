@@ -1,18 +1,16 @@
 #!/bin/bash
 
-export PREFIX="$HOME/opt/cross"
+export PREFIX="${HOME}/opt/cross"
 export TARGET=x86_64-elf
-export PATH="$PREFIX/bin:$PATH"
-export KHH_HOME="/home/voidwalker/git-repos/KhhraspokOS"
+export PATH="${PREFIX}/bin:${PATH}"
+export KHH_HOME=${PWD}
 
 function mountFS() {
     sudo mkdir /mnt/kpk
     sudo mount ${KHH_HOME}/KhhraspokOS.bin /mnt/kpk -t vfat
     cd /mnt/kpk
-    for i in $(seq 1 1000); do echo "Hello world1"; done | sudo tee 1.txt 1>/dev/null
-    sudo mkdir dir
-    for i in $(seq 1 1000); do echo "Hello dir"; done | sudo tee dir/2.txt 1>/dev/null
-    sudo cp ${KHH_HOME}/bin/user/* dir/
+    sudo mkdir bin
+    sudo cp ${KHH_HOME}/bin/user/* bin/
     cd ..
     sudo umount kpk
     cd ${KHH_HOME}
