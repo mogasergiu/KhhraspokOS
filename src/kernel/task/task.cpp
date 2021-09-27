@@ -450,12 +450,6 @@ void TaskMgr::endTask(int8_t pid) {
             }
         }
     }
-
-    if (task == NULL) {
-        kpwarn("No such PID!\n");
-
-        return;
-    }
 }
 
 void TaskMgr::endTask() {
