@@ -17,4 +17,6 @@ extern "C" int kfclose(int fd);
 
 extern "C" FILESYSTEM::FileStat* kfstat(int fd);
 
+extern "C" size_t fgets(char *buffer, size_t maxSize);
+
 #endif  /* STDLIB_HPP */

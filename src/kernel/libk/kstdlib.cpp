@@ -1,4 +1,5 @@
 #include <kstdlib.hpp>
+#include <drivers.hpp>
 
 static void reverse(char *str, int length) {
     --length;
@@ -66,3 +67,10 @@ extern "C" FILESYSTEM::FileStat* kfstat(int fd) {
     return vfsHandler.fstat(fd);
 }
 
+extern "C" size_t fgets(char *buffer, size_t maxSize) {
+    size_t len;
+
+    while (!(len = DRIVERS::PS2::KEYBOARD::readKeyboard(buffer, maxSize)));
+
+    return len;
+}

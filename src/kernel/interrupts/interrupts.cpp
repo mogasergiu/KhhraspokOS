@@ -1,5 +1,6 @@
 #include <interrupts.hpp>
 #include <kstdio.hpp>
+#include <kstdlib.hpp>
 #include <syscall.hpp>
 #include <stdarg.h>
 #include <video.hpp>
@@ -461,6 +462,12 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
                 :
                 :
             );
+
+            break;
+
+        case SYS_FGETS:
+            ret = DRIVERS::PS2::KEYBOARD::readKeyboard(va_arg(ap, char*),
+                                                        va_arg(ap, size_t));
 
             break;
 

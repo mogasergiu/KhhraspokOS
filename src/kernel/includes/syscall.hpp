@@ -26,5 +26,6 @@
 #define SYS_PS 19
 #define SYS_SHUTDOWN 20
 #define SYS_REBOOT 21
+#define SYS_FGETS 22
 
 #endif  /*  SYSCALL_HPP  */

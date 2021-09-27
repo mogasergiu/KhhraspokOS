@@ -81,6 +81,8 @@ extern "C" void printf(const char *format, ...) {
 
     va_end(ap);
 
+    str[idx] = 0;
+
     puts(str);
 }
 

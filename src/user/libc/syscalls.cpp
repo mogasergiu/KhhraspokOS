@@ -212,3 +212,18 @@ extern "C" void reboot() {
         : "a" (SYS_REBOOT)
     );
 }
+
+extern "C" size_t fgets(char *buffer, size_t maxSize) {
+    size_t ret;
+
+    while (!ret) {
+        __asm__ __volatile__(
+            "int $0x80;"
+            : "=a"(ret)
+            : "a" (SYS_FGETS), "D" (buffer), "S" (maxSize)
+        );
+    }
+
+    return ret;
+}
+
