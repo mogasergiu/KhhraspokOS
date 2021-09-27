@@ -5,6 +5,7 @@
 #include <kstring.hpp>
 #include <gdt.hpp>
 #include <elf.hpp>
+#include <video.hpp>
 
 using namespace TASK;
 
@@ -14,6 +15,7 @@ static uint8_t threadEnd[] = {0x48, 0xc7, 0xc0, 0x07, 0x0,
                             0x0, 0x0, 0xcd, 0x80, 0xeb, 0xfe};
 
 TaskMgr::TaskMgr() {
+    char kernelFilename[] = "Kernel Thread";
     this->kernelPHdr = (TaskHeader::ProcessHdr*)
                         KPKHEAP::kpkZalloc(sizeof(*this->kernelPHdr));
     CATCH_FIRE(this->kernelPHdr == NULL,
@@ -25,6 +27,7 @@ TaskMgr::TaskMgr() {
     this->kernelPHdr->pd = NULL;
     this->kernelPHdr->heap = NULL;
     this->kernelPHdr->statusEnd = false;
+    memcpy(this->kernelPHdr->filename, kernelFilename, sizeof(kernelFilename));
 }
 
 TaskHeader::ProcessHdr* TaskMgr::getKernelPHdr() const {
@@ -473,4 +476,22 @@ void TaskMgr::endTask() {
 
     task->TCB->statusEnd = task->PCB->statusEnd = true;
 }
-    
+
+void TaskMgr::printPS() const {
+    vgaHandler.putString("\n{TID, PID, PPID, Process Name}\n", 15);
+    TaskHeader *task;
+
+    for (int i = 0; i < this->tasksCount; i++) {
+        task = this->tasks[i];
+
+        if (task == NULL) {
+            continue;
+        }
+
+        kprintf("{%x, %x, %x, %s}\n",
+                task->TCB->tid,
+                task->PCB->pid,
+                task->PCB->ppid,
+                task->PCB->filename);
+    }
+}

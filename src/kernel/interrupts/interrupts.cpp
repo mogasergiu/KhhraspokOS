@@ -366,12 +366,28 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
 
             break;
 
+        case SYS_FREE:
+            TASK::acquireLock(&vgaHandler.vLock);
+            vgaHandler.putChar('\n', 15);
+            kprintf("Used Memory: %x Bytes\n", MMU::usedMem);
+            kprintf("Free Memory: %x Bytes\n", MMU::freeMem);
+            vgaHandler.putChar('\n', 15);
+            TASK::releaseLock(&vgaHandler.vLock);
+
+            break;
+
         case SYS_CLEAR:
             TASK::acquireLock(&vgaHandler.vLock);
             vgaHandler.clear();
             vgaHandler.setLine(0);
             vgaHandler.setColumn(0);
-            vgaHandler.putString("$:> ", 10);
+            TASK::releaseLock(&vgaHandler.vLock);
+
+            break;
+
+        case SYS_PS:
+            TASK::acquireLock(&vgaHandler.vLock);
+            taskMgr.printPS();
             TASK::releaseLock(&vgaHandler.vLock);
 
             break;

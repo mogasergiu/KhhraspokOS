@@ -23,5 +23,6 @@
 #define SYS_LSPCI 16
 #define SYS_FREE 17
 #define SYS_CLEAR 18
+#define SYS_PS 19
 
 #endif  /*  SYSCALL_HPP  */

@@ -8,6 +8,8 @@ int main(int argc, char **argv) {
     lspci();
     free();
     clear();
+    free();
+    ps();
 
     return 0;
 }

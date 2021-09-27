@@ -23,6 +23,7 @@
 #define SYS_LSPCI 16
 #define SYS_FREE 17
 #define SYS_CLEAR 18
+#define SYS_PS 19
 
 extern "C" void putch(const char c);
 
@@ -59,5 +60,7 @@ extern "C" void lspci();
 extern "C" void free();
 
 extern "C" void clear();
+
+extern "C" void ps();
 
 #endif  /*  SYSCALL_HPP  */

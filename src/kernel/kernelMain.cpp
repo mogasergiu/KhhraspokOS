@@ -52,8 +52,5 @@ extern "C" void kernelMain() {
     taskMgr.createTask(&reaper, 0, file4, taskMgr.getKernelPHdr());
     taskMgr.createTask(&loader, 0, file4, taskMgr.getKernelPHdr());
 
-    while (1) {
-        pitHandler.sleep(10);
-        kprintf("CPUS: %d\n", *apicHandler.activeCPUs);
-    };
+    while (1);
 }

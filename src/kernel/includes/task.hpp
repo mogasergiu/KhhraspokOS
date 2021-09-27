@@ -108,6 +108,7 @@ namespace TASK {
             void endTask(int8_t pid);
             void endTask();
             bool taskReady(uint8_t tid) const;
+            void printPS() const;
     };
 }
 

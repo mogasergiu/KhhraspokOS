@@ -188,3 +188,12 @@ extern "C" void clear() {
         : "a" (SYS_CLEAR)
     );
 }
+
+extern "C" void ps() {
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_PS)
+    );
+}
+
