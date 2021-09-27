@@ -24,5 +24,7 @@
 #define SYS_FREE 17
 #define SYS_CLEAR 18
 #define SYS_PS 19
+#define SYS_SHUTDOWN 20
+#define SYS_REBOOT 21
 
 #endif  /*  SYSCALL_HPP  */

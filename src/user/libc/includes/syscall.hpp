@@ -24,6 +24,8 @@
 #define SYS_FREE 17
 #define SYS_CLEAR 18
 #define SYS_PS 19
+#define SYS_SHUTDOWN 20
+#define SYS_REBOOT 21
 
 extern "C" void putch(const char c);
 
@@ -62,5 +64,9 @@ extern "C" void free();
 extern "C" void clear();
 
 extern "C" void ps();
+
+extern "C" void shutdown();
+
+extern "C" void reboot();
 
 #endif  /*  SYSCALL_HPP  */

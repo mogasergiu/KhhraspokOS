@@ -10,6 +10,7 @@ int main(int argc, char **argv) {
     clear();
     free();
     ps();
+    reboot();
 
     return 0;
 }

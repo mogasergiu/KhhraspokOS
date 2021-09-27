@@ -197,3 +197,18 @@ extern "C" void ps() {
     );
 }
 
+extern "C" void shutdown() {
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_SHUTDOWN)
+    );
+}
+
+extern "C" void reboot() {
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_REBOOT)
+    );
+}

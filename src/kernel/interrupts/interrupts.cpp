@@ -209,7 +209,7 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
     long sysNo;
     TASK::TaskHeader *task;
     uintptr_t edx, eax;
-    uint8_t tid;
+    uint8_t tid, good = 0x2;
     MMU::memRegionDescriptor *md;
 
     __asm__ __volatile__(
@@ -443,6 +443,24 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             TASK::acquireLock(&vgaHandler.vLock);
             taskMgr.printPS();
             TASK::releaseLock(&vgaHandler.vLock);
+
+            break;
+
+        case SYS_SHUTDOWN:
+            PMIO::pOutWord(0x604, 0x2000);
+
+            break;
+
+        case SYS_REBOOT:
+            while (good & 0x2) {
+                good = PMIO::pInByte(0x64);
+            }
+            PMIO::pOutWord(0x64, 0xfe);
+            __asm__ __volatile__(
+                "hlt;"
+                :
+                :
+            );
 
             break;
 
