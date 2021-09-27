@@ -19,6 +19,7 @@
 #define SYS_CREATE_THREAD 12
 #define SYS_THREAD_JOIN 13
 #define SYS_MUNMAP 14
+#define SYS_PROMPT 15
 
 extern "C" void putch(const char c);
 
@@ -47,5 +48,7 @@ extern "C" int createThread(void (*func)(int argc, char **argv), char *args);
 extern "C" int threadJoin(uint8_t tid);
 
 extern "C" int munmap(void *addr, size_t length);
+
+extern "C" void prompt();
 
 #endif  /*  SYSCALL_HPP  */

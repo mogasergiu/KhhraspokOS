@@ -351,6 +351,13 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
 
             break;
 
+        case SYS_PROMPT:
+            TASK::acquireLock(&vgaHandler.vLock);
+            vgaHandler.putString("$:> ", 10);
+            TASK::releaseLock(&vgaHandler.vLock);
+
+            break;
+
         default:
             TASK::acquireLock(&vgaHandler.vLock);
             kprintf("%x Syscall does not exit yet!\n", sysNo);

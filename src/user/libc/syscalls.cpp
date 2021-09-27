@@ -157,3 +157,10 @@ extern "C" int munmap(void *addr, size_t length) {
     return ret;
 }
 
+extern "C" void prompt() {
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_PROMPT)
+    );
+}
