@@ -109,6 +109,8 @@ namespace DRIVERS {
             extern char buffer[KEYBOARD_BUFFER_MAX_SIZE];
 
             void __attribute__((constructor)) initKeyboard();
+
+            size_t readKeyboard(char *buf);
         }
     }
 };

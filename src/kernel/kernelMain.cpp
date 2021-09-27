@@ -45,7 +45,13 @@ extern "C" void kernelMain() {
 
     intsHandler.initInterrupts();
 
-    char file3[] = "/dir/shell lol pls no";
+    char buf[100];
+    while (1) {
+    while (!DRIVERS::PS2::KEYBOARD::readKeyboard(buf));
+    kprintf("%s\n", buf);
+    }
+
+/*    char file3[] = "/dir/shell lol pls no";
     char file4[] = " ";
 
     taskMgr.createTask(file3, 3, 0);
@@ -55,5 +61,5 @@ extern "C" void kernelMain() {
     while (1) {
         pitHandler.sleep(10);
         kprintf("CPUS: %d\n", *apicHandler.activeCPUs);
-    };
+    };*/
 }

@@ -5,7 +5,7 @@
 using namespace DRIVERS::PS2::KEYBOARD;
 using namespace INTERRUPTS;
 
-char buffer[KEYBOARD_BUFFER_MAX_SIZE];
+char DRIVERS::PS2::KEYBOARD::buffer[KEYBOARD_BUFFER_MAX_SIZE];
 
 static uint8_t keyboardCode[] = {
     0x00, 0x1B, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=',
@@ -17,11 +17,48 @@ static uint8_t keyboardCode[] = {
 };
 
 static uint8_t keyboardCodeSize = sizeof(keyboardCode) / sizeof(*keyboardCode);
-
-static bool capitalON;
+static uint32_t buffIdx, readIdx;
+static bool capitalON, lineON;
 
 void __attribute__((constructor)) initKeyboard() {
     PMIO::pOutByte(PS2_PORT, PS2_ENABLE_KEYBOARD);
+}
+
+static void putInBuffer(char c) {
+    if (buffIdx == KEYBOARD_BUFFER_MAX_SIZE) {
+        buffIdx = 0;
+    }
+
+    buffer[buffIdx++] = c;
+}
+
+size_t DRIVERS::PS2::KEYBOARD::readKeyboard(char *buf) {
+    if (!lineON) {
+        return 0;
+    }
+
+    for (int i = 0; i < KEYBOARD_BUFFER_MAX_SIZE; i++, readIdx++) {
+        if (readIdx == KEYBOARD_BUFFER_MAX_SIZE) {
+            readIdx = 0;
+        }
+
+        if (buffer[readIdx] == '\n') {
+            buf[i] = 0;
+
+            lineON = false;
+
+            readIdx++;
+
+            return i + 1;
+
+        } else {
+            buf[i] = buffer[readIdx];
+        }
+    }
+
+    lineON = false;
+
+    return 0;
 }
 
 extern "C" void IntCallbacks::keyboardIRQ() {
@@ -29,9 +66,12 @@ extern "C" void IntCallbacks::keyboardIRQ() {
     PMIO::pInByte(KEYBOARD_INPUT_PORT);
 
     if (scanCode == KEYBOARD_SPACE_PRESSED) {
+        putInBuffer(' ');
         kputc(' ');
 
     } else if (scanCode == KEYBOARD_ENTER_PRESSED) {
+        putInBuffer('\n');
+        lineON = true;
         kputc('\n');
 
     } else if (scanCode == KEYBOARD_CAPSLOCK_PRESSED ||
@@ -47,6 +87,7 @@ extern "C" void IntCallbacks::keyboardIRQ() {
                     keyboardCode[scanCode] + 32;
 
         if (c) {
+            putInBuffer(c);
             kputc(c);
         }
     }
