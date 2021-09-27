@@ -61,8 +61,6 @@ namespace TASK {
             } env;
             uint8_t tid;
             bool statusEnd;
-            size_t pgCount;
-            void *lastVaddr;
         }__attribute__((packed)) *TCB;
 
         struct ProcessHdr {

@@ -27,7 +27,6 @@ extern "C" void IntCallbacks::lapicTimerIRQ() {
             TASK::ret2User(&task->TCB->ctxReg);
 
         }
-
     } else { 
         apicHandler.sendLAPICEOI();
     }

@@ -341,8 +341,6 @@ ret2User:
     mov r14, qword [r15 + 104]
     mov r15, qword [r15 + 112]
 
-    sti
-    
     iretq
 
 global acquireLock

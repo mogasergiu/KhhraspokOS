@@ -77,21 +77,35 @@ void TaskMgr::freeTask(uint8_t tid) {
 
     if (task != NULL) {
         if (task->TCB != NULL && task->TCB->statusEnd == true) {
-            for (uintptr_t i =
+/*            for (uintptr_t i =
                 (uintptr_t)((uint8_t*)task->TCB->lastVaddr - USERSPACE_START_ADDR)
                         / PAGE_SIZE;
                 task->TCB->pgCount != 0;
                 task->TCB->pgCount--, i--) {
                     pageManager.freePg(task->PCB->pd->entries[i]);
-            }
+            }*/
 
             KPKHEAP::kpkFree(task->TCB);
             task->TCB = NULL;
         }
 
         if (task->PCB != NULL) {
-            if (task->PCB->ogTLS != NULL) {
-                KPKHEAP::kpkFree(task->PCB->ogTLS);
+            if (task->PCB->pid == task->TCB->tid) {
+                if (task->PCB->ogTLS != NULL) {
+                    KPKHEAP::kpkFree(task->PCB->ogTLS);
+
+                }
+
+                for (int i =
+                    (int)((uintptr_t)
+                    ((uint8_t*)task->PCB->lastVaddr - USERSPACE_START_ADDR)
+                            / PAGE_SIZE);
+                    i >= 0;
+                    i--) {
+                        pageManager.freePg(task->PCB->pd->entries[i]);
+                }
+
+                pageManager.freePg(task->PCB->pd);
             }
 
             KPKHEAP::kpkFree(task->PCB);
@@ -102,6 +116,8 @@ void TaskMgr::freeTask(uint8_t tid) {
     }
 
     this->tasks[tid] = NULL;
+
+    this->tasksCount--;
 }
 
 TaskHeader* TASK::TaskMgr::schedule() {
@@ -141,11 +157,14 @@ TaskHeader* TASK::TaskMgr::schedule() {
     while (task != NULL && (task->PCB->statusEnd || task->TCB->statusEnd)) {
         this->tasksToReap.push(task->TCB->tid);
 
+        if (this->threadsQue[id].isEmpty()) {
+            return NULL;
+        }
+
         task = this->tasks[*this->threadsQue[id].pop()];
     }
- 
-    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = (uint64_t*)task->PCB->pd;
 
+    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = (uint64_t*)task->PCB->pd;
     flushCR3();
 
     return task;
@@ -196,13 +215,14 @@ void TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
 
     kfread(fd, buffer, fst->size);
 
+    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = NULL;
+    flushCR3();
+
     void *lastVaddr = loadELF(buffer, task);
     CATCH_FIRE(lastVaddr == NULL, "Could not load ELF!\n");
 
     KPKHEAP::kpkFree(buffer);
     kfclose(fd);
-
-    lastVaddr= (uint8_t*)lastVaddr + PAGE_SIZE;
 
     void *lastPg = pageManager.reqPg();
     pageManager.mapPg(lastVaddr, lastPg, PDE_P | PDE_R | PDE_U);
@@ -219,7 +239,7 @@ void TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
 
     task->PCB->ppid = ppid;
 
-    task->PCB->pid = ++this->pids;
+    task->PCB->pid = task->TCB->tid;
 
     task->PCB->statusEnd = false;
 
@@ -245,8 +265,6 @@ void TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
     pageManager.mapPg(lastVaddr, lastPg, PDE_P | PDE_R | PDE_U);
 
     task->PCB->lastVaddr = (uint8_t*)lastVaddr + PAGE_SIZE;
-    task->TCB->lastVaddr = lastVaddr;
-    task->TCB->pgCount = ((size_t)lastVaddr - USERSPACE_START_ADDR) / PAGE_SIZE;
    
     arg = strtok(args, filter);
     size_t argSize = strlen(arg);
@@ -280,7 +298,7 @@ void TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
 
     flushCR3();
 
-    this->tasksToLoad.push(task->TCB->tid);
+    this->threadsQue[0].push(task->TCB->tid);
 }
 
 void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
@@ -324,7 +342,6 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
         lastPg = pageManager.reqPg();
         pageManager.mapPg(task->PCB->lastVaddr, lastPg, flags);
 
-        task->TCB->pgCount++; 
         char *argv0 = (char*)task->PCB->lastVaddr;
         size_t len;
         while (arg != NULL) {
@@ -350,7 +367,6 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
     lastPg = pageManager.reqPg();
     pageManager.mapPg(task->PCB->lastVaddr, lastPg, flags);
 
-    task->TCB->pgCount++; 
     task->PCB->lastVaddr = (uint8_t*)task->PCB->lastVaddr + PAGE_SIZE;
 
     task->TCB->stack = (uint8_t*)task->PCB->lastVaddr - 32;
@@ -375,7 +391,6 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
             task->PCB->lastVaddr = (uint8_t*)task->PCB->lastVaddr + PAGE_SIZE) {
             lastPg = pageManager.reqPg();
             pageManager.mapPg(task->PCB->lastVaddr, lastPg, flags);
-            task->TCB->pgCount++; 
         }
 
         memcpy(lastVaddr, PCB->ogTLS, PCB->tlsSize);
@@ -385,9 +400,8 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
 
     lastPg = pageManager.reqPg();
     pageManager.mapPg(task->PCB->lastVaddr, lastPg, flags);
+    task->PCB->lastVaddr = (uint8_t*)task->PCB->lastVaddr + PAGE_SIZE;
    
-    task->TCB->lastVaddr = task->PCB->lastVaddr;
-
     task->TCB->ctxReg.rdi = task->TCB->env.argc;
     task->TCB->ctxReg.rsi = (uint64_t)task->TCB->env.argv;
     task->TCB->ctxReg.rip = ((uint64_t)func);
@@ -415,13 +429,17 @@ uint8_t TaskMgr::getTasksCount() const {
 void TaskMgr::endTask(int8_t pid) {
     TaskHeader *task = NULL;
 
-    for (uint8_t i = 0; i < this->tasksCount; i++) {
-        if (this->tasks[i]->PCB->pid == pid) {
-            task = this->tasks[i];
+    volatile uint8_t initialTasksCount = this->tasksCount;
+    for (uint8_t i = 0; i <= initialTasksCount; i++) {
+        if (this->tasks[i] != NULL) {
+            if (this->tasks[i]->PCB->pid == pid &&
+                this->tasks[i]->TCB->tid != pid) {
+                task = this->tasks[i];
 
-            task->TCB->statusEnd = task->PCB->statusEnd = true;
+                task->TCB->statusEnd = task->PCB->statusEnd = true;
 
-            break;
+                while (this->tasks[i] != NULL);
+            }
         }
     }
 
@@ -443,7 +461,11 @@ void TaskMgr::endTask() {
     );
 
     task = (TaskHeader*)((edx <<  32) + eax);
-   
+ 
+    if (task->TCB->tid == task->PCB->pid) {
+        this->endTask(task->PCB->pid);
+    }
+
     task->TCB->statusEnd = task->PCB->statusEnd = true;
 }
     
