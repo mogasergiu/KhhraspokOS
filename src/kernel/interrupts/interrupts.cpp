@@ -263,21 +263,16 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             break;
 
         case SYS_FORK:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo)
-            );
+            TASK::acquireLock(&vgaHandler.vLock);
+            kpwarn("STUBBED!\n");
+            TASK::releaseLock(&vgaHandler.vLock);
 
             break;
 
         case SYS_EXECVE:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, char*)),
-                    "S" (va_arg(ap, char**))
-            );
+            TASK::acquireLock(&vgaHandler.vLock);
+            kpwarn("STUBBED!\n");
+            TASK::releaseLock(&vgaHandler.vLock);
 
             break;
 
@@ -287,21 +282,17 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             break;
 
         case SYS_MMAP:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, void*)),
-                "S" (va_arg(ap, size_t)), "d" (va_arg(ap, int))
-            );
+            TASK::acquireLock(&vgaHandler.vLock);
+            kpwarn("STUBBED!\n");
+            TASK::releaseLock(&vgaHandler.vLock);
+
 
             break;
 
         case SYS_SCHED_YIELD:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo)
-            );
+            TASK::acquireLock(&vgaHandler.vLock);
+            kpwarn("STUBBED!\n");
+            TASK::releaseLock(&vgaHandler.vLock);
 
             break;
 
@@ -350,17 +341,16 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             break;
 
         case SYS_MUNMAP:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, void*)),
-                "S" (va_arg(ap, size_t))
-            );
+            TASK::acquireLock(&vgaHandler.vLock);
+            kpwarn("STUBBED!\n");
+            TASK::releaseLock(&vgaHandler.vLock);
 
             break;
 
-//        default:
-//            printf("%x Syscall does not exit yet!\n");
+        default:
+            TASK::acquireLock(&vgaHandler.vLock);
+            kprintf("%x Syscall does not exit yet!\n", sysNo);
+            TASK::releaseLock(&vgaHandler.vLock);
     }
 
     va_end(ap);
