@@ -210,6 +210,7 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
     TASK::TaskHeader *task;
     uintptr_t edx, eax;
     uint8_t tid;
+    MMU::memRegionDescriptor *md;
 
     __asm__ __volatile__(
         ""
@@ -371,6 +372,59 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             vgaHandler.putChar('\n', 15);
             kprintf("Used Memory: %x Bytes\n", MMU::usedMem);
             kprintf("Free Memory: %x Bytes\n", MMU::freeMem);
+            vgaHandler.putString("Memory Map:\n"
+                                "{Base Address, Size, Type, Attribute}\n", 15);
+            for (md = MMU::memMap; md < (MMU::memMap + MMU::memRegionCount); md++) {
+                switch (md->type) {
+                    case USABLE_MEM:
+                        kprintf("{%x, %x, Usable Memory, %x}\n",
+                                md->baseAddr,
+                                md->length,
+                                md->type,
+                                md->attr);
+
+                        break;
+
+                    case RESERVED_MEM:
+                        kprintf("{%x, %x, Reserved Memory, %x}\n",
+                                md->baseAddr,
+                                md->length,
+                                md->type,
+                                md->attr);
+
+                        break;
+
+                    case ACPI_RECLAIMABLE_MEM:
+                        kprintf("{%x, %x, ACPI Reclaimable Memory, %x}\n",
+                                md->baseAddr,
+                                md->length,
+                                md->type,
+                                md->attr);
+
+                        break;
+
+                    case ACPI_NVS_MEM:
+                        kprintf("{%x, %x, ACPI NVS Memory, %x}\n",
+                                md->baseAddr,
+                                md->length,
+                                md->type,
+                                md->attr);
+
+                        break;
+
+                    case BAD_MEM:
+                        kprintf("{%x, %x, Corrupted Memory, %x}\n",
+                                md->baseAddr,
+                                md->length,
+                                md->type,
+                                md->attr);
+
+                        break;
+
+                    default:
+                        kprintf("Unknown Memory Type: %x\n", md->type);
+                }
+            }
             vgaHandler.putChar('\n', 15);
             TASK::releaseLock(&vgaHandler.vLock);
 
