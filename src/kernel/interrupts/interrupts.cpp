@@ -206,6 +206,9 @@ void Interrupts::setIDTEntry(uint32_t number, void (*address)(), uint8_t type) {
 
 extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
     long sysNo;
+    TASK::TaskHeader *task;
+    uintptr_t edx, eax;
+    uint8_t tid;
 
     __asm__ __volatile__(
         ""
@@ -237,28 +240,40 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
 
         case SYS_GETPID:
             __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo)
+                "rdmsr;"
+                : "=a" (eax), "=d" (edx)
+                : "c" (0xc0000101)
             );
+
+            task = (TASK::TaskHeader*)((edx <<  32) + eax);
+
+            ret = task->PCB->pid;
 
             break;
 
         case SYS_GETPPID:
             __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo)
+                "rdmsr;"
+                : "=a" (eax), "=d" (edx)
+                : "c" (0xc0000101)
             );
+
+            task = (TASK::TaskHeader*)((edx <<  32) + eax);
+
+            ret = task->PCB->ppid;
 
             break;
 
         case SYS_GETTID:
             __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo)
+                "rdmsr;"
+                : "=a" (eax), "=d" (edx)
+                : "c" (0xc0000101)
             );
+
+            task = (TASK::TaskHeader*)((edx <<  32) + eax);
+
+            ret = task->TCB->tid;
 
             break;
 
@@ -297,46 +312,35 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             break;
 
         case SYS_SLEEP:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, uint64_t))
-            );
+            pitHandler.sleep(va_arg(ap, size_t));
 
             break;
 
         case SYS_KILL:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, uintptr_t))
-            );
+            TASK::acquireLock(&vgaHandler.vLock);
+            kpwarn("STUBBED!\n");
+            TASK::releaseLock(&vgaHandler.vLock);
 
             break;
 
         case SYS_CREATE_THREAD:
-                TASK::TaskHeader *task;
-                uintptr_t edx, eax;
+            __asm__ __volatile__(
+                "rdmsr;"
+                : "=a" (eax), "=d" (edx)
+                : "c" (0xc0000101)
+            );
 
-                __asm__ __volatile__(
-                    "rdmsr;"
-                    : "=a" (eax), "=d" (edx)
-                    : "c" (0xc0000101)
-                );
+            task = (TASK::TaskHeader*)((edx <<  32) + eax);
 
-                task = (TASK::TaskHeader*)((edx <<  32) + eax);
-
-                taskMgr.createTask(va_arg(ap, void (*)(int, char**)), 3,
-                                    va_arg(ap, char*), task->PCB);
+            ret = taskMgr.createTask(va_arg(ap, void (*)(int, char**)), 3,
+                                        va_arg(ap, char*), task->PCB);
 
             break;
 
         case SYS_THREAD_JOIN:
-            __asm__ __volatile__(
-                "int $0x80;"
-                : "=a"(ret)
-                : "a" (sysNo), "D" (va_arg(ap, uintptr_t))
-            );
+            tid = arg1;
+
+            taskMgr.taskReady(tid);
 
             break;
 

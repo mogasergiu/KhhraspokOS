@@ -101,12 +101,13 @@ namespace TASK {
             friend void ::loader(int argc, char **argv);
             friend void INTERRUPTS::IntCallbacks::lapicTimerIRQ();
             void createTask(char *args, uint8_t dpl, int8_t ppid);
-            void createTask(void (*)(int, char**), uint8_t dpl,
+            uint8_t createTask(void (*)(int, char**), uint8_t dpl,
                                 char *args, TASK::TaskHeader::ProcessHdr *PCB);
             void loadTask(TaskHeader *task);
             void freeTask(uint8_t tid);
             void endTask(int8_t pid);
             void endTask();
+            bool taskReady(uint8_t tid) const;
     };
 }
 

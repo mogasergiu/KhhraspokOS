@@ -131,13 +131,16 @@ extern "C" int createThread(void (*func)(int argc, char **argv), char *args) {
 }
 
 extern "C" int threadJoin(uint8_t tid) {
-    int ret;
+    int ret = 0;
 
-    __asm__ __volatile__(
-        "int $0x80;"
-        : "=a"(ret)
-        : "a" (SYS_THREAD_JOIN), "D" (tid)
-    );
+    bool threadReady = false;
+    while (!threadReady) {
+        __asm__ __volatile__(
+            "int $0x80;"
+            : "=a"(threadReady)
+            : "a" (SYS_THREAD_JOIN), "D" (tid)
+        );
+    }
 
     return ret;
 }

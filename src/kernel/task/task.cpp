@@ -301,12 +301,12 @@ void TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
     this->threadsQue[0].push(task->TCB->tid);
 }
 
-void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
+uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
                                 char *args, TASK::TaskHeader::ProcessHdr *PCB) {
     if (this->tasksCount == MAX_TASKS_COUNT) {
         kpwarn("Maximum tasks reached! Retry again later!\n");
 
-        return;
+        return 0;
     }
 
     MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = (uint64_t*)PCB->pd;
@@ -419,12 +419,17 @@ void TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
     } else {
         this->tasksToLoad.push(task->TCB->tid);
     }
+
+    return task->TCB->tid;
 }
 
 uint8_t TaskMgr::getTasksCount() const {
     return this->tasksCount;
 }
 
+bool TaskMgr::taskReady(uint8_t tid) const {
+    return this->tasks[tid]->TCB->statusEnd;
+}
 
 void TaskMgr::endTask(int8_t pid) {
     TaskHeader *task = NULL;
