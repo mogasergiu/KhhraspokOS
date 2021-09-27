@@ -6,18 +6,22 @@ using namespace VIDEO;
 
 VIDEO::VGA::TextMode vgaHandler;
 
+void VGA::TextMode::clear() {
+     // Clear screen (fill with black zeroes)
+    for (uint8_t l = 0; l < VGA_HEIGHT; l++) {
+        for (uint8_t c = 0; c < VGA_WIDTH; c++) {
+            this->address[l * VGA_WIDTH + c] = 0x0032;
+        }
+    }
+}  
+
 // Constructor - sets up line, column, address and VGA buffer
 VGA::TextMode::TextMode() {
     this->column = this->line = 0;
 
     this->address = (uint16_t*)VGA_START_ADDRESS;
 
-    // Clear screen (fill with black zeroes)
-    for (uint8_t l = 0; l < VGA_HEIGHT; l++) {
-        for (uint8_t c = 0; c < VGA_WIDTH; c++) {
-            this->address[l * VGA_WIDTH + c] = 0x0032;
-        }
-    }
+    this->clear();
 
     // disable cursor
     PMIO::pOutByte(0x3D4, 0x0A);

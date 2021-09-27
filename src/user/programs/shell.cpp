@@ -4,8 +4,10 @@
 
 int main(int argc, char **argv) {
 
-    while (1)
-        prompt();
+    prompt();
+    lspci();
+    free();
+    clear();
 
     return 0;
 }

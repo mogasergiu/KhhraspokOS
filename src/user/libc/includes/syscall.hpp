@@ -20,6 +20,9 @@
 #define SYS_THREAD_JOIN 13
 #define SYS_MUNMAP 14
 #define SYS_PROMPT 15
+#define SYS_LSPCI 16
+#define SYS_FREE 17
+#define SYS_CLEAR 18
 
 extern "C" void putch(const char c);
 
@@ -50,5 +53,11 @@ extern "C" int threadJoin(uint8_t tid);
 extern "C" int munmap(void *addr, size_t length);
 
 extern "C" void prompt();
+
+extern "C" void lspci();
+
+extern "C" void free();
+
+extern "C" void clear();
 
 #endif  /*  SYSCALL_HPP  */

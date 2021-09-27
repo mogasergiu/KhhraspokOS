@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <video.hpp>
 #include <task.hpp>
+#include <drivers.hpp>
 
 using namespace INTERRUPTS;
 
@@ -353,6 +354,23 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
 
         case SYS_PROMPT:
             TASK::acquireLock(&vgaHandler.vLock);
+            vgaHandler.putString("$:> ", 10);
+            TASK::releaseLock(&vgaHandler.vLock);
+
+            break;
+
+        case SYS_LSPCI:
+            TASK::acquireLock(&vgaHandler.vLock);
+            DRIVERS::PCI::printPCIDevices();
+            TASK::releaseLock(&vgaHandler.vLock);
+
+            break;
+
+        case SYS_CLEAR:
+            TASK::acquireLock(&vgaHandler.vLock);
+            vgaHandler.clear();
+            vgaHandler.setLine(0);
+            vgaHandler.setColumn(0);
             vgaHandler.putString("$:> ", 10);
             TASK::releaseLock(&vgaHandler.vLock);
 

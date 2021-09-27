@@ -164,3 +164,27 @@ extern "C" void prompt() {
         : "a" (SYS_PROMPT)
     );
 }
+
+extern "C" void lspci() {
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_LSPCI)
+    );
+}
+
+extern "C" void free() {
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_FREE)
+    );
+}
+
+extern "C" void clear() {
+    __asm__ __volatile__(
+        "int $0x80;"
+        :
+        : "a" (SYS_CLEAR)
+    );
+}

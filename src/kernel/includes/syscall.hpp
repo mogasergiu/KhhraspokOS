@@ -20,5 +20,8 @@
 #define SYS_THREAD_JOIN 13
 #define SYS_MUNMAP 14
 #define SYS_PROMPT 15
+#define SYS_LSPCI 16
+#define SYS_FREE 17
+#define SYS_CLEAR 18
 
 #endif  /*  SYSCALL_HPP  */
