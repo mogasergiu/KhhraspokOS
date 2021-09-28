@@ -86,8 +86,7 @@ static inline void gatherPCIDevInfo(uint8_t bus, uint8_t device, uint8_t func) {
 }
 
 static void printPCIDevice(PCI::PCIDevType *dev) {
-    kprintf("Found PCI Device: %x (Device ID), %x (Vendor ID), %x (Class Code),"
-           "%x (Subclass), %x (Prog IF), %x (Revision ID), %x (Header Type).\n",
+    kprintf("{%x, %x, %x, %x, %x, %x, %x}\n",
            dev->deviceID,
            dev->vendorID,
            dev->classCode,
@@ -98,6 +97,9 @@ static void printPCIDevice(PCI::PCIDevType *dev) {
 }
 
 void PCI::printPCIDevices() {
+    kprintf("{Device ID, Vendor ID, Class Code, Subclass, Prog IF, Revision ID,"
+            "Header Type}\n");
+
     for (int i = 0; i < PCI::PCIDevicesCount; i++) {
         printPCIDevice(&PCI::pciDevs[i]);
     }
