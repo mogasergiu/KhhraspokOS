@@ -153,3 +153,6 @@ uint8_t VGA::TextMode::setColumn(const uint8_t column) {
     return this->column;
 }
 
+uint16_t VGA::TextMode::getCurrChar() {
+    return this->address[VGA_WIDTH * this->line + this->column - 1];
+}

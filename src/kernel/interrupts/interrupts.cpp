@@ -356,7 +356,7 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
 
         case SYS_PROMPT:
             TASK::acquireLock(&vgaHandler.vLock);
-            vgaHandler.putString("$:> ", 10);
+            vgaHandler.putString("$:>", 10);
             TASK::releaseLock(&vgaHandler.vLock);
 
             break;

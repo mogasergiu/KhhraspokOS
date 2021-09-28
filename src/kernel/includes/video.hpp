@@ -93,6 +93,8 @@ namespace VIDEO {
                  *          column is out of bounds
                  */
                 uint8_t setColumn(const uint8_t column);
+
+                uint16_t getCurrChar();
         };
     };
 }

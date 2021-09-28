@@ -1,6 +1,7 @@
 #include <interrupts.hpp>
 #include <drivers.hpp>
 #include <kstdio.hpp>
+#include <video.hpp>
 
 using namespace DRIVERS::PS2::KEYBOARD;
 using namespace INTERRUPTS;
@@ -62,6 +63,15 @@ size_t DRIVERS::PS2::KEYBOARD::readKeyboard(char *buf, size_t size) {
     return 0;
 }
 
+static inline void deleteChar() {
+    if (vgaHandler.getCurrChar() != 0xa3e) {
+        vgaHandler.setColumn(vgaHandler.getColumn() - 1);
+        vgaHandler.putChar(0x32, 0);
+        vgaHandler.setColumn(vgaHandler.getColumn() - 1);
+        buffIdx--;
+    }
+}
+
 extern "C" void IntCallbacks::keyboardIRQ() {
     uint8_t scanCode = PMIO::pInByte(KEYBOARD_INPUT_PORT);
     PMIO::pInByte(KEYBOARD_INPUT_PORT);
@@ -69,6 +79,9 @@ extern "C" void IntCallbacks::keyboardIRQ() {
     if (scanCode == KEYBOARD_SPACE_PRESSED) {
         putInBuffer(' ');
         kputc(' ');
+
+    } else if (scanCode == KEYBOARD_BACKSPACE_PRESSED) {
+        deleteChar();
 
     } else if (scanCode == KEYBOARD_ENTER_PRESSED) {
         putInBuffer('\n');
