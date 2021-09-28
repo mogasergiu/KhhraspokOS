@@ -1,10 +1,11 @@
 #include <kpkheap.hpp>
 #include <kstring.hpp>
 #include <kstdio.hpp>
+#include <kdsa.hpp>
 
 using namespace KPKHEAP;
 
-static chunk *bucket[KPKBUCKET_SIZE];
+static Queue<chunk*> bucket[KPKBUCKET_SIZE];
 void* KPKHEAP::topChunk = (void*)KPKHEAP_START;
 
 static inline uintptr_t msb (size_t size)
@@ -22,20 +23,6 @@ static inline uintptr_t lsb (size_t size)
 
     return ret;
 }
-
-static inline void popChunk(chunk **bucket, chunk *it) {
-    if (it->link.prev == NULL) {
-        *bucket = it->link.next;
-
-    } else if (it->link.next == NULL) {
-        it->link.prev->link.next = NULL;
-
-    } else {
-        it->link.prev->link.next = it->link.next;
-        it->link.next->link.prev = it->link.prev;
-    }
-}        
-
 
 static inline size_t alignSize(size_t size) {
     uint8_t sizeMSB = (uint8_t)msb(size);
@@ -56,38 +43,9 @@ static inline chunk* chunkEaddr(chunk *it) {
     return (chunk*)((char*)it + it->metadata.size);
 }
 
-static inline void consolidate(chunk *l, chunk *r) {
-    l->metadata.size <<= 1;
-}
-
 static void pushChunk(chunk *c) {
     uint8_t bucketIdx = (uint8_t)msb(c->metadata.size) - 4;
-    chunk *it = bucket[bucketIdx];
-
-    if (it == NULL) {
-        bucket[bucketIdx] = c;
-        return;
-    }
-
-    while (it != NULL && it->link.next) {
-        if (it == chunkEaddr(c)) {
-            consolidate(c, it);
-            popChunk(&bucket[bucketIdx], it);
-            pushChunk(c);
-            return;
-
-        } else if (c == chunkEaddr(it)) {
-            consolidate(it, c);
-            popChunk(&bucket[bucketIdx], it);
-            pushChunk(it);
-            return;
-        }
-
-        it = it->link.next;
-    }
-
-    it->link.next = c;
-    c->link.prev = it;
+    bucket[bucketIdx].push(c);
 }
 
 static chunk* makeChunk(void *addr, size_t size) {
@@ -105,12 +63,6 @@ static chunk* makeChunk(void *addr, size_t size) {
     return it;
 }
 
-static inline void fragmentChunk(chunk *it, size_t size) {
-    if (it->metadata.size > size) {
-        pushChunk(makeChunk(it, (size >> 1)));
-    }
-}
-
 static chunk* checkBucket(size_t size) {
     uint8_t bucketIdx = size;
     if (size > MAX_CHUNK_SIZE) {
@@ -119,34 +71,21 @@ static chunk* checkBucket(size_t size) {
 
     bucketIdx = msb(size) - 4;
 
-    chunk *it = bucket[bucketIdx];
-    while (it != NULL && it->metadata.size < size) {
-        it = it->link.next;
+    if (bucket[bucketIdx].isEmpty()) {
+        return NULL;
+
+    } else {
+        return *bucket[bucketIdx].pop();
     }
-
-    if (it != NULL) {
-        if (it->metadata.size == size) {
-            popChunk(&bucket[bucketIdx], it);
-            it->metadata.free = 0;
-            return it;
-
-        } else {
-            fragmentChunk(it, size);
-            popChunk(&bucket[bucketIdx], it);
-            return it;
-        }
-    }
-
-    return NULL;
 }
 
 extern "C" void* kpkMalloc(size_t size) {
-    size = alignSize(size);
+    size_t __size = alignSize(size);
 
-    chunk *ret = checkBucket(size);
+    chunk *ret = checkBucket(__size);
 
     if (ret == NULL) {
-        ret = makeChunk(KPKHEAP::topChunk, size);
+        ret = makeChunk(KPKHEAP::topChunk, __size);
 
         if (ret != NULL) {
             KPKHEAP::topChunk = (void*)((char*)topChunk + size + sizeof(chunk));

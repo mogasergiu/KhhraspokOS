@@ -180,9 +180,9 @@ class Stack : public LinkedList<T> {
                 return NULL;
             }
 
-            T *it = this->get(0);
+            T *it = this->get((size_t)0);
 
-            this->deleteElem(0);
+            this->deleteElem((size_t)0);
 
             this->size--;
 
