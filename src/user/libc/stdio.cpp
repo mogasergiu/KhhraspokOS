@@ -59,9 +59,8 @@ extern "C" void printf(const char *format, ...) {
                     break;
 
                 case 'd':
-                    itoa(va_arg(ap, int), 10, argStr);
-                    strcat(str + idx, argStr);
-                    idx += strlen(argStr);
+                    strcat(str + idx, itoa(va_arg(ap, int), 10));
+                    idx = strlen(str);
 
                     break;
 
