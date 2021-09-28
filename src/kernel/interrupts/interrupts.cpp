@@ -295,6 +295,16 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             break;
 
         case SYS_EXIT:
+           /* __asm__ __volatile__(
+                "rdmsr;"
+                : "=a" (eax), "=d" (edx)
+                : "c" (0xc0000101)
+            );
+
+            task = (TASK::TaskHeader*)((edx <<  32) + eax);
+
+            task->TCB->timeSlices = 0;  // yield*/
+
             taskMgr.endTask();
 
             break;
