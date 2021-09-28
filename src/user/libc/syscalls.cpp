@@ -97,6 +97,7 @@ extern "C" void* mmap(void *addr, size_t length, int prot) {
 extern "C" void schedYield() {
     __asm__ __volatile__(
         "int $0x80;"
+        "int $0x22;"
         :
         : "a" (SYS_SCHED_YIELD)
     );

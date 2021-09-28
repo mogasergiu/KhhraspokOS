@@ -318,9 +318,7 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             break;
 
         case SYS_SCHED_YIELD:
-            TASK::acquireLock(&vgaHandler.vLock);
-            kpwarn("STUBBED!\n");
-            TASK::releaseLock(&vgaHandler.vLock);
+            TASK::schedYield();
 
             break;
 

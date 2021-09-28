@@ -112,6 +112,8 @@ namespace TASK {
             bool taskReady(uint8_t tid) const;
             void printPS() const;
     };
+
+    extern "C" void schedYield();
 }
 
 extern TASK::TaskMgr taskMgr;
