@@ -16,9 +16,18 @@ char cmd[][MAX_CMD_LENGTH] = {
 
 char invalidCmd[] = "Invalid command!\n";
 
+static __thread uint8_t tid;
+static __thread int8_t pid, ppid;
+
 int main(int argc, char **argv) {
     char buffer[MAX_CMD_LENGTH];
     int i;
+
+    tid = gettid();
+    pid = getpid();
+    ppid = getppid();
+
+    printf("Shell %x (TID), %x (PID), %x (PPID)\n", tid, pid, ppid);
 
     while (1) {
         prompt();

@@ -11,6 +11,10 @@ static size_t printHex(int64_t num, char *str) {
 
     size_t idx = strlen(str);
 
+    if (num == 0) {
+        return idx;
+    }
+
     int64_t hex = 0, remainder;
     char hexChar;
 
@@ -62,7 +66,7 @@ extern "C" void printf(const char *format, ...) {
 
                 case 'x':
                 case 'X':
-                    idx += printHex(va_arg(ap, int64_t), str);
+                    idx = printHex(va_arg(ap, int64_t), str);
 
                     break;
 
@@ -74,7 +78,7 @@ extern "C" void printf(const char *format, ...) {
             }
 
         } else {
-            strncpy(str + idx, &format[i], 1);
+            strcat(str + idx, format[i]);
             idx++;
         }
     }
