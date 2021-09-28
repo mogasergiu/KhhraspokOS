@@ -52,7 +52,7 @@
 #define ACPI_RECLAIMABLE_MEM 0x3
 #define ACPI_NVS_MEM 0x4
 #define BAD_MEM 0x5
-#define USERSPACE_START_ADDR 0x90000000
+#define USERSPACE_START_ADDR 0x70000000
 
 #define setPgFlag(pg, flags) (pg = (pgTbl*)(((uintptr_t)pg | flags)))
 #define getPgFlag(pg, flag) ((uintptr_t)pg & (1 << flag))
