@@ -26,6 +26,7 @@ extern keyboardIRQ
 extern APEntry
 extern lapicTimerIRQ
 extern dumpCPU
+extern schedYield
 
 ; Export constructor and destructor sections
 extern startCtors
@@ -353,6 +354,7 @@ acquireLock:
  
 .spin_with_pause:
     pause                    ; Tell CPU we're spinning
+    call schedYield
     test dword [rdi],1      ; Is the lock free?
     jnz .spin_with_pause     ; no, wait
     jmp acquireLock          ; retry
