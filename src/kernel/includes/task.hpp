@@ -100,7 +100,7 @@ namespace TASK {
             friend void ::reaper(int argc, char **argv);
             friend void ::loader(int argc, char **argv);
             friend void INTERRUPTS::IntCallbacks::lapicTimerIRQ();
-            void createTask(char *args, uint8_t dpl, int8_t ppid);
+            int createTask(char *args, uint8_t dpl, int8_t ppid);
             uint8_t createTask(void (*)(int, char**), uint8_t dpl,
                                 char *args, TASK::TaskHeader::ProcessHdr *PCB);
             void loadTask(TaskHeader *task);

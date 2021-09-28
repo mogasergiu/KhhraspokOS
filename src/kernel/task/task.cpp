@@ -116,11 +116,11 @@ void TaskMgr::freeTask(uint8_t tid) {
         }
 
         KPKHEAP::kpkFree(task);
+
+        this->tasks[tid] = NULL;
+
+        this->tasksCount--;
     }
-
-    this->tasks[tid] = NULL;
-
-    this->tasksCount--;
 }
 
 TaskHeader* TASK::TaskMgr::schedule() {
@@ -180,26 +180,30 @@ static inline void* alignPAGE_SIZE(void *addr) {
     return (void*)(remainder ? (uint8_t*)addr + (PAGE_SIZE - remainder) : addr);
 }
 
-void TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
+int TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
     if (this->tasksCount == MAX_TASKS_COUNT) {
         kpwarn("Maximum tasks reached! Retry again later!\n");
 
-        return;
+        return -1;
     }
 
     const char mode[] = "r", filter[] = " ";
+    char _args[100];
+    memcpy(_args, args, sizeof(_args));
 
-    char *arg = strtok(args, filter);
+    char *arg = strtok(_args, filter);
     if (arg == NULL) {
         kpwarn("Incorrect executable/task name!\n");
 
-        return;
+        return -1;
     }
 
-    args += strlen(args) + 1;
-
     int fd = kfopen(arg, mode);
-    CATCH_FIRE(fd < 0, "Could not open file!");
+    if (fd < 0) {
+        kpwarn("No such ELF!\n");
+
+        return -1;
+    }
 
     FILESYSTEM::FileStat *fst = kfstat(fd);
     CATCH_FIRE(fst == NULL, "Could not get file stats!");
@@ -218,6 +222,7 @@ void TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
 
     kfread(fd, buffer, fst->size);
 
+    uint64_t *oldPD = MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)];
     MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = NULL;
     flushCR3();
 
@@ -269,7 +274,7 @@ void TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
 
     task->PCB->lastVaddr = (uint8_t*)lastVaddr + PAGE_SIZE;
    
-    arg = strtok(args, filter);
+    arg = strtok(args + strlen(_args) + 1, filter);
     size_t argSize = strlen(arg);
     int argc = 0;
     char *argv0 = (char*)lastVaddr;
@@ -297,11 +302,13 @@ void TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
     task->TCB->ctxReg.rdi = argc;
     task->TCB->ctxReg.rsi = (uint64_t)argv;
 
-    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = NULL;
+    MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = oldPD;
 
     flushCR3();
 
     this->threadsQue[0].push(task->TCB->tid);
+
+    return (int)task->TCB->tid;
 }
 
 uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,

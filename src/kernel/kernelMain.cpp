@@ -47,7 +47,7 @@ extern "C" void kernelMain() {
 
     char shell[] = "/bin/shell";
 
-    taskMgr.createTask(shell, 3, 0);
+    CATCH_FIRE(taskMgr.createTask(shell, 3, -1) < 0, "Could not spawn Shell!\n");
     taskMgr.createTask(&reaper, 0, NULL, taskMgr.getKernelPHdr());
     taskMgr.createTask(&loader, 0, NULL, taskMgr.getKernelPHdr());
 

@@ -27,6 +27,7 @@
 #define SYS_SHUTDOWN 20
 #define SYS_REBOOT 21
 #define SYS_FGETS 22
+#define SYS_CREATE_PROCESS 23
 
 extern "C" void putch(const char c);
 
@@ -71,5 +72,7 @@ extern "C" void shutdown();
 extern "C" void reboot();
 
 extern "C" size_t fgets(char *buffer, size_t maxSize);
+
+extern "C" int8_t createProcess(char *fileName);
 
 #endif  /*  SYSCALL_HPP  */

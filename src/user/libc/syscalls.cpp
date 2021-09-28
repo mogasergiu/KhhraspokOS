@@ -227,3 +227,15 @@ extern "C" size_t fgets(char *buffer, size_t maxSize) {
     return ret;
 }
 
+extern "C" int8_t createProcess(char *fileName) {
+    int8_t ret = 0;
+
+    __asm__ __volatile__(
+        "int $0x80;"
+        : "=a"(ret)
+        : "a" (SYS_CREATE_PROCESS), "D" (fileName)
+    );
+
+    return ret;
+}
+

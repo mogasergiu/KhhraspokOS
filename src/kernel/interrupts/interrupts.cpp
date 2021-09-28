@@ -471,6 +471,19 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
 
             break;
 
+        case SYS_CREATE_PROCESS:
+            __asm__ __volatile__(
+                "rdmsr;"
+                : "=a" (eax), "=d" (edx)
+                : "c" (0xc0000101)
+            );
+
+            task = (TASK::TaskHeader*)((edx <<  32) + eax);
+
+            ret = taskMgr.createTask((char*)arg1, 3, task->PCB->pid);
+
+            break;
+
         default:
             TASK::acquireLock(&vgaHandler.vLock);
             kprintf("%x Syscall does not exit yet!\n", sysNo);
