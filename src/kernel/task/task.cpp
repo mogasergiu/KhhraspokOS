@@ -138,7 +138,7 @@ TaskHeader* TASK::TaskMgr::schedule() {
 
     oldTask = (TaskHeader*)((edx <<  32) + eax);
 
-    if (oldTask != NULL) {
+    if (oldTask != NULL && oldTask->TCB != NULL && oldTask->PCB != NULL) {
     if (oldTask->PCB->statusEnd || oldTask->TCB->statusEnd) {
         this->tasksToReap.push(oldTask->TCB->tid);
 
@@ -431,7 +431,7 @@ uint8_t TaskMgr::getTasksCount() const {
 }
 
 bool TaskMgr::taskReady(uint8_t tid) const {
-    return this->tasks[tid]->TCB->statusEnd;
+    return this->tasks[tid] == NULL;
 }
 
 void TaskMgr::endTask(int8_t pid) {
