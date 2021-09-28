@@ -37,9 +37,10 @@ int main(int argc, char **argv) {
 
     uint8_t childTid1 = createThread(test, NULL);
     threadJoin(childTid1);
+    printf("Thread %x finished\n", childTid1);
     uint8_t childTid2 = createThread(test, someArgs);
     threadJoin(childTid2);
-    printf("Thread %x finished\n", childTid1);
+    printf("Thread %x finished\n", childTid2);
 
     return 0;
 }

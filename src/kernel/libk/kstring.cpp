@@ -176,6 +176,10 @@ extern "C" char* strtok(char *str, const char *delim) {
     if (str != NULL) {
         start = str;
 
+        if (*str == 0) {
+            return NULL;
+        }
+
     } else {
         if (end == NULL) {
             return NULL;
