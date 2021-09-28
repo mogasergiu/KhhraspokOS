@@ -33,7 +33,7 @@ static __thread int8_t pid, ppid;
 int main(int argc, char **argv) {
     char buffer[MAX_CMD_LENGTH];
     char binPath[6] = "/bin/";
-    char ELFPath[20];
+    char ELFPath[100];
     int i;
 
     tid = gettid();
