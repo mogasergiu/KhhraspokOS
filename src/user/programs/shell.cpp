@@ -4,7 +4,7 @@
 #include <syscall.hpp>
 
 #define MAX_CMD_LENGTH 100
-#define CMD_COUNT 8
+#define CMD_COUNT 9
 
 #define removeLead() \
     do { \
@@ -22,10 +22,23 @@ char cmd[][MAX_CMD_LENGTH] = {
     "shutdown",
     "gettid",
     "getpid",
-    "getppid"
+    "getppid",
+    "help"
     };
 
-char invalidCmd[] = "Invalid command!\n";
+static char invalidCmd[] = "Invalid command!\n";
+
+static char helpCmd[] =
+    "List of available commands:\n"
+    "lspci - Show available connected PCI Devices\n"
+    "free - Show Free/Used Memory and the BIOS Memory Map\n"
+    "clear - Clear the screen\n"
+    "ps - Show running Threads and Processes\n"
+    "shutdown - Shutdown the Machine\n"
+    "gettid - Get the current Thread ID\n"
+    "getpid - Get the current Process ID\n"
+    "getppid - Get the current Parent Process ID\n"
+    "help - Show this message\n";
 
 static __thread uint8_t tid;
 static __thread int8_t pid, ppid;
@@ -87,6 +100,11 @@ int main(int argc, char **argv) {
 
                     case 7:
                         printf("Shell PPID: %x\n", ppid);
+
+                        break;
+
+                    case 8:
+                        puts(helpCmd);
 
                         break;
                 }
