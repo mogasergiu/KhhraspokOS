@@ -79,14 +79,6 @@ void TaskMgr::freeTask(uint8_t tid) {
 
     if (task != NULL) {
         if (task->TCB != NULL && task->TCB->statusEnd == true) {
-/*            for (uintptr_t i =
-                (uintptr_t)((uint8_t*)task->TCB->lastVaddr - USERSPACE_START_ADDR)
-                        / PAGE_SIZE;
-                task->TCB->pgCount != 0;
-                task->TCB->pgCount--, i--) {
-                    pageManager.freePg(task->PCB->pd->entries[i]);
-            }*/
-
             KPKHEAP::kpkFree(task->TCB);
             task->TCB = NULL;
         }
@@ -138,18 +130,25 @@ TaskHeader* TASK::TaskMgr::schedule() {
     oldTask = (TaskHeader*)((edx <<  32) + eax);
 
     if (oldTask != NULL && oldTask->TCB != NULL && oldTask->PCB != NULL) {
-    if (oldTask->PCB->statusEnd || oldTask->TCB->statusEnd) {
-        this->tasksToReap.push(oldTask->TCB->tid);
+        if (oldTask->TCB->timeSlices > 0) {
+            oldTask->TCB->timeSlices--;
 
-    } else {
-        uint64_t gs = oldTask->TCB->ctxReg.gs;
-        uint64_t fs = oldTask->TCB->ctxReg.fs;
-        memcpy(&oldTask->TCB->ctxReg, ctx, sizeof(*ctx));
-        oldTask->TCB->ctxReg.gs = gs;
-        oldTask->TCB->ctxReg.fs = fs;
+            return NULL;
+        }
 
-        this->threadsQue[id].push(oldTask->TCB->tid);
-    }}
+        if (oldTask->PCB->statusEnd || oldTask->TCB->statusEnd) {
+            this->tasksToReap.push(oldTask->TCB->tid);
+
+        } else {
+            uint64_t gs = oldTask->TCB->ctxReg.gs;
+            uint64_t fs = oldTask->TCB->ctxReg.fs;
+            memcpy(&oldTask->TCB->ctxReg, ctx, sizeof(*ctx));
+            oldTask->TCB->ctxReg.gs = gs;
+            oldTask->TCB->ctxReg.fs = fs;
+
+            this->threadsQue[id].push(oldTask->TCB->tid);
+        }
+    }
  
     if (this->threadsQue[id].isEmpty()) {
         return NULL;
@@ -165,6 +164,8 @@ TaskHeader* TASK::TaskMgr::schedule() {
 
         task = this->tasks[*this->threadsQue[id].pop()];
     }
+
+    task->TCB->timeSlices = task->estimate * TIME_SLICE;
 
     MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = (uint64_t*)task->PCB->pd;
     flushCR3();
@@ -324,6 +325,7 @@ uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
     const char filter[] = " ";
 
     void *lastPg;
+    uint8_t pgCount = 0;
 
     TaskHeader *task = (TaskHeader*)KPKHEAP::kpkZalloc(sizeof(*task));
     CATCH_FIRE(task == NULL, "Could not allocate task!");
@@ -349,6 +351,7 @@ uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
     if (args != NULL) {
         arg = strtok(args, filter);
         lastPg = pageManager.reqPg();
+        pgCount++;
         pageManager.mapPg(task->PCB->lastVaddr, lastPg, flags);
 
         char *argv0 = (char*)task->PCB->lastVaddr;
@@ -374,6 +377,7 @@ uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
 
 
     lastPg = pageManager.reqPg();
+    pgCount++;
     pageManager.mapPg(task->PCB->lastVaddr, lastPg, flags);
 
     task->PCB->lastVaddr = (uint8_t*)task->PCB->lastVaddr + PAGE_SIZE;
@@ -408,6 +412,7 @@ uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
     }
 
     lastPg = pageManager.reqPg();
+    pgCount++;
     pageManager.mapPg(task->PCB->lastVaddr, lastPg, flags);
     task->PCB->lastVaddr = (uint8_t*)task->PCB->lastVaddr + PAGE_SIZE;
    
@@ -418,6 +423,8 @@ uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
     task->PCB = (TaskHeader::ProcessHdr*)KPKHEAP::kpkZalloc(sizeof(*task->PCB));
     CATCH_FIRE(task->PCB == NULL, "Could not allocate task PCB!");
     memcpy(task->PCB, PCB, sizeof(*task->PCB));
+
+    task->estimate = ++pgCount;
 
     task->PCB->pd = (MMU::pgTbl*)MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)];
     flushCR3();

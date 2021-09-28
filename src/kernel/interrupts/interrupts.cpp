@@ -34,7 +34,7 @@ void APIC::initLAPICTimer() {
 
     apicHandler.LAPICout(LAPIC_TDCR, 0x3);
 
-    apicHandler.LAPICout(LAPIC_TICR, ticks << 0x8);
+    apicHandler.LAPICout(LAPIC_TICR, ticks / 10);
 }
 
 static void wakeAPs() {
@@ -344,6 +344,18 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             tid = arg1;
 
             ret = taskMgr.taskReady(tid);
+
+            if (!ret) {
+                __asm__ __volatile__(
+                    "rdmsr;"
+                    : "=a" (eax), "=d" (edx)
+                    : "c" (0xc0000101)
+                );
+
+                task = (TASK::TaskHeader*)((edx <<  32) + eax);
+
+                task->TCB->timeSlices = 0;  // yield
+            }
 
             break;
 

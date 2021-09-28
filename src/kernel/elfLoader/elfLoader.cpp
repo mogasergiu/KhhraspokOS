@@ -23,6 +23,7 @@ static void* loadPHDR(void *elf, TASK::TaskHeader *task) {
 
     void *lastPaddr = NULL, *lastVaddr = (void*)USERSPACE_START_ADDR;
     size_t pg;
+    uint8_t pgCount = 0;
     for (size_t i = 0; i < phdrCount; i++) {
         switch (phdr[i].p_type) {
             case PT_NULL:
@@ -34,6 +35,7 @@ static void* loadPHDR(void *elf, TASK::TaskHeader *task) {
                         pg += PAGE_SIZE) {
 
                     lastPaddr = pageManager.reqPg();
+                    pgCount++;
                     if (lastPaddr == NULL) {
                         kpwarn("No more available pages!\n");
 
@@ -56,6 +58,7 @@ static void* loadPHDR(void *elf, TASK::TaskHeader *task) {
                         pg += PAGE_SIZE) {
 
                     lastPaddr = pageManager.reqPg();
+                    pgCount++;
                     if (lastPaddr == NULL) {
                         kpwarn("No more available pages!\n");
 
@@ -86,6 +89,8 @@ static void* loadPHDR(void *elf, TASK::TaskHeader *task) {
                 kpwarn("PT not yet supported!\n");
         }
     }
+
+    task->estimate = pgCount;
 
     return lastVaddr;
 }

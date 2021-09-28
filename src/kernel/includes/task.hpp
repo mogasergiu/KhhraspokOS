@@ -12,6 +12,7 @@
 #define TASK_STACK_SIZE 0x2000
 #define TASK_HEAP_SIZE 0x4000
 #define TASK_TLS_SIZE 0x2000
+#define TIME_SLICE 10  // 10 ms
 
 namespace TASK {
     class TaskMgr;
@@ -61,6 +62,7 @@ namespace TASK {
             } env;
             uint8_t tid;
             bool statusEnd;
+            uint8_t timeSlices;
         }__attribute__((packed)) *TCB;
 
         struct ProcessHdr {
@@ -76,7 +78,7 @@ namespace TASK {
             size_t threadPoolCount;
         }__attribute__((packed)) *PCB;
 
-        uint32_t size;
+        uint32_t estimate;
     }__attribute__((packed));
 
     class TaskMgr {
