@@ -190,7 +190,7 @@ void Interrupts::setIDTEntry(uint32_t number, void (*address)(), uint8_t type) {
 
     descriptor->ist = type;
 
-    if (type == INT_SYSCALL) {
+    if (type == INT_SYSCALL || type == INT_NMI) {
         descriptor->typeAttr = 0xee;
 
     } else {
@@ -295,7 +295,7 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             break;
 
         case SYS_EXIT:
-           /* __asm__ __volatile__(
+            __asm__ __volatile__(
                 "rdmsr;"
                 : "=a" (eax), "=d" (edx)
                 : "c" (0xc0000101)
@@ -303,7 +303,7 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
 
             task = (TASK::TaskHeader*)((edx <<  32) + eax);
 
-            task->TCB->timeSlices = 0;  // yield*/
+            task->TCB->timeSlices = 0;  // yield
 
             taskMgr.endTask();
 
@@ -471,6 +471,7 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
 
         case SYS_SHUTDOWN:
             PMIO::pOutWord(0x604, 0x2000);
+            while (1);
 
             break;
 

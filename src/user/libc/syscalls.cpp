@@ -140,6 +140,11 @@ extern "C" int threadJoin(uint8_t tid) {
             : "=a"(threadReady)
             : "a" (SYS_THREAD_JOIN), "D" (tid)
         );
+        __asm__ __volatile__(
+            "int $0x22;"
+            :
+            :
+        );
     }
 
     return ret;

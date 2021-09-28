@@ -40,8 +40,12 @@ void reaper(int argc, char **argv) {
     while (1) {
         if (!taskMgr.tasksToReap.isEmpty()) {
             deadTid = taskMgr.tasksToReap.pop();
-            taskMgr.freeTask(*deadTid);
-
+            if (deadTid != NULL && taskMgr.tasks[*deadTid] != NULL) {
+                taskMgr.tasks[*deadTid]->PCB = NULL;
+                taskMgr.tasks[*deadTid]->TCB = NULL;
+                taskMgr.tasks[*deadTid] = NULL;
+                taskMgr.tasksCount--;
+            }
         }
     }
 }
@@ -424,7 +428,7 @@ uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
     CATCH_FIRE(task->PCB == NULL, "Could not allocate task PCB!");
     memcpy(task->PCB, PCB, sizeof(*task->PCB));
 
-    task->estimate = ++pgCount;
+    task->estimate = pgCount << 2;
 
     task->PCB->pd = (MMU::pgTbl*)MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)];
     flushCR3();

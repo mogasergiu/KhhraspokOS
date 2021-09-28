@@ -10,8 +10,14 @@ static void test(int argc, char **argv) {
     pid = getpid();
     ppid = getppid();
 
-    printf("Hello from TID %x, of PID %x, child of PPID %x\n!",
+    printf("Hello from Thread %x, of Process %x, child of Process %x\n!",
             tid, pid, ppid);
+
+    printf("I received %d arguments!\n", argc);
+
+    for (int i = 0; i < argc; i++) {
+        printf("Argument %d: %s\n", i, argv[i]);
+    }
 }
 
 int main(int argc, char **argv) {
@@ -19,12 +25,21 @@ int main(int argc, char **argv) {
     pid = getpid();
     ppid = getppid();
 
-    printf("Hello from TID %x, of PID %x, child of PPID %x\n!",
-            tid, pid, ppid);
+    char someArgs[] = "arg-1 arg-2 arg-3";
 
-    uint8_t childTid = createThread(test, NULL);
-    threadJoin(childTid);
-    printf("Thread %x finished\n", childTid);
+    printf("Hello from Thread %x, of Process %x, child of Process %x\n!",
+            tid, pid, ppid);
+    printf("I received %d arguments!\n", argc);
+
+    for (int i = 0; i < argc; i++) {
+        printf("Argument %d: %s\n", i, argv[i]);
+    }
+
+    uint8_t childTid1 = createThread(test, NULL);
+    threadJoin(childTid1);
+    uint8_t childTid2 = createThread(test, someArgs);
+    threadJoin(childTid2);
+    printf("Thread %x finished\n", childTid1);
 
     return 0;
 }
