@@ -214,7 +214,7 @@ extern "C" void reboot() {
 }
 
 extern "C" size_t fgets(char *buffer, size_t maxSize) {
-    size_t ret;
+    size_t ret = 0;
 
     while (!ret) {
         __asm__ __volatile__(
