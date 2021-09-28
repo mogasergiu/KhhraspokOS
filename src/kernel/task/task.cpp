@@ -274,7 +274,7 @@ int TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
 
     task->PCB->lastVaddr = (uint8_t*)lastVaddr + PAGE_SIZE;
    
-    arg = strtok(args + strlen(_args) + 1, filter);
+    arg = strtok(_args + strlen(_args) + 1, filter);
     size_t argSize = strlen(arg);
     int argc = 0;
     char *argv0 = (char*)lastVaddr;
