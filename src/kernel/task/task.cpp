@@ -42,7 +42,6 @@ void reaper(int argc, char **argv) {
             deadTid = taskMgr.tasksToReap.pop();
             taskMgr.freeTask(*deadTid);
 
-            KPKHEAP::kpkFree(deadTid);
         }
     }
 }
@@ -217,7 +216,7 @@ int TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
     task->PCB = (TaskHeader::ProcessHdr*)KPKHEAP::kpkZalloc(sizeof(*task->PCB));
     CATCH_FIRE(task->PCB == NULL, "Could not allocate task PCB!");
 
-    void *buffer = KPKHEAP::kpkZalloc(fst->size);
+    void *buffer = KPKHEAP::kpkZalloc(fst->size + 65535);
     CATCH_FIRE(buffer == NULL, "Could not allocate Heap to read the ELF!\n");
 
     kfread(fd, buffer, fst->size);
