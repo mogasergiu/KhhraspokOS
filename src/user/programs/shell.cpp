@@ -6,6 +6,14 @@
 #define MAX_CMD_LENGTH 100
 #define CMD_COUNT 8
 
+#define removeLead() \
+    do { \
+        if (buffer[0] == ' ') { \
+            memcpy(buffer, buffer + 1, sizeof(buffer)); \
+        } \
+    } while (0);
+       
+
 char cmd[][MAX_CMD_LENGTH] = {
     "lspci",
     "free",
@@ -36,6 +44,8 @@ int main(int argc, char **argv) {
         prompt();
 
         fgets(buffer, sizeof(buffer));
+
+        removeLead();
 
         for (i = 0; i < CMD_COUNT; i++) {
             if (!strcmp(cmd[i], buffer)) {
@@ -88,7 +98,6 @@ int main(int argc, char **argv) {
         if (i == CMD_COUNT) {
             memcpy(ELFPath, binPath, sizeof(binPath));
             strcat(ELFPath + sizeof(binPath) - 1, buffer);
-            puts(ELFPath);
             int8_t childPid = createProcess(ELFPath);
             if (childPid < 0) {
                 puts(invalidCmd);
