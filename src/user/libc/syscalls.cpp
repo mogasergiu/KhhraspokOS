@@ -133,8 +133,8 @@ extern "C" int createThread(void (*func)(int argc, char **argv), char *args) {
 extern "C" int threadJoin(uint8_t tid) {
     int ret = 0;
 
-    bool threadReady = false;
-    while (!threadReady) {
+    uint8_t threadReady = 0;
+    while (threadReady == 0) {
         __asm__ __volatile__(
             "int $0x80;"
             : "=a"(threadReady)

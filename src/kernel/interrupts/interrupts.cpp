@@ -343,7 +343,7 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
         case SYS_THREAD_JOIN:
             tid = arg1;
 
-            taskMgr.taskReady(tid);
+            ret = taskMgr.taskReady(tid);
 
             break;
 

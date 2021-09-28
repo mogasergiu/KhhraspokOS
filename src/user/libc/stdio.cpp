@@ -42,6 +42,7 @@ static size_t printHex(int64_t num, char *str) {
 
 extern "C" void printf(const char *format, ...) {
     char str[200], *argStr;
+    memset(str, 0, sizeof(str));
     size_t idx = 0;
     va_list ap;
     va_start(ap, format);
