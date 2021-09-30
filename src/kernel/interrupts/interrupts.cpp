@@ -34,7 +34,7 @@ void APIC::initLAPICTimer() {
 
     apicHandler.LAPICout(LAPIC_TDCR, 0x3);
 
-    apicHandler.LAPICout(LAPIC_TICR, ticks / 10);
+    apicHandler.LAPICout(LAPIC_TICR, ticks / 100);
 }
 
 static void wakeAPs() {

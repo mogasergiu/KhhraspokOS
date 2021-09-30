@@ -40,12 +40,7 @@ void reaper(int argc, char **argv) {
     while (1) {
         if (!taskMgr.tasksToReap.isEmpty()) {
             deadTid = taskMgr.tasksToReap.pop();
-            if (deadTid != NULL && taskMgr.tasks[*deadTid] != NULL) {
-                taskMgr.tasks[*deadTid]->PCB = NULL;
-                taskMgr.tasks[*deadTid]->TCB = NULL;
-                taskMgr.tasks[*deadTid] = NULL;
-                taskMgr.tasksCount--;
-            }
+            taskMgr.freeTask(*deadTid);
         }
     }
 }
@@ -88,22 +83,25 @@ void TaskMgr::freeTask(uint8_t tid) {
         }
 
         if (task->PCB != NULL) {
-            if (task->PCB->pid == task->TCB->tid) {
+            if (task->PCB->pid == tid) {
                 if (task->PCB->ogTLS != NULL) {
                     KPKHEAP::kpkFree(task->PCB->ogTLS);
 
                 }
 
+                MMU::pgTbl* pt = (MMU::pgTbl*)getPgAddr(task->PCB->pd);
+
+                task->PCB->lastVaddr = (uint8_t*)task->PCB->lastVaddr - PAGE_SIZE;
                 for (int i =
                     (int)((uintptr_t)
                     ((uint8_t*)task->PCB->lastVaddr - USERSPACE_START_ADDR)
                             / PAGE_SIZE);
                     i >= 0;
                     i--) {
-                        pageManager.freePg(task->PCB->pd->entries[i]);
+                        pageManager.freePg(pt->entries[i]);
                 }
 
-                pageManager.freePg(task->PCB->pd);
+                pageManager.freePg(pt);
             }
 
             KPKHEAP::kpkFree(task->PCB);
@@ -154,17 +152,13 @@ TaskHeader* TASK::TaskMgr::schedule() {
         }
     }
  
-    if (this->threadsQue[id].isEmpty()) {
-        return NULL;
-    }
+    while (this->threadsQue[id].isEmpty());
 
     TaskHeader *task = this->tasks[*this->threadsQue[id].pop()];
     while (task != NULL && (task->PCB->statusEnd || task->TCB->statusEnd)) {
         this->tasksToReap.push(task->TCB->tid);
 
-        if (this->threadsQue[id].isEmpty()) {
-            return NULL;
-        }
+        while (this->threadsQue[id].isEmpty());
 
         task = this->tasks[*this->threadsQue[id].pop()];
     }

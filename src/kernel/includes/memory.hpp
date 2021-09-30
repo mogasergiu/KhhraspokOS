@@ -54,10 +54,10 @@
 #define BAD_MEM 0x5
 #define USERSPACE_START_ADDR 0x70000000
 
-#define setPgFlag(pg, flags) (pg = (pgTbl*)(((uintptr_t)pg | flags)))
+#define setPgFlag(pg, flags) (pg = (MMU::pgTbl*)(((uintptr_t)pg | flags)))
 #define getPgFlag(pg, flag) ((uintptr_t)pg & (1 << flag))
-#define getPgAddr(pg) (pgTbl*)((((uintptr_t)pg >> (uintptr_t)12) << (uintptr_t)12) & (uintptr_t)0xffffffffff000)
-#define setPgAddr(pg, paddr) (pg = (pgTbl*)(((uintptr_t)pg & (uintptr_t)0xfff0000000000fff) | \
+#define getPgAddr(pg) (MMU::pgTbl*)((((uintptr_t)pg >> (uintptr_t)12) << (uintptr_t)12) & (uintptr_t)0xffffffffff000)
+#define setPgAddr(pg, paddr) (pg = (MMU::pgTbl*)(((uintptr_t)pg & (uintptr_t)0xfff0000000000fff) | \
                              ((((uintptr_t)paddr >> (uintptr_t)12) & (uintptr_t)0xffffffffff) << (uintptr_t)12)))
 
 #define flushCR3() \
