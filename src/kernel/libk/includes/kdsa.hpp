@@ -175,7 +175,6 @@ class Stack : public LinkedList<T> {
 
         T* pop() {
             if (this->getSize() == 0) {
-                kpwarn("Stack is empty!\n");
 
                 return NULL;
             }

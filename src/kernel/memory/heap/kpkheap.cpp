@@ -5,7 +5,7 @@
 
 using namespace KPKHEAP;
 
-static Queue<chunk*> bucket[KPKBUCKET_SIZE];
+static Stack<chunk*> bucket[KPKBUCKET_SIZE];
 void* KPKHEAP::topChunk = (void*)KPKHEAP_START;
 
 static inline uintptr_t msb (size_t size)
@@ -28,7 +28,7 @@ static inline size_t alignSize(size_t size) {
     uint8_t sizeMSB = (uint8_t)msb(size);
     uint8_t sizeLSB = (uint8_t)lsb(size);
 
-    if (sizeMSB != sizeLSB && sizeLSB < 4) {
+    if (sizeMSB != sizeLSB || sizeLSB < 4) {
         if (size < MIN_CHUNK_SIZE) {
             return MIN_CHUNK_SIZE;
         }
