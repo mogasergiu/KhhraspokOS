@@ -77,11 +77,6 @@ void TaskMgr::freeTask(uint8_t tid) {
     TaskHeader *task = this->tasks[tid];
 
     if (task != NULL) {
-        if (task->TCB != NULL && task->TCB->statusEnd == true) {
-            KPKHEAP::kpkFree(task->TCB);
-            task->TCB = NULL;
-        }
-
         if (task->PCB != NULL) {
             if (task->PCB->pid == tid) {
                 if (task->PCB->ogTLS != NULL) {
@@ -485,7 +480,7 @@ void TaskMgr::endTask(int8_t pid) {
                 task->TCB->statusEnd = task->PCB->statusEnd = true;
                 task->TCB->timeSlices = 0;
 
-                while (this->tasks[i] != NULL);
+                while (this->tasks[i] != NULL && this->tasks[i]->TCB != NULL);
             }
         }
     }
@@ -507,12 +502,17 @@ void TaskMgr::endTask() {
         this->endTask(task->PCB->pid);
     }
 
+    if (task->TCB != NULL && task->TCB->statusEnd == true) {
+        KPKHEAP::kpkFree(task->TCB);
+        task->TCB = NULL;
+    }
+
     task->TCB->statusEnd = task->PCB->statusEnd = true;
     task->TCB->timeSlices = 0;
 }
 
 void TaskMgr::printPS() const {
-    vgaHandler.putString("\n{TID, PID, PPID, Process Name}\n", 15);
+    vgaHandler.putString("{TID, PID, PPID, Process Name}\n", 15);
     TaskHeader *task;
 
     for (int i = 0; i < this->tasksCount; i++) {

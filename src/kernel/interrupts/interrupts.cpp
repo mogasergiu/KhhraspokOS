@@ -395,7 +395,6 @@ extern "C" long __attribute__((optimize("O3"))) IntCallbacks::syscallISR(long ar
 
         case SYS_FREE:
             TASK::acquireLock(&vgaHandler.vLock);
-            vgaHandler.putChar('\n', 15);
             kprintf("Used Memory: %x Bytes\n", MMU::usedMem);
             kprintf("Free Memory: %x Bytes\n", MMU::freeMem);
             vgaHandler.putString("Memory Map:\n"
@@ -451,7 +450,7 @@ extern "C" long __attribute__((optimize("O3"))) IntCallbacks::syscallISR(long ar
                         kprintf("Unknown Memory Type: %x\n", md->type);
                 }
             }
-            vgaHandler.putChar('\n', 15);
+
             TASK::releaseLock(&vgaHandler.vLock);
 
             break;
