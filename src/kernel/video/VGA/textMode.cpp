@@ -30,10 +30,8 @@ VGA::TextMode::TextMode() {
 
 /*
  * Places given character of given color in VGA buffer
- * @character: the character the be placed in the buffer
- * @color: the desired color of the character
  */
-void VGA::TextMode::putChar(const char character, const uint8_t color) {
+void __attribute__((optimize("O3"))) VGA::TextMode::putChar(const char character, const uint8_t color) {
     if (this->line == VGA_HEIGHT) {
         // Scroll Up!
         for (int i = 0; i < VGA_HEIGHT - 1; i++) {
@@ -52,8 +50,10 @@ void VGA::TextMode::putChar(const char character, const uint8_t color) {
     }
     // If character is newline, move to next line and reset column
     if (character == '\n') {
-        memset(this->address + VGA_WIDTH * this->line + this->column, 0,
-                ((VGA_WIDTH - this->column) << 1));
+        for (int j = this->column; j < VGA_WIDTH; j++) {
+            this->address[this->line * VGA_WIDTH + j] = 0x0032;
+        }
+
         this->line++;
         this->column = 0;
 
@@ -75,9 +75,6 @@ void VGA::TextMode::putChar(const char character, const uint8_t color) {
 
 /*
  * Places given string of given color in VGA buffer
- * @string: string to be placed in VGA buffer
- * @color: desired color of the string
- * @return: number of bytes successfully placed in VGA buffer
  */
 size_t VGA::TextMode::putString(const char* string, const uint8_t color) {
     size_t length = strlen(string), l;
@@ -92,10 +89,6 @@ size_t VGA::TextMode::putString(const char* string, const uint8_t color) {
 /*
  * Places first number of given bytes of given string of given
  * color in VGA buffer
- * @string: string to be placed in VGA buffer
- * @color: desired color of the string
- * @length: number of first bytes of given string to be placed
- * @return: number of bytes successfully placed in VGA buffer
  */
 size_t VGA::TextMode::putString(const char* string, const uint8_t color,
                                         const size_t length) {
@@ -110,7 +103,6 @@ size_t VGA::TextMode::putString(const char* string, const uint8_t color,
 
 /*
  * Retrieves current line of our position in the VGA buffer
- * @return: current line of our position in the VGA buffer
  */
 uint8_t VGA::TextMode::getLine() const {
     return this->line;
@@ -118,7 +110,6 @@ uint8_t VGA::TextMode::getLine() const {
 
 /*
  * Retrieves current column of our position in the VGA buffer
- * @return: current column of our position in the VGA buffer
  */
 uint8_t VGA::TextMode::getColumn() const {
     return this->column;
@@ -126,9 +117,6 @@ uint8_t VGA::TextMode::getColumn() const {
 
 /*
  * Sets current line in the VGA buffer
- * @line: given line to set
- * @return: the new line or the current line if given line is
- *           out of bounds
  */
 uint8_t VGA::TextMode::setLine(const uint8_t line) {
     if (line <= VGA_HEIGHT) {
@@ -141,9 +129,6 @@ uint8_t VGA::TextMode::setLine(const uint8_t line) {
 
 /*
  * Sets current column in the VGA buffer
- * @column: given column to set
- * @return: the new column or the current column if given
- *          column is out of bounds
  */
 uint8_t VGA::TextMode::setColumn(const uint8_t column) {
     if (column <= VGA_WIDTH) {

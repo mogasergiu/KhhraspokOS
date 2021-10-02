@@ -4,7 +4,7 @@
 #include <string.hpp>
 #include <syscall.hpp>
 
-static size_t printHex(int64_t num, char *str) {
+static size_t __attribute__((optimize("O3"))) printHex(int64_t num, char *str) {
     strcat(str, '0');
     strcat(str, 'x');
     strcat(str, '0');
@@ -40,7 +40,7 @@ static size_t printHex(int64_t num, char *str) {
     return idx;
 }
 
-extern "C" void printf(const char *format, ...) {
+extern "C" void __attribute__((optimize("O3"))) printf(const char *format, ...) {
     char str[200], *argStr;
     memset(str, 0, sizeof(str));
     size_t idx = 0;

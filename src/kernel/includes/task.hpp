@@ -12,7 +12,7 @@
 #define TASK_STACK_SIZE 0x2000
 #define TASK_HEAP_SIZE 0x4000
 #define TASK_TLS_SIZE 0x2000
-#define TIME_SLICE 10  // 10 ms
+#define TIME_SLICE 2  // 20 ms
 
 namespace TASK {
     class TaskMgr;

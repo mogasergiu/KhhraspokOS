@@ -2,7 +2,7 @@ FLAGS = -ffreestanding -falign-jumps -falign-functions -falign-labels \
         -falign-loops -fomit-frame-pointer \
         -finline-functions -Wno-unused-function -fno-builtin -Werror -Wall \
         -Wextra -Wno-unused-label -Wno-unused-parameter -nostdlib \
-        -nostartfiles -nodefaultlibs -O0 -std=c++20 -mno-red-zone \
+        -nostartfiles -nodefaultlibs -std=c++20 -mno-red-zone \
 	-mgeneral-regs-only -m64 -mno-mmx -mno-sse -mno-sse2 -fstrength-reduce
 USER_SOURCES_PATH = ${KHH_HOME}/src/user
 USER_BUILD_PATH = ${KHH_HOME}/build/user

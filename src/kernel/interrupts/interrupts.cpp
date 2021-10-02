@@ -34,7 +34,12 @@ void APIC::initLAPICTimer() {
 
     apicHandler.LAPICout(LAPIC_TDCR, 0x3);
 
-    apicHandler.LAPICout(LAPIC_TICR, ticks / 10);
+    if (apicHandler.getLAPICID() == 0) {
+        apicHandler.LAPICout(LAPIC_TICR, ticks >> 2);
+
+    } else {
+        apicHandler.LAPICout(LAPIC_TICR, ticks << 2);
+    }
 }
 
 static void wakeAPs() {
@@ -176,8 +181,6 @@ extern "C" void IntHandlers::dumpCPU() {
 
 /*
  * Helper function to add an entry in the IDT
- * @number: desired interrupt number of the entry
- * @address: address of the function to be placed in the entry
  */
 void Interrupts::setIDTEntry(uint32_t number, void (*address)(), uint8_t type) {
     IDTD *descriptor = this->IDTDescriptors + number;
@@ -206,7 +209,7 @@ void Interrupts::setIDTEntry(uint32_t number, void (*address)(), uint8_t type) {
     descriptor->zero32 = 0x0;
 }
 
-extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
+extern "C" long __attribute__((optimize("O3"))) IntCallbacks::syscallISR(long arg1, ...) {
     long sysNo;
     TASK::TaskHeader *task;
     uintptr_t edx, eax;
@@ -345,6 +348,8 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
 
             ret = taskMgr.createTask(va_arg(ap, void (*)(int, char**)), 3,
                                         va_arg(ap, char*), task->PCB);
+
+            task->TCB->timeSlices = 0;
 
             break;
 
@@ -502,6 +507,8 @@ extern "C" long IntCallbacks::syscallISR(long arg1, ...) {
             task = (TASK::TaskHeader*)((edx <<  32) + eax);
 
             ret = taskMgr.createTask((char*)arg1, 3, task->PCB->pid);
+
+            task->TCB->timeSlices = 0;
 
             break;
 

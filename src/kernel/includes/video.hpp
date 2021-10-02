@@ -24,7 +24,7 @@ namespace VIDEO {
         class TextMode {
             private:
                 // Pointer to video memory address (0xb8000)
-                uint16_t *address;
+                volatile uint16_t * volatile address;
 
                 // Represents the line we are currently at inside VGA buffer
                 uint8_t line;
@@ -42,55 +42,38 @@ namespace VIDEO {
 
                 /*
                  * Places given character of given color in VGA buffer
-                 * @character: the character the be placed in the buffer
-                 * @color: the desired color of the character
                  */
                 void putChar(const char character, const uint8_t color);
 
                 /*
                  * Places given string of given color in VGA buffer
-                 * @string: string to be placed in VGA buffer
-                 * @color: desired color of the string
-                 * @return: number of bytes successfully placed in VGA buffer
                  */
                 size_t putString(const char* string, const uint8_t color);
 
                 /*
                  * Places first number of given bytes of given string of given
                  * color in VGA buffer
-                 * @string: string to be placed in VGA buffer
-                 * @color: desired color of the string
-                 * @length: number of first bytes of given string to be placed
-                 * @return: number of bytes successfully placed in VGA buffer
                  */
                 size_t putString(const char* string, const uint8_t color,
                                     const size_t length);
 
                 /*
                  * Retrieves current line of our position in the VGA buffer
-                 * @return: current line of our position in the VGA buffer
                  */
                 uint8_t getLine() const;
 
                 /*
                  * Retrieves current column of our position in the VGA buffer
-                 * @return: current column of our position in the VGA buffer
                  */
                 uint8_t getColumn() const;
 
                 /*
                  * Sets current line in the VGA buffer
-                 * @line: given line to set
-                 * @return: the new line or the current line if given line is
-                 *           out of bounds
                  */
                 uint8_t setLine(const uint8_t line);
 
                 /*
                  * Sets current column in the VGA buffer
-                 * @column: given column to set
-                 * @return: the new column or the current column if given
-                 *          column is out of bounds
                  */
                 uint8_t setColumn(const uint8_t column);
 

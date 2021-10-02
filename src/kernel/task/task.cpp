@@ -132,16 +132,16 @@ TaskHeader* TASK::TaskMgr::schedule() {
     oldTask = (TaskHeader*)((edx <<  32) + eax);
 
     if (oldTask != NULL && oldTask->TCB != NULL && oldTask->PCB != NULL) {
-        if (oldTask->TCB->timeSlices > 0) {
-            oldTask->TCB->timeSlices--;
-
-            return NULL;
-        }
-
         if (oldTask->PCB->statusEnd || oldTask->TCB->statusEnd) {
             this->tasksToReap.push(oldTask->TCB->tid);
 
         } else {
+            if (oldTask->TCB->timeSlices > 0) {
+                oldTask->TCB->timeSlices--;
+
+                return NULL;
+            }
+
             uint64_t gs = oldTask->TCB->ctxReg.gs;
             uint64_t fs = oldTask->TCB->ctxReg.fs;
             memcpy(&oldTask->TCB->ctxReg, ctx, sizeof(*ctx));
@@ -152,13 +152,25 @@ TaskHeader* TASK::TaskMgr::schedule() {
         }
     }
  
-    while (this->threadsQue[id].isEmpty());
+    while (this->threadsQue[id].isEmpty()) {
+        __asm__ __volatile__(
+            "pause"
+            :
+            :
+        );
+    }
 
     TaskHeader *task = this->tasks[*this->threadsQue[id].pop()];
     while (task != NULL && (task->PCB->statusEnd || task->TCB->statusEnd)) {
         this->tasksToReap.push(task->TCB->tid);
 
-        while (this->threadsQue[id].isEmpty());
+        while (this->threadsQue[id].isEmpty()) {
+            __asm__ __volatile__(
+                "pause"
+                :
+                :
+            );
+        }
 
         task = this->tasks[*this->threadsQue[id].pop()];
     }
@@ -178,7 +190,7 @@ static inline void* alignPAGE_SIZE(void *addr) {
     return (void*)(remainder ? (uint8_t*)addr + (PAGE_SIZE - remainder) : addr);
 }
 
-int TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
+int __attribute__((optimize("O3"))) TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
     if (this->tasksCount == MAX_TASKS_COUNT) {
         kpwarn("Maximum tasks reached! Retry again later!\n");
 
@@ -471,6 +483,7 @@ void TaskMgr::endTask(int8_t pid) {
                 task = this->tasks[i];
 
                 task->TCB->statusEnd = task->PCB->statusEnd = true;
+                task->TCB->timeSlices = 0;
 
                 while (this->tasks[i] != NULL);
             }
@@ -495,6 +508,7 @@ void TaskMgr::endTask() {
     }
 
     task->TCB->statusEnd = task->PCB->statusEnd = true;
+    task->TCB->timeSlices = 0;
 }
 
 void TaskMgr::printPS() const {

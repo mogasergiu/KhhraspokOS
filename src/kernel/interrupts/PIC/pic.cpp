@@ -32,9 +32,6 @@ void PIC::initPIC() {
 
 /*
  * Function to write to the PIC'S Command Register
- * @cmd: the command byte to send
- * @picNum: which PIC to send the command to (0 for Master,
- * 1 for Slave)
  */
 void PIC::writeCMDR(uint8_t cmd, uint8_t picNum) {
     if (picNum == 1) {
@@ -47,9 +44,6 @@ void PIC::writeCMDR(uint8_t cmd, uint8_t picNum) {
 
 /*
  * Function to write to the PIC'S Interrupt Mask Register
- * @cmd: the command byte to send
- * @picNum: which PIC to send the command to (0 for Master,
- * 1 for Slave)
  */
 void PIC::writeIMR(uint8_t data, uint8_t picNum) {
     if (picNum == 1) {
@@ -62,8 +56,6 @@ void PIC::writeIMR(uint8_t data, uint8_t picNum) {
 
 /*
  * Function to read from the PIC'S Data Register
- * @picNum: which PIC to read from (0 for Master, 1 for Slave)
- * @return: the byte that was received
  */
 uint8_t PIC::readDR(uint8_t picNum) {
     uint8_t portNum;
@@ -80,8 +72,6 @@ uint8_t PIC::readDR(uint8_t picNum) {
 
 /*
  * Function to read from the PIC'S portNum Register
- * @picNum: which PIC to read from (0 for Master, 1 for Slave)
- * @return: the byte that was received
  */
 uint8_t PIC::readSR(uint8_t picNum) {
     uint8_t portNum;

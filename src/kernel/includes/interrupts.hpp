@@ -328,15 +328,11 @@ namespace INTERRUPTS {
 
             /*
              * Helper function to add an entry in the IDT
-             * @number: desired interrupt number of the entry
-             * @handler: address of the handler to be placed in the entry
              */
             void setIDTEntry(uint32_t number, void (*handler)(), uint8_t type);
 
             /*
              * Helper function to retrieve an entry in the IDT
-             * @number: desired interrupt number of the entry
-             * @return: address of the function to be placed from the entry
              */
             void (*getIDTEntry)(uint32_t number);
     };
@@ -351,31 +347,21 @@ namespace INTERRUPTS {
 
             /*
              * Function to write to the PIC'S Command Register
-             * @cmd: the command byte to send
-             * @picNum: which PIC to send the command to (0 for Master,
-             * 1 for Slave)
              */
             void writeCMDR(uint8_t cmd, uint8_t picNum);
 
             /*
              * Function to write to the PIC'S Interrupt Mask Register
-             * @cmd: the command byte to send
-             * @picNum: which PIC to send the command to (0 for Master,
-             * 1 for Slave)
              */
             void writeIMR(uint8_t data, uint8_t picNum);
 
             /*
              * Function to read from the PIC'S Data Register
-             * @picNum: which PIC to read from (0 for Master, 1 for Slave)
-             * @return: the byte that was received
              */
             uint8_t readDR(uint8_t picNum);
 
             /*
              * Function to read from the PIC'S Status Register
-             * @picNum: which PIC to read from (0 for Master, 1 for Slave)
-             * @return: the byte that was received
              */
             uint8_t readSR(uint8_t picNum);
     };
@@ -394,28 +380,21 @@ namespace INTERRUPTS {
 
             /*
              * Getter method to retrieve the number of system ticks
-             * @return: number of system ticks
              */
             uint32_t getTicks() const;
 
             /*
              * Write Operation Command Word to Command Register
-             * @ocw: the OCW to send
              */
             void sendOCW(uint8_t ocw) const;
 
             /*
              * Get current count value from Channel Register
-             * @channel: the Channel Register we get the value from
-             * @return: value found in the Channel Register
              */
             uint8_t readChannel(uint8_t channel) const;
 
             /*
              * Set current count value of Channel Register
-             * @channel: the Channel Register whose value we set
-             * @value: the value we will set
-             * @return: value found in the Channel Register
              */
             void sendChannel(uint8_t channel, uint8_t value) const;
     };

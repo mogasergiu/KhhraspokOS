@@ -106,6 +106,7 @@ extern "C" void schedYield() {
 extern "C" void exit() {
     __asm__ __volatile__(
         "int $0x80;"
+        "int $0x22;"
         :
         : "a" (SYS_EXIT)
     );
@@ -238,6 +239,7 @@ extern "C" int8_t createProcess(char *fileName) {
 
     __asm__ __volatile__(
         "int $0x80;"
+        "int $0x22;"
         : "=a"(ret)
         : "a" (SYS_CREATE_PROCESS), "D" (fileName)
     );

@@ -34,7 +34,6 @@ void PIT::initPIT() {
 
 /*
 * Getter method to retrieve the number of system ticks
-* @return: number of system ticks
 */
 uint32_t PIT::getTicks() const {
     return ticks;
@@ -42,7 +41,6 @@ uint32_t PIT::getTicks() const {
 
 /*
 * Write Operation Command Word to Command Register
-* @ocw: the OCW to send
 */
 void PIT::sendOCW(uint8_t ocw) const {
     PMIO::pOutByte(PIT_REG_CW, ocw);
@@ -50,8 +48,6 @@ void PIT::sendOCW(uint8_t ocw) const {
 
 /*
 * Get current count value from Channel Register
-* @channel: the Channel Register we get the value from
-* @return: value found in the Channel Register
 */
 uint8_t PIT::readChannel(uint8_t channel) const {
     switch (channel) {
@@ -66,9 +62,6 @@ uint8_t PIT::readChannel(uint8_t channel) const {
 
 /*
 * Set current count value of Channel Register
-* @channel: the Channel Register whose value we set
-* @value: the value we will set
-* @return: value found in the Channel Register
 */
 void PIT::sendChannel(uint8_t channel, uint8_t value) const {
     switch (channel) {
