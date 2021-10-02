@@ -84,9 +84,11 @@ extern "C" void IntCallbacks::keyboardIRQ() {
         deleteChar();
 
     } else if (scanCode == KEYBOARD_ENTER_PRESSED) {
-        putInBuffer('\n');
-        lineON = true;
-        kputc('\n');
+        if (!lineON) {
+            putInBuffer('\n');
+            lineON = true;
+            kputc('\n');
+        }
 
     } else if (scanCode == KEYBOARD_CAPSLOCK_PRESSED ||
         scanCode == KEYBOARD_RSHIFT_PRESSED ||

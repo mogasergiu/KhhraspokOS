@@ -98,7 +98,7 @@ static void printPCIDevice(PCI::PCIDevType *dev) {
 
 void PCI::printPCIDevices() {
     kprintf("{Device ID, Vendor ID, Class Code, Subclass, Prog IF, Revision ID,"
-            "Header Type}\n");
+            " Header Type}\n");
 
     for (int i = 0; i < PCI::PCIDevicesCount; i++) {
         printPCIDevice(&PCI::pciDevs[i]);
