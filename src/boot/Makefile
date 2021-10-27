@@ -1,30 +1,25 @@
-BOOTLOADER_SOURCES_PATH = ${KHH_HOME}/src/boot
-BINARIES = ${KHH_HOME}/bin/boot
-STAGE_1_SOURCES = $(BOOTLOADER_SOURCES_PATH)/bootloader_stage_1.asm
-STAGE_2_SOURCES = $(BOOTLOADER_SOURCES_PATH)/bootloader_stage_2.asm
-AP_BOOT_SOURCES = $(BOOTLOADER_SOURCES_PATH)/ap_boot.asm
-STAGE_1_BOOTLOADER = $(BINARIES)/bootloader_stage_1.bin
-STAGE_2_BOOTLOADER = $(BINARIES)/bootloader_stage_2.bin
-AP_BOOT = $(BINARIES)/ap_boot.bin
-FINAL_BOOTLOADER = $(BINARIES)/bootloader.bin
-FLAGS = -fbin
+BOOTLOADER_BINARIES := $(BINARIES)/boot
+STAGE_1_SOURCES := $(BOOTLOADER_SOURCES_PATH)/bootloader_stage_1.asm
+STAGE_2_SOURCES := $(BOOTLOADER_SOURCES_PATH)/bootloader_stage_2.asm
+AP_BOOT_SOURCES := $(BOOTLOADER_SOURCES_PATH)/ap_boot.asm
+BOOTLOADER_SOURCES := $(STAGE_1_SOURCES) \
+			$(STAGE_2_SOURCES) \
+			$(AP_BOOT_SOURCES)
+STAGE_BINARIES := $(patsubst $(BOOTLOADER_SOURCES_PATH)/%,$(BOOTLOADER_BINARIES)/%,$(BOOTLOADER_SOURCES:.asm=.bin))
+FINAL_BOOTLOADER := $(BOOTLOADER_BINARIES)/bootloader.bin
+FLAGS := -fbin
+AS := nasm
 
 all: $(FINAL_BOOTLOADER)
 
-$(FINAL_BOOTLOADER): $(STAGE_1_BOOTLOADER) $(STAGE_2_BOOTLOADER) $(AP_BOOT)
+$(FINAL_BOOTLOADER): $(STAGE_BINARIES)
 	rm -f $@
 	dd if=$< >> $@
 	dd if=$(word 2, $^) >> $@
 	dd if=$(word 3, $^) >> $@
 
-$(STAGE_1_BOOTLOADER): $(STAGE_1_SOURCES)
-	nasm $(FLAGS) $< -o $@
-
-$(STAGE_2_BOOTLOADER): $(STAGE_2_SOURCES)
-	nasm $(FLAGS) $< -o $@
-
-$(AP_BOOT): $(AP_BOOT_SOURCES)
-	nasm $(FLAGS) $< -o $@
+$(BOOTLOADER_BINARIES)/%.bin: $(BOOTLOADER_SOURCES_PATH)/%.asm
+	$(AS) $(FLAGS) $< -o $@
 
 .PHONY: clean
 
