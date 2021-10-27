@@ -14,6 +14,7 @@ TASK::TaskMgr taskMgr;
 static uint8_t threadEnd[] = {0x48, 0xc7, 0xc0, 0x07, 0x0,
                             0x0, 0x0, 0xcd, 0x80, 0xeb, 0xfe};
 
+// Initialise kernel's generic virtual PCB
 TaskMgr::TaskMgr() {
     char kernelFilename[] = "Kernel Thread";
     this->kernelPHdr = (TaskHeader::ProcessHdr*)
@@ -34,6 +35,7 @@ TaskHeader::ProcessHdr* TaskMgr::getKernelPHdr() const {
     return this->kernelPHdr;
 }
 
+// Reaper Thead's operations
 void reaper(int argc, char **argv) {
     uint8_t *deadTid;
 
@@ -45,6 +47,7 @@ void reaper(int argc, char **argv) {
     }
 }
 
+// Loading Thread's operations
 void loader(int argc, char **argv) {
     uint8_t *newTid, ap = 1;
     TaskHeader *task;
@@ -84,6 +87,7 @@ void TaskMgr::freeTask(uint8_t tid) {
 
                 }
 
+                // carefully free the mapped pages of the Process
                 MMU::pgTbl* pt = (MMU::pgTbl*)getPgAddr(task->PCB->pd);
 
                 task->PCB->lastVaddr = (uint8_t*)task->PCB->lastVaddr - PAGE_SIZE;
@@ -114,6 +118,7 @@ void TaskMgr::freeTask(uint8_t tid) {
 TaskHeader* TASK::TaskMgr::schedule() {
     uint8_t id = apicHandler.getLAPICID();
 
+    // gather PCB and context registers off the stack
     CtxRegisters *ctx;
     TaskHeader *oldTask;
     uintptr_t edx, eax;
@@ -127,9 +132,11 @@ TaskHeader* TASK::TaskMgr::schedule() {
     oldTask = (TaskHeader*)((edx <<  32) + eax);
 
     if (oldTask != NULL && oldTask->TCB != NULL && oldTask->PCB != NULL) {
+        // if task is dead give it to the reaper
         if (oldTask->PCB->statusEnd || oldTask->TCB->statusEnd) {
             this->tasksToReap.push(oldTask->TCB->tid);
 
+        // if task alive, decrement its time slices
         } else {
             if (oldTask->TCB->timeSlices > 0) {
                 oldTask->TCB->timeSlices--;
@@ -137,6 +144,7 @@ TaskHeader* TASK::TaskMgr::schedule() {
                 return NULL;
             }
 
+            // restore PCB and TLS
             uint64_t gs = oldTask->TCB->ctxReg.gs;
             uint64_t fs = oldTask->TCB->ctxReg.fs;
             memcpy(&oldTask->TCB->ctxReg, ctx, sizeof(*ctx));
@@ -147,6 +155,7 @@ TaskHeader* TASK::TaskMgr::schedule() {
         }
     }
  
+    // wait until queue is not empty, keep core on waiting
     while (this->threadsQue[id].isEmpty()) {
         __asm__ __volatile__(
             "pause"
@@ -155,6 +164,7 @@ TaskHeader* TASK::TaskMgr::schedule() {
         );
     }
 
+    // pop tasks off the core's queue
     TaskHeader *task = this->tasks[*this->threadsQue[id].pop()];
     while (task != NULL && (task->PCB->statusEnd || task->TCB->statusEnd)) {
         this->tasksToReap.push(task->TCB->tid);
@@ -172,6 +182,7 @@ TaskHeader* TASK::TaskMgr::schedule() {
 
     task->TCB->timeSlices = task->estimate * TIME_SLICE;
 
+    // invalidate the cache
     MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)] = (uint64_t*)task->PCB->pd;
     flushCR3();
 
@@ -185,6 +196,8 @@ static inline void* alignPAGE_SIZE(void *addr) {
     return (void*)(remainder ? (uint8_t*)addr + (PAGE_SIZE - remainder) : addr);
 }
 
+// Big function that creates a Process
+// TODO: shorten below 80 lines preferrably
 int __attribute__((optimize("O3"))) TASK::TaskMgr::createTask(char *args, uint8_t dpl, int8_t ppid) {
     if (this->tasksCount == MAX_TASKS_COUNT) {
         kpwarn("Maximum tasks reached! Retry again later!\n");
@@ -279,6 +292,7 @@ int __attribute__((optimize("O3"))) TASK::TaskMgr::createTask(char *args, uint8_
 
     task->PCB->lastVaddr = (uint8_t*)lastVaddr + PAGE_SIZE;
    
+    // parse process's cli arguments
     arg = strtok(_args + strlen(_args) + 1, filter);
     size_t argSize = strlen(arg);
     int argc = 0;
@@ -316,6 +330,7 @@ int __attribute__((optimize("O3"))) TASK::TaskMgr::createTask(char *args, uint8_
     return (int)task->TCB->tid;
 }
 
+// Big function that creates threads
 uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
                                 char *args, TASK::TaskHeader::ProcessHdr *PCB) {
     if (this->tasksCount == MAX_TASKS_COUNT) {
@@ -350,6 +365,7 @@ uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
         flags = PDE_P | PDE_R;
     }
 
+    // parse arguments passed to the thread
     task->PCB = PCB;
     char *arg;
     int argc = 0;
@@ -402,6 +418,7 @@ uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
 
     this->tasks[task->TCB->tid] = task;
 
+    // pass the TLS pointer to new thread
     if (PCB->ogTLS != NULL && PCB->tlsSize > 0) {
         void *lastVaddr = task->PCB->lastVaddr;
 
@@ -434,6 +451,7 @@ uint8_t TASK::TaskMgr::createTask(void (*func)(int, char**), uint8_t dpl,
     task->PCB->pd = (MMU::pgTbl*)MMU::userPD->entries[PDidx((void*)USERSPACE_START_ADDR)];
     flushCR3();
 
+    // loader is BSP specific
     if (func == &loader) {
         this->threadsQue[0].push(task->TCB->tid);
 
@@ -452,6 +470,7 @@ bool TaskMgr::taskReady(uint8_t tid) const {
     return this->tasks[tid] == NULL;
 }
 
+// give up time slices
 extern "C" void TASK::schedYield() {
     uintptr_t eax, edx;
     TASK::TaskHeader *task;
@@ -467,6 +486,7 @@ extern "C" void TASK::schedYield() {
     task->TCB->timeSlices = 0;  // yield
 }
 
+// tell process to kill self and kill children threads
 void TaskMgr::endTask(int8_t pid) {
     TaskHeader *task = NULL;
 
@@ -486,6 +506,7 @@ void TaskMgr::endTask(int8_t pid) {
     }
 }
 
+// tell thread to kill self, if process main thread also kill children threads
 void TaskMgr::endTask() {
     TaskHeader *task;
     uintptr_t edx, eax;
@@ -511,6 +532,7 @@ void TaskMgr::endTask() {
     task->TCB->timeSlices = 0;
 }
 
+// output of `ps` command
 void TaskMgr::printPS() const {
     vgaHandler.putString("{TID, PID, PPID, Process Name}\n", 15);
     TaskHeader *task;

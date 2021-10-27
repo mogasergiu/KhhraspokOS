@@ -17,6 +17,7 @@ APIC::APIC() {
     this->lapicCount = 0;
 }
 
+// LAPIC Timer invokes the scheduler
 extern "C" void IntCallbacks::lapicTimerIRQ() {
     if (taskMgr.getTasksCount() > 2) {
         TASK::TaskHeader *task = taskMgr.schedule();
@@ -32,6 +33,7 @@ extern "C" void IntCallbacks::lapicTimerIRQ() {
     }
 }
 
+// parse MADT to register APIC info
 void APIC::parseMADT() {
     *this->lapicAddr = (uintptr_t)ACPI::madt->LAPICAddr;
 
@@ -152,6 +154,7 @@ void APIC::sendLAPICIPI(uint8_t remoteLAPICID, uint32_t flags) {
 void APIC::initAPICs() {
     this->parseMADT();
 
+    // set up conventional flags
     this->LAPICout(LAPIC_SIVR, 0x100 | 0xff);
 
     this->LAPICout(LAPIC_LDR, 0x01000000);
@@ -160,6 +163,7 @@ void APIC::initAPICs() {
 
     this->LAPICout(LAPIC_DFR, 0xffffffff);
 
+    // setup global IRQ's for keyboard and PIT, mapped to BSP
     uint8_t pitIRQ = PIC1_IRQ_TIMER;
     uint8_t keyboardIRQ = PIC1_IRQ_KEYBOARD;
     for (int i = 0; i < this->ioapicisoCount; i++) {
@@ -179,6 +183,7 @@ void APIC::initAPICs() {
         this->setIOAPICEntry(entry, 1 << 16);
     }
 
+    // add the previous two IRQ's to IOAPIC's internal IVT
     this->setIOAPICEntry(pitIRQ, PIC1_IRQ0 + PIC1_IRQ_TIMER);
 
     this->setIOAPICEntry(keyboardIRQ, PIC1_IRQ0 + PIC1_IRQ_KEYBOARD);

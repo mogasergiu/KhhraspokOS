@@ -232,9 +232,6 @@
 
 #define SYSCALL_IDT_ENTRY 0x80
 
-/*********************************************
- * CLI and STI assembly instructions inlined *
- *********************************************/
 #define cli()                                                                  \
     __asm__ __volatile__(                                                      \
         "cli"                                                                  \
@@ -249,15 +246,8 @@
         :                                                                      \
     )
 
-/********************************************************************
- * INTERRUPTS namespace - covers every interrupts related component *
- ********************************************************************/
 namespace INTERRUPTS {
 
-    /*********************************************************************
-     * This namespaces declares the IRQ Handlers whose implementation is *
-     * located inside the pre-Kernel                                     *
-     *********************************************************************/
     namespace IntHandlers {
         extern "C" void pitIRQHandler();
         extern "C" void syscallISRHandler();
@@ -337,9 +327,6 @@ namespace INTERRUPTS {
             void (*getIDTEntry)(uint32_t number);
     };
 
-    /*********************************************************************
-     * Class to describe the Programmable Interrupt Controller component *
-     *********************************************************************/
     class PIC {
         public:
             // Constructor - sets up Programmable Interrupt Controller
@@ -368,9 +355,6 @@ namespace INTERRUPTS {
 
     extern uint32_t ticks;
 
-    /*********************************************************************
-     * Class to describe the Programmable Interval Timer component *
-     *********************************************************************/
     class PIT {
         public:
             // Constructor - Initializes the PIT

@@ -21,6 +21,7 @@ namespace GDT {
         uint8_t type;
     } __attribute__((packed));
 
+    // detailed description in src/boot/globalDescriptorTable.asm
     struct RealEntry {
         uint8_t limit0_15[2];
         uint8_t base0_23[3];

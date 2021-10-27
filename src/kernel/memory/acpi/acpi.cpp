@@ -6,6 +6,7 @@ using namespace ACPI;
 
 MADT* ACPI::madt;
 
+// We need this to find MADT for SMP
 static void parseRSDP(RSDP *rsdp) {
     if (rsdp->revision == 0) {
         RSDT *rsdt = (RSDT*)((uintptr_t)rsdp->rsdtAddr);

@@ -75,6 +75,7 @@ static void* loadPHDR(void *elf, TASK::TaskHeader *task) {
 
                 lastVaddr = (void*)pg;
 
+                // if we have TLS segment we also need to set FS_BASE
                 task->TCB->ctxReg.fs = phdr[i].p_vaddr + phdr[i].p_memsz;
 
                 ((uintptr_t*)task->TCB->ctxReg.fs)[0] = task->TCB->ctxReg.fs;

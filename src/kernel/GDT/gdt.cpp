@@ -73,6 +73,7 @@ uint64_t GDT::createDescriptor(uint32_t base, uint32_t limit, uint16_t flag) {
     return descriptor;
 }
 
+// Creates a proper GDT for each logical core and assigns ISTs
 void GDT::createProperGDTs() {
     if (perCpuGDT == NULL) {
         perCpuGDT = (EncodedEntry**)KPKHEAP::kpkZalloc(MAX_CPU_COUNT *

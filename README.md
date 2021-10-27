@@ -10,7 +10,7 @@ commands:
 Some of the features:
 - SMP support
 - Multithreaded Kernelspace
-- Preemptive Round-robin Scheduler
+- Preemptive Scheduler
 - PCI Configuration Space Enumeration
 - Page Frame Allocator
 - ATA, PS/2 Keyboard and VGA Text Mode drivers
@@ -18,6 +18,7 @@ Some of the features:
 - Some System Calls
 - ELF64 Loader
 - Custom 2 Stage Bootloader
+- Static TLS support
 - The Multithreaded Userspace can create its own threads through the available
 API. For example, this [test](https://github.com/mogasergiu/KhhraspokOS/blob/main/src/user/programs/test.cpp)
 creates two user threads. In order to get the Shell to load the final ELF64
@@ -28,7 +29,6 @@ internal filesystem and create the new task:
 
 Waiting for a thread to finish is entirely optional, as the Kernel's Reaper Thread
 is constantly on the lookout for threads whose spawner is dead.
-- Static TLS support
 
 # How to build
 

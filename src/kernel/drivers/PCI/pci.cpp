@@ -7,6 +7,7 @@ using namespace DRIVERS;
 PCI::PCIDevType PCI::pciDevs[256];
 uint8_t PCI::PCIDevicesCount;
 
+// make proper address for PCI probing
 static uint32_t makeAddress(uint8_t bus, uint8_t slot, uint8_t func,
                             uint8_t offset) {
     uint32_t addr;
@@ -65,6 +66,7 @@ void PCIoutDWord(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset,
     PMIO::pOutDWord(PCI_CONFIG_DATA, value);
 }
 
+// gather general PCI Device info
 static inline void gatherPCIDevInfo(uint8_t bus, uint8_t device, uint8_t func) {
     PCI::pciDevs[PCI::PCIDevicesCount].deviceID = PCIinWord(bus, device, func,
                                         PCI_DEVICE_ID_OFFSET);
@@ -105,6 +107,7 @@ void PCI::printPCIDevices() {
     }
 }
 
+// Probes all of the PCI buses
 static void checkDevice(uint8_t bus, uint8_t device) {
     uint8_t func = 0;
  

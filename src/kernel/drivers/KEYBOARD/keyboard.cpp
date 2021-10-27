@@ -8,6 +8,7 @@ using namespace INTERRUPTS;
 
 char DRIVERS::PS2::KEYBOARD::buffer[KEYBOARD_BUFFER_MAX_SIZE];
 
+// Code Table
 static uint8_t keyboardCode[] = {
     0x00, 0x1B, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=',
     0x08, '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']',
@@ -33,6 +34,7 @@ static void putInBuffer(char c) {
     buffer[buffIdx++] = c;
 }
 
+// Used by gets-like functions
 size_t DRIVERS::PS2::KEYBOARD::readKeyboard(char *buf, size_t size) {
     if (!lineON) {
         return 0;
@@ -72,6 +74,7 @@ static inline void deleteChar() {
     }
 }
 
+// Gets executed when keyboard button gets pressed
 extern "C" void IntCallbacks::keyboardIRQ() {
     uint8_t scanCode = PMIO::pInByte(KEYBOARD_INPUT_PORT);
     PMIO::pInByte(KEYBOARD_INPUT_PORT);

@@ -11,8 +11,10 @@
 #define LAPIC_ADDR 0x500
 #define ACTIVE_CPUS 0x509
 
+// RSDP signature
 #define RSD_PTR 0x2052545020445352
 
+// define APIC specific entries
 #define MADT_PTR 0x43495041
 #define MADT_ENTRY_LAPIC 0x0
 #define MADT_ENTRY_IOAPIC 0x1

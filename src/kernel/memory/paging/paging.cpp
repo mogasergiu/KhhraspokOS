@@ -35,25 +35,30 @@ void PgFrAllocator::initPgAlloc() {
         }
     }
 
+    // map the bootloader
     for (pg = 0; pg < 0x9000; pg += PAGE_SIZE) {
         this->allocPg((void*)pg);
     }
 
     this->bitmapIdx = pg / PAGE_SIZE;
 
+    // map the video memory
     for (pg = 0x80000; pg < 0xfffff; pg += PAGE_SIZE) {
         this->allocPg((void*)pg);
     }
 
+    // map the kernel
     for (pg = KERNEL_START_ADDR; pg < KERNEL_USED_MEM; pg += PAGE_SIZE) {
         this->allocPg((void*)pg);
     }
 
+    // map kernel heap
     for (pg = KPKHEAP_START; pg < KPKHEAP_END; pg += PAGE_SIZE) {
         this->allocPg((void*)pg);
     } 
 }
 
+// returns physical page
 void* PgFrAllocator::reqPg() {
     size_t len = this->PgsMap->getSize();
 
@@ -72,6 +77,7 @@ void* PgFrAllocator::reqPg() {
     return NULL;
 }
 
+// frees physical page
 void PgFrAllocator::freePg(void* addr) {
     size_t idx = (size_t)addr / PAGE_SIZE;
 
@@ -114,6 +120,7 @@ void PgFrAllocator::allocPgs(void* addr, size_t count) {
     }
 }
 
+// used to find the inter-changeable directory for userspace processes
 inline static void extractUserPD(void *vaddr) {
     size_t idx;
     MMU::userPD = getPgAddr(vaddr);
@@ -131,6 +138,7 @@ PgMgr::PgMgr() {
 
     this->PML4 = (PML4struct*)PML4T_ADDR;
  
+    // map kernel memory and its heap
     for (size_t pg = KERNEL_USED_MEM; pg < memSize; pg += PAGE_SIZE) {
         this->mapPg((void*)pg, (void*)pg, PDE_P | PDE_R);
     }
@@ -155,6 +163,7 @@ void PgMgr::freePg(void *addr) {
     return this->pgAllocator.freePg(addr);
 }
 
+// do a table walk to map vaddr to paddr
 void PgMgr::mapPg(void *vaddr, void *paddr, uintptr_t flags) {
     size_t idx = PML4idx(vaddr);
     pgTbl *pdt = NULL,

@@ -11,6 +11,7 @@ using namespace INTERRUPTS;
 
 INTERRUPTS::Interrupts intsHandler;
 
+// algorithm to properly initialise each LAPIC's Timer
 void APIC::initLAPICTimer() {
     static uint32_t ticks;
 
@@ -42,6 +43,7 @@ void APIC::initLAPICTimer() {
     }
 }
 
+// Algorithm to enable SMP
 static void wakeAPs() {
     for (uint8_t i = 0, id = apicHandler.getLAPICID();
         i < apicHandler.getLAPICCount(); i++) {
@@ -209,6 +211,7 @@ void Interrupts::setIDTEntry(uint32_t number, void (*address)(), uint8_t type) {
     descriptor->zero32 = 0x0;
 }
 
+// Syscall Interrupt Service Routine - when syscall is invoked through int 0x80
 extern "C" long __attribute__((optimize("O3"))) IntCallbacks::syscallISR(long arg1, ...) {
     long sysNo;
     TASK::TaskHeader *task;

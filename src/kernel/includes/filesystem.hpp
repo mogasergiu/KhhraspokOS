@@ -65,6 +65,7 @@ namespace FILESYSTEM {
         uint32_t size;
     } __attribute__((packed));
 
+    // this is to be inherited only
     class FS_TEMPLATE {
         public:
             parsedPath *path;

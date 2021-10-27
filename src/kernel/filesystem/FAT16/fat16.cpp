@@ -105,6 +105,7 @@ FAT::FAT16::FAT16() {
 
     this->root.itemsCount = 0;
 
+    // jump to root directory
     do {
 
         DRIVERS::DISK::readDisk(nail, sizeof(item), &item);
@@ -122,6 +123,7 @@ FAT::FAT16::FAT16() {
 
     this->root.end = this->root.start + this->hdr.rootEntryCount * 32;
 
+    // assign virtual path
     char rootStr[] = "/";
     strncpy(this->root.hdr.hdr16.name, rootStr, 1);
 }

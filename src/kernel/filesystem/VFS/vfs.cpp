@@ -15,6 +15,7 @@ using namespace FILESYSTEM;
 
 VFS vfsHandler;
 
+// fill template with stubs
 int FS_TEMPLATE::fopenCallback(void *fd, char *filename, const char *mode) {
     STUB();
 }
